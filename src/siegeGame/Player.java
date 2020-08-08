@@ -27,6 +27,7 @@ public class Player {
 	}
 
 	public void draw(Graphics2D g2) {
+		// feet at 66, 223
 		// g2.drawImage(siege,100,100,400,533,offset*animationFrame,0,offset*animationFrame+300,400,null);
 		// g2.drawImage(siege,100,100,250,315,offset*animationFrame,0,offset*animationFrame+300,430,null);
 		if (!grounded) {
