@@ -9,27 +9,31 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
+import java.awt.geom.Point2D;
 
 public class Screen extends JPanel {
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	public static int scrollx = 0;
+	public static int scrolly = 0;
 
-	long timeElapsed;
+	private long timeElapsed = System.nanoTime();
 
-	ArrayList<Tile> area = new ArrayList<Tile>();
-	Player player = new Player();
+	private ArrayList<Tile> area = new ArrayList<Tile>();
+	private Player player = new Player(this);
 	// RectObj finish=new RectObj(new Point2D.Double(3000,100),50,1000,Color.BLACK);
-	boolean isShift = false;
-	boolean isJump = false;
-	int direction = 1;
+	private boolean isShift = false;
+	private boolean isJump = false;
+	//private int direction = 1;
 
 	static int windowWidth = 0;
-	int linearDirection = 0;
-	int currentLevel = 1;
-	double left = 0;
-	double right = 0;
+	//private int linearDirection = 0;
+	private int currentLevel = 1;
+	private double left = 0;
+	private double right = 0;
 
 	public Screen() {
 		setBackground(Color.WHITE);
@@ -83,10 +87,46 @@ public class Screen extends JPanel {
 		requestFocusInWindow();
 
 	}
+	
+	// returns height
+	public int checkLandingCollision(Point2D.Double leftFoot, Point2D.Double rightFoot) {
+		int highest = 1000001;
+		// For every tile
+		for (Tile tile:area) {
+			//TODO check that tile is in viable area
+			// See if either foot is inside something
+			if(tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
+				// If it is, save the lowest Y value
+				if(tile.y<highest) {
+					highest = tile.y;
+				}
+			}
+		}
+		return highest;
+	}
+	public int checkHorizontalCollision(Point2D.Double left, Point2D.Double right) {
+		//TODO check that tile is in viable area
+		// For every tile
+		for (Tile tile:area) {
+			//TODO check that tile is in viable area
+			// See if either foot is inside something
+			if(tile.isInside(left)) {
+				return tile.x+tile.width+15 + 2;
+			} else if (tile.isInside(right)) {
+				return tile.x-75 - 2;
+			}
+		}
+		return -1000001;
+	}
 
 	public void loadLevel(int which) {
 		area = new ArrayList<Tile>();
+		area.add(new Tile(-200,600,2000,400));
 		area.add(new Tile(200,200,200,200));
+		area.add(new Tile(600,300,200,100));
+		area.add(new Tile(900,0,200,100));
+		area.add(new Tile(0,150,200,100));
+		area.add(new Tile(2200,600,200,100));
 	}
 
 	public Color randomColor() {
@@ -100,6 +140,8 @@ public class Screen extends JPanel {
 
 			} else if (e.getKeyCode() == 16) {
 				isShift = true;
+				scrollx=0;
+				scrolly=0;
 			} else if (e.getKeyCode() == KeyEvent.VK_A) {
 				left = -1;
 			} else if (e.getKeyCode() == KeyEvent.VK_D) {

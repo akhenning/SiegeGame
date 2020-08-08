@@ -1,6 +1,7 @@
 package siegeGame;
 
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 
 public class Tile {
 	int x;
@@ -21,7 +22,23 @@ public class Tile {
 		this.id = id;
 	}
 
-	void draw(Graphics2D g2) {
-		g2.drawRect(x, y, width, height);
+	public void draw(Graphics2D g2) {
+		// If the X value could be rendered
+		if (Screen.scrollx + x + width > 1000 || Screen.scrollx + x < -100) {
+			// if(Screen.scrolly+y)
+		}
+		g2.fillRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+	}
+
+	public boolean isInside(Point2D.Double point) {
+		if (id==200) {
+			System.out.println("S's X: "+point.getX());
+			System.out.println((point.getX() >= x && point.getX()<=x+width)+ " " +(point.getY() >= y && point.getY()<=y+height ));
+		}
+		if (point.getY() >= y && point.getY()<=y+height && point.getX() >= x && point.getX()<=x+width) {//point.getX() - x <= width && point.getY() - y <= height) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 }
