@@ -24,7 +24,10 @@ public class Tile {
 
 	public void draw(Graphics2D g2) {
 		// If the X value could be rendered
-		if (Screen.scrollx + x + width > 1000 || Screen.scrollx + x < -100) {
+		if (Screen.scrollx + x + width > 2000 || Screen.scrollx + x < -100) {
+			if (-Screen.scrolly + y + height < -100 || -Screen.scrolly + y > 1000) {
+				//System.out.println("This one is not in frame");
+			}
 			// if(Screen.scrolly+y)
 		}
 		g2.fillRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
