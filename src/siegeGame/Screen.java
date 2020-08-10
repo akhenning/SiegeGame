@@ -23,6 +23,7 @@ public class Screen extends JPanel {
 	private long timeElapsed = System.nanoTime();
 
 	private ArrayList<Tile> area = new ArrayList<Tile>();
+	private ArrayList<Interactable> interactables = new ArrayList<Interactable>();
 	private Player player = new Player(this);
 	// RectObj finish=new RectObj(new Point2D.Double(3000,100),50,1000,Color.BLACK);
 	private boolean isShift = false;
@@ -59,6 +60,8 @@ public class Screen extends JPanel {
 		// System.out.println(offset*animationFrame);
 
 		for (Tile tile : area) {
+			tile.draw(g2);
+		}for (Interactable tile : interactables) {
 			tile.draw(g2);
 		}
 		player.draw(g2);
@@ -118,6 +121,30 @@ public class Screen extends JPanel {
 		}
 		return -1000001;
 	}
+	public boolean checkHitboxCollision(ArrayList<Hitbox> hitboxes) {
+		// TODO optimize checking if valid hitbox or something
+		int point[];
+		for (Hitbox box: hitboxes) {
+			if (box.isActive()) {
+				for (Interactable tile:interactables) {
+					//TODO check that tile is in viable area
+					for (int i=1;i<5;i++) {
+						point = box.getRelativePoint(i);
+						point[0] += player.x - Screen.scrollx;
+						point[1] += player.y - Screen.scrolly;
+						if(i==4) {
+							System.out.println(point[0]+", "+point[1]+" | "+tile.x+", "+tile.y + " " + scrolly);
+						}
+						if(tile.isInside(point)) {
+							System.out.println("MADE CONTACT");
+							return true;
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	public void loadLevel(int which) {
 		area = new ArrayList<Tile>();
@@ -127,6 +154,10 @@ public class Screen extends JPanel {
 		area.add(new Tile(900,0,200,100));
 		area.add(new Tile(0,150,200,100));
 		area.add(new Tile(2200,600,200,100));
+		interactables.add(new Interactable(1200,-2000,200,2600));
+		interactables.add(new Interactable(2000,-2000,200,2600));
+		area.add(new Tile(1000,-1000,200,1200));
+		area.add(new Tile(2200,-1000,200,1200));
 	}
 
 	public Color randomColor() {
