@@ -9,7 +9,7 @@ import java.util.ArrayList;
 
 public class Player {
 	public boolean debug = true;
-	
+
 	public static Image walk = Toolkit.getDefaultToolkit().getImage("assets/walk.png");
 	public static Image IDLE = Toolkit.getDefaultToolkit().getImage("assets/idle.png");
 	// public static Image jump =
@@ -30,6 +30,8 @@ public class Player {
 	private boolean isSpace = false;
 	int width = -1;
 	private boolean isHitbox = false;
+	boolean onSlope = false;
+	double slope = 0;
 
 	public enum State {
 		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING
@@ -41,11 +43,12 @@ public class Player {
 
 	State state = State.GROUNDED;
 	private Screen screen;
+	Tile standingOn = null;
 
 	private int animationFrame = 0;
 	private Animation previousAnimation = Animation.NONE;
 	private int rotations = 0;
-	
+
 	private ArrayList<Hitbox> hitboxes = new ArrayList<Hitbox>();
 
 	public Player(Screen screen) {
@@ -55,14 +58,14 @@ public class Player {
 		lity = 600;
 		y = 600;
 
-		hitboxes.add(new Hitbox(0,-220,180,60));
-		hitboxes.add(new Hitbox(130,-190,70,120));
-		hitboxes.add(new Hitbox(130,-100,80,160));
+		hitboxes.add(new Hitbox(0, -220, 180, 60));
+		hitboxes.add(new Hitbox(130, -190, 70, 120));
+		hitboxes.add(new Hitbox(130, -100, 80, 160));
 	}
 
 	public void draw(Graphics2D g2) {
 		// feet at 67, 223 when facing right
-		//System.out.println(state);
+		// System.out.println(state);
 		if (state != State.GROUNDED) {
 			if (state == State.JUMPSQUAT) {
 				int offset = 300;
@@ -81,10 +84,10 @@ public class Player {
 							null);
 				}
 				animationFrame += 1;
-				//if (offset * animationFrame + 300 > width) {
-					// animationFrame -= 1;
-					// state = State.JUMPING;
-				//}
+				// if (offset * animationFrame + 300 > width) {
+				// animationFrame -= 1;
+				// state = State.JUMPING;
+				// }
 			} else if (state == State.JUMPING) {
 				int offset = 300;
 				// Check if this is the first frame of the new animation
@@ -131,7 +134,7 @@ public class Player {
 								offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
 					}
 					animationFrame += 1;
-					if (offset * animationFrame  + 300 == width) {
+					if (offset * animationFrame + 300 == width) {
 						if (!isSpace || rotations > 2) {
 							state = State.DESCENDING;
 						}
@@ -141,7 +144,8 @@ public class Player {
 						rotations += 1;
 					}
 				} else {
-					// draws the first frame of strike instead of nothing in case that this is skipped frame 1
+					// draws the first frame of strike instead of nothing in case that this is
+					// skipped frame 1
 					if (direction == 1) {
 						g2.drawImage(strike, x - 36 - 67, y - 85 - 223, offset + x - 36 - 67, y + 340 - 85 - 223, 0, 0,
 								offset, 340, null);
@@ -159,14 +163,14 @@ public class Player {
 				}
 				if (animationFrame == 8) {
 					isHitbox = true;
-					hitboxes.get(0).setActive(true,direction);
-					hitboxes.get(1).setActive(true,direction);
+					hitboxes.get(0).setActive(true, direction);
+					hitboxes.get(1).setActive(true, direction);
 				} else if (animationFrame == 9) {
-					hitboxes.get(0).setActive(false,direction);
-					hitboxes.get(1).setActive(false,direction);
-					hitboxes.get(2).setActive(true,direction);
+					hitboxes.get(0).setActive(false, direction);
+					hitboxes.get(1).setActive(false, direction);
+					hitboxes.get(2).setActive(true, direction);
 				} else if (animationFrame == 10) {
-					hitboxes.get(2).setActive(false,direction);
+					hitboxes.get(2).setActive(false, direction);
 					isHitbox = false;
 				}
 				if (direction == 1) {
@@ -183,7 +187,7 @@ public class Player {
 			} else if (state == State.LANDING) {
 				int offset = 300;
 				if (previousAnimation != Animation.LANDING) {
-					for (Hitbox box:hitboxes) {
+					for (Hitbox box : hitboxes) {
 						box.setActive(false, direction);
 					}
 					animationFrame = 0;
@@ -248,9 +252,9 @@ public class Player {
 			g2.drawRect(x - 2 + 62, y - 2, 4, 4);
 			g2.drawRect(x - 17, y - 42, 4, 4); // left
 			g2.drawRect(x + 75, y - 42, 4, 4);
-			for (Hitbox box:hitboxes) {
+			for (Hitbox box : hitboxes) {
 				if (box.isActive()) {
-					box.draw(g2,x,y);
+					box.draw(g2, x, y);
 				}
 			}
 			g2.setColor(Color.black);
@@ -269,12 +273,12 @@ public class Player {
 			}
 		}
 		// System.out.println(lity+" "+Screen.scrolly+" " + (lity-Screen.scrolly));
-		if(isHitbox && screen.checkHitboxCollision(hitboxes)) {
-			state=State.JUMPING;
-			yspeed=-30;
-			direction *=-1;
-			xspeed= 20*direction;
-			for (Hitbox box:hitboxes) {
+		if (isHitbox && screen.checkHitboxCollision(hitboxes)) {
+			state = State.JUMPING;
+			yspeed = -30;
+			direction *= -1;
+			xspeed = 20 * direction;
+			for (Hitbox box : hitboxes) {
 				box.setActive(false, direction);
 			}
 		}
@@ -361,6 +365,11 @@ public class Player {
 			litx = wallLevel + Screen.scrollx;
 			xspeed = 0;
 		}
+		
+		if(onSlope) {
+			lity -= slope*xspeed;
+			lity +=2;
+		}
 
 		// System.out.println("end"+xspeed);
 		if (litx > 800) {
@@ -381,8 +390,12 @@ public class Player {
 		y = (int) lity;
 
 	}
+	
+	public void setStandingOn(Tile obj) {
+		standingOn = obj;
+	}
 
-	// Was having issues with it not loading in time, where getWidth() was 
+	// Was having issues with it not loading in time, where getWidth() was
 	// returning -1, therefore skipping animations
 	private int MakeSureImageHasLoaded(Image image) {
 		int width = image.getWidth(null);
