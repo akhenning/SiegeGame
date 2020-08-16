@@ -115,7 +115,9 @@ public class Screen extends JPanel {
 						}
 					}
 				} else if(tile.slopeState==SlopeState.RIGHT) {
+					//System.out.println("Checking for object");
 					if(tile.isInside(rightFoot)) {
+						//System.out.println("Successfully found object)");
 						if (tile.y < highest) {
 							highest = tile.getHeight(rightFoot.getX());
 						}
@@ -133,7 +135,6 @@ public class Screen extends JPanel {
 	}
 
 	public int checkHorizontalCollision(Point2D.Double left, Point2D.Double right) {
-		// TODO check that tile is in viable area
 		// For every tile
 		for (Tile tile : area) {
 			if (tile.isVisible() && tile.id < 100) {
@@ -178,7 +179,7 @@ public class Screen extends JPanel {
 		area = new ArrayList<Tile>();
 		area.add(new Tile(-200, 600, 2000, 400));
 		area.add(new Tile(200, 200, 200, 200));
-		area.add(new Tile(600, 300, 200, 100));
+		//area.add(new Tile(600, 300, 200, 100));
 		area.add(new Tile(900, 0, 200, 100));
 		area.add(new Tile(0, 150, 200, 100));
 		area.add(new Tile(2200, 600, 200, 100));

@@ -73,13 +73,16 @@ public class Tile {
 		} else {
 			if (point.getX() >= x && point.getX()<=x+width) {
 				if (slopeState == SlopeState.RIGHT) {
-					if(point.getX()<=y+height && point.getY() >= ((double)(width-(point.getX()-x)))*slope+y) {
+					//System.out.println("Is within X for right object!");
+					if(point.getY()<=y+height && point.getY() >= ((double)(width-(point.getX()-x)))*slope+y) {
+						//System.out.println("And Y!");
 						return true;
 					} else {
+						//System.out.println("...but not Y");
 						return false;
 					}
 				} else {
-					if(point.getX()<=y+height && point.getY() >= ((double)(point.getX()-x))*slope+y) {
+					if(point.getY()<=y+height && point.getY() >= -(((double)(point.getX()-x))*slope)+y) {
 						return true;
 					} else {
 						return false;
@@ -106,13 +109,13 @@ public class Tile {
 		} else {
 			if (point[0] >= x && point[0]<=x+width) {//point.getX() - x <= width && point.getY() - y <= height) {
 				if (slopeState == SlopeState.RIGHT) {
-					if(point[0]<=y+height && point[1] >= ((double)(width-(point[0]-x)))*slope+y) {
+					if(point[1]<=y+height && point[1] >= ((double)(width-(point[0]-x)))*slope+y) {
 						return true;
 					} else {
 						return false;
 					}
 				} else {
-					if(point[0]<=y+height && point[1] >= ((double)(point[0]-x))*slope+y) {
+					if(point[1]<=y+height && point[1] >= -(((double)(point[0]-x))*slope)+y) {
 						return true;
 					} else {
 						return false;
@@ -128,10 +131,18 @@ public class Tile {
 	public int getHeight(double px) {
 		if(id<100) {
 			return y;
-		} else {
+		} else if (slopeState == SlopeState.RIGHT){
 			int dy = (int)((width-(px-(double)x))*slope);
 			if(height-dy>6) {
 				return dy+y+6;
+			} else {
+				return y+height;
+			}
+			//return ((int)((px-(double)x)*slope))+y;
+		} else {// if (slopeState == SlopeState.LEFT){
+			int dy = (int)((px-(double)x)*slope);
+			if(height-dy>6) {
+				return -dy+y+6;
 			} else {
 				return y+height;
 			}
