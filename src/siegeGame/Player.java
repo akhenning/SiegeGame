@@ -366,10 +366,7 @@ public class Player {
 			xspeed = 0;
 		}
 		
-		if(onSlope) {
-			lity -= slope*xspeed;
-			lity +=2;
-		}
+
 
 		// System.out.println("end"+xspeed);
 		if (litx > 800) {
@@ -391,9 +388,9 @@ public class Player {
 
 	}
 	
-	public void setStandingOn(Tile obj) {
-		standingOn = obj;
-	}
+	//public void setStandingOn(Tile obj) {
+	//	standingOn = obj;
+	//}
 
 	// Was having issues with it not loading in time, where getWidth() was
 	// returning -1, therefore skipping animations

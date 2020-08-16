@@ -1,6 +1,9 @@
 package siegeGame;
 
 import javax.swing.JPanel;
+
+import siegeGame.Tile.SlopeState;
+
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
 import java.awt.Color;
@@ -103,11 +106,25 @@ public class Screen extends JPanel {
 		for (Tile tile : area) {
 			if (tile.isVisible()) {
 				// See if either foot is inside something
-				if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
-					player.setStandingOn(tile);
-					// If it is, save the lowest Y value
-					if (tile.y < highest) {
-						highest = tile.getHeight(rightFoot.getX());
+				if (tile.slopeState==SlopeState.NONE) {
+					if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
+						//player.setStandingOn(tile);
+						// If it is, save the lowest Y value
+						if (tile.y < highest) {
+							highest = tile.getHeight(rightFoot.getX());
+						}
+					}
+				} else if(tile.slopeState==SlopeState.RIGHT) {
+					if(tile.isInside(rightFoot)) {
+						if (tile.y < highest) {
+							highest = tile.getHeight(rightFoot.getX());
+						}
+					}
+				} else {
+					if(tile.isInside(leftFoot)) {
+						if (tile.y < highest) {
+							highest = tile.getHeight(leftFoot.getX());
+						}
 					}
 				}
 			}
@@ -141,12 +158,12 @@ public class Screen extends JPanel {
 							point = box.getRelativePoint(i);
 							point[0] += player.x - Screen.scrollx;
 							point[1] += player.y - Screen.scrolly;
-							if (i == 4) {
-								System.out.println(
-										point[0] + ", " + point[1] + " | " + tile.x + ", " + tile.y + " " + scrolly);
-							}
+							//if (i == 4) {
+							//	System.out.println(
+							//			point[0] + ", " + point[1] + " | " + tile.x + ", " + tile.y + " " + scrolly);
+							//}
 							if (tile.isInside(point)) {
-								System.out.println("MADE CONTACT");
+								//System.out.println("MADE CONTACT");
 								return true;
 							}
 						}
@@ -165,11 +182,14 @@ public class Screen extends JPanel {
 		area.add(new Tile(900, 0, 200, 100));
 		area.add(new Tile(0, 150, 200, 100));
 		area.add(new Tile(2200, 600, 200, 100));
-		interactables.add(new Interactable(1200, -2000, 200, 2600));
-		interactables.add(new Interactable(2000, -2000, 200, 2600));
+		interactables.add(new Interactable(1200, -2000, 200, 2200));
+		interactables.add(new Interactable(2000, -2000, 200, 2200));
 		area.add(new Tile(1000, -1000, 200, 1200));
 		area.add(new Tile(2200, -1000, 200, 1200));
 		area.add(new Tile(1000, 400, 200, 200, 101));
+		area.add(new Tile(1200, 400, 200, 200));
+		area.add(new Tile(1400, 200, 400, 200, 101));
+		area.add(new Tile(-200, 400, 200, 200, 102));
 	}
 
 	public Color randomColor() {

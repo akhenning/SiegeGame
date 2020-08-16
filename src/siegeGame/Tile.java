@@ -13,13 +13,18 @@ public class Tile {
 	int id;
 	boolean isVisible = false;
 	public static Image cobb_slope_right = Toolkit.getDefaultToolkit().getImage("assets/cobblestonesloperight.png");
+	public static Image cobb_slope_left = Toolkit.getDefaultToolkit().getImage("assets/cobblestoneslopeleft.png");
 	double slope = 0;
+	public enum SlopeState {
+		NONE, LEFT, RIGHT
+	}
+	SlopeState slopeState = SlopeState.NONE;
 
 	public Tile(int x, int y, int width, int height) {
 		this(x, y, width, height, 0);
 	}
 
-	// id 101=one direction-facing slope
+	// id 101=one right-leaning slope
 	public Tile(int x, int y, int width, int height, int id) {
 		this.x = x;
 		this.y = y;
@@ -27,7 +32,13 @@ public class Tile {
 		this.width = width;
 		this.id = id;
 		if (id>100) {
-			slope = ((double)height)/((double)width);
+			if (id == 101) {
+				slopeState = SlopeState.RIGHT;
+				slope = ((double)height)/((double)width);
+			} else if (id == 102) {
+				slopeState = SlopeState.LEFT;
+				slope = -((double)height)/((double)width);
+			}
 		}
 	}
 
@@ -35,8 +46,12 @@ public class Tile {
 		 switch(id) {
 		  case 101:
 			g2.drawImage(cobb_slope_right, Screen.scrollx + x, Screen.scrolly + y,width,height, null);
-			g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+			//g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
 		    break;
+		  case 102:
+			g2.drawImage(cobb_slope_left, Screen.scrollx + x, Screen.scrolly + y,width,height, null);
+			//g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+			break;
 		  default: 
 			g2.fillRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
 		}
@@ -56,11 +71,20 @@ public class Tile {
 				return false;
 			}
 		} else {
-			if (point.getX() >= x && point.getX()<=x+width) {//point.getX() - x <= width && point.getY() - y <= height) {
-				if(point.getY()<=y+height && point.getY() >= ((double)(width-(point.getX()-x)))*slope+y) {
-					return true;
+			if (point.getX() >= x && point.getX()<=x+width) {
+				if (slopeState == SlopeState.RIGHT) {
+					if(point.getX()<=y+height && point.getY() >= ((double)(width-(point.getX()-x)))*slope+y) {
+						return true;
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					if(point.getX()<=y+height && point.getY() >= ((double)(point.getX()-x))*slope+y) {
+						return true;
+					} else {
+						return false;
+					}
+					
 				}
 			} else {
 				return false;
@@ -81,10 +105,19 @@ public class Tile {
 			}
 		} else {
 			if (point[0] >= x && point[0]<=x+width) {//point.getX() - x <= width && point.getY() - y <= height) {
-				if(point[0]<=y+height && point[1] >= ((double)(width-(point[0]-x)))*slope+y) {
-					return true;
+				if (slopeState == SlopeState.RIGHT) {
+					if(point[0]<=y+height && point[1] >= ((double)(width-(point[0]-x)))*slope+y) {
+						return true;
+					} else {
+						return false;
+					}
 				} else {
-					return false;
+					if(point[0]<=y+height && point[1] >= ((double)(point[0]-x))*slope+y) {
+						return true;
+					} else {
+						return false;
+					}
+					
 				}
 			} else {
 				return false;
@@ -96,7 +129,12 @@ public class Tile {
 		if(id<100) {
 			return y;
 		} else {
-			return ((int)((width-(px-(double)x))*slope))+y;
+			int dy = (int)((width-(px-(double)x))*slope);
+			if(height-dy>6) {
+				return dy+y+6;
+			} else {
+				return y+height;
+			}
 			//return ((int)((px-(double)x)*slope))+y;
 		}
 	}
