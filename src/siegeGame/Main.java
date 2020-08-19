@@ -1,6 +1,9 @@
 package siegeGame;
 
+import java.awt.Dimension;
+
 import javax.swing.JFrame;
+import java.awt.Toolkit;
 
 /**
  * Class that contains the main method for the program and creates the frame
@@ -11,6 +14,10 @@ import javax.swing.JFrame;
  */
 
 public class Main {
+	
+	public static Dimension screenSize;
+	public static Dimension gameSize;
+	public static int scrollPos[] = {0,0,0,0};
 	/**
 	 * main method for the program which creates and configures the frame for the
 	 * program
@@ -23,6 +30,15 @@ public class Main {
 		// new thing I'm testing
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		// frame.setUndecorated(true);
+		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+		gameSize = new Dimension();
+		Main.gameSize.width=Main.screenSize.width;
+		Main.gameSize.height=Main.screenSize.height;
+		Main.scrollPos[0] = gameSize.width/5;
+		Main.scrollPos[1] = gameSize.width*2/3;
+		Main.scrollPos[2] = gameSize.width/5;
+		Main.scrollPos[3] = gameSize.width*2/5;
+
 
 		frame.setTitle("Siege Game");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -35,10 +51,27 @@ public class Main {
 		// component.
 		frame.setVisible(true);
 
+
+		long timeElapsed = 0; 
+		long timeTook = 0;
+		
 		while (true) {
+			//System.out.println("Time since last frame:" + (System.nanoTime() - timeElapsed) / 1000000);
+			
+			timeElapsed = System.nanoTime(); // starts counting here...
+			
 			canvas.nextFrame();
+			
+			timeTook = (System.nanoTime() - timeElapsed) / 1000000;
+			if (timeTook  > 2) {
+				System.out.println("Time Took: " + timeTook);
+			}
+			//System.out.println("Time Took: " + timeTook);
+
 			try {
-				Thread.sleep((long) 33.3);
+				if (timeTook<33.3) {
+					Thread.sleep((long) (33.3-timeTook));
+				}
 			} catch (InterruptedException e) {
 				System.out.println("Error while sleeping\n");
 				e.printStackTrace();

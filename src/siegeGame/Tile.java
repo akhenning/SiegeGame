@@ -133,16 +133,16 @@ public class Tile {
 			return y;
 		} else if (slopeState == SlopeState.RIGHT){
 			int dy = (int)((width-(px-(double)x))*slope);
-			if(height-dy>6) {
-				return dy+y+6;
+			if(height-dy>8) {
+				return dy+y+8;
 			} else {
 				return y+height;
 			}
 			//return ((int)((px-(double)x)*slope))+y;
 		} else {// if (slopeState == SlopeState.LEFT){
 			int dy = (int)((px-(double)x)*slope);
-			if(height-dy>6) {
-				return -dy+y+6;
+			if(height+dy>8) {
+				return -dy+y+8;
 			} else {
 				return y+height;
 			}
@@ -152,12 +152,14 @@ public class Tile {
 	
 	public void checkIsVisible() {
 		// If the X value could be rendered
-		if (Screen.scrollx + x > 2000 || Screen.scrollx + x + width < -200) {
-			if (-Screen.scrolly + y + height < -200 || -Screen.scrolly + y > 1000) {
+		//if (id==10) {
+		//	System.out.println((Screen.scrollx + x - 200)+ ">"+ (Main.screenSize.width) + ", ");
+		//}
+		if (Screen.scrollx + x - 200 > Main.gameSize.width || Screen.scrollx + x + width < -200 ||
+			Screen.scrolly + y + height < -200 || Screen.scrolly + y - 200 > Main.gameSize.height) {
 				//System.out.println("This one is not in frame");
 				isVisible=false;
 				return;
-			}
 			// if(Screen.scrolly+y)
 		}
 		isVisible=true;

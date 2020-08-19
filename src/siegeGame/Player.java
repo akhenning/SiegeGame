@@ -23,8 +23,8 @@ public class Player {
 	private int direction = 1;
 	private double xspeed = 0;
 	private double yspeed = 0;
-	private double litx = 0;
-	private double lity = 0;
+	public double litx = 0;
+	public double lity = 0;
 	public int x;
 	public int y;
 	private boolean isSpace = false;
@@ -250,8 +250,13 @@ public class Player {
 			g2.drawRect(x - 2, y - 2, 4, 4);
 			g2.setColor(Color.red);
 			g2.drawRect(x - 2 + 62, y - 2, 4, 4);
-			g2.drawRect(x - 17, y - 42, 4, 4); // left
-			g2.drawRect(x + 75, y - 42, 4, 4);
+			g2.drawRect(x - 2, y - 182, 4, 4);
+			g2.drawRect(x - 2 + 62, y - 182, 4, 4);
+			
+			g2.drawRect(x - 17, y - 47, 4, 4); // left
+			g2.drawRect(x + 75, y - 47, 4, 4);
+			g2.drawRect(x - 17, y - 152, 4, 4); // left
+			g2.drawRect(x + 75, y - 152, 4, 4);
 			for (Hitbox box : hitboxes) {
 				if (box.isActive()) {
 					box.draw(g2, x, y);
@@ -263,7 +268,14 @@ public class Player {
 	}
 
 	public void calcMove(double xMove, boolean isShift, boolean isJump) {
+		boolean doLandingCheck = false;
 		isSpace = isJump;
+		
+		if (yspeed>35) {
+			yspeed=35;
+		}
+		
+		
 		// System.out.println("start"+xspeed);
 		if (state == State.GROUNDED) {
 			if (xMove == 1) {
@@ -309,6 +321,14 @@ public class Player {
 					// System.out.println("JUMPSQUAT"+xspeed);
 					xspeed *= .7;
 					litx += xspeed;
+					
+
+					Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly);
+					Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly);
+					int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
+					if (groundLevel != 1000001) {
+						lity = groundLevel + Screen.scrolly;
+					}
 				}
 			} else { // if in JUMPSQUAT, move slowly
 			}
@@ -325,16 +345,31 @@ public class Player {
 			litx += xspeed;
 		}
 
+		Point2D.Double left = new Point2D.Double(litx - Screen.scrollx - 15, lity - 45 - Screen.scrolly);
+		Point2D.Double left2 = new Point2D.Double(litx - Screen.scrollx - 15, lity - 150 - Screen.scrolly);
+		Point2D.Double right = new Point2D.Double(litx - Screen.scrollx + 77, lity - 45 - Screen.scrolly);
+		Point2D.Double right2 = new Point2D.Double(litx - Screen.scrollx + 77, lity - 150 - Screen.scrolly);
+		int wallLevel = screen.checkHorizontalCollision(left, left2, right, right2);
+		if (wallLevel != -1000001) {
+			litx = wallLevel + Screen.scrollx;
+			xspeed = 0;
+		}
+
 		if (state != State.GROUNDED && state != State.JUMPSQUAT && state != State.LANDING) {
-			// System.out.println("Screen's X: " + litx + " Game's X: " +
-			// (litx-Screen.scrollx));
+			Point2D.Double leftHead = new Point2D.Double(litx - Screen.scrollx, lity -180 - Screen.scrolly);
+			Point2D.Double rightHead = new Point2D.Double(litx - Screen.scrollx + 62, lity -180 - Screen.scrolly);
+			int ceilingLevel = screen.checkCeilingCollision(leftHead, rightHead);
+			if (ceilingLevel != -1000001) {
+				yspeed=0;
+				lity = ceilingLevel +180+ Screen.scrolly;
+			}
+			
+			
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
-			// System.out.println(x+ " x1: "+litx);
-			// System.out.println(groundLevel);
-			if (groundLevel != 1000001) {// lity-Screen.scrolly > 600)
-				// System.out.println("LANDING");
+			if (groundLevel != 1000001) {
+				// System.out.println("FORCED LANDING");
 				lity = groundLevel + Screen.scrolly;
 				yspeed = 0;
 				xspeed = 0;
@@ -344,7 +379,7 @@ public class Player {
 				}
 			}
 		}
-		if (state == State.GROUNDED) {
+		if (state == State.GROUNDED || doLandingCheck) {
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
@@ -358,31 +393,23 @@ public class Player {
 			}
 		}
 
-		Point2D.Double left = new Point2D.Double(litx - Screen.scrollx - 15, lity - 40 - Screen.scrolly);
-		Point2D.Double right = new Point2D.Double(litx - Screen.scrollx + 77, lity - 40 - Screen.scrolly);
-		int wallLevel = screen.checkHorizontalCollision(left, right);
-		if (wallLevel != -1000001) {
-			litx = wallLevel + Screen.scrollx;
-			xspeed = 0;
-		}
-		
-
 
 		// System.out.println("end"+xspeed);
-		if (litx > 800) {
-			Screen.scrollx = Screen.scrollx - (int) (litx - 800);
-			litx = 800;
-		} else if (litx < 200) {
-			Screen.scrollx = Screen.scrollx + (int) (200 - litx);
-			litx = 200;
+		//System.out.println(lity + " " + Main.scrollPos[2]+ " "+Main.scrollPos[3]);
+		if (litx > Main.scrollPos[1]) {
+			Screen.scrollx = Screen.scrollx - (int) (litx - Main.scrollPos[1]);
+			litx = Main.scrollPos[1];
+		} else if (litx < Main.scrollPos[0]) {
+			Screen.scrollx = Screen.scrollx + (int) (Main.scrollPos[0] - litx);
+			litx = Main.scrollPos[0];
 		}
 		x = (int) litx;
-		if (lity > 600) {
-			Screen.scrolly = Screen.scrolly - (int) (lity - 600);
-			lity = 600;
-		} else if (lity < 300) {
-			Screen.scrolly = Screen.scrolly + (int) (300 - lity);
-			lity = 300;
+		if (lity > Main.scrollPos[3]) {
+			Screen.scrolly = Screen.scrolly - (int) (lity - Main.scrollPos[3]);
+			lity = Main.scrollPos[3];
+		} else if (lity < Main.scrollPos[2]) {
+			Screen.scrolly = Screen.scrolly + (int) (Main.scrollPos[2] - lity);
+			lity = Main.scrollPos[2];
 		}
 		y = (int) lity;
 
@@ -413,4 +440,13 @@ public class Player {
 		return width;
 	}
 
+	// Loads images to remove flickering
+	public void load(Graphics2D g2) {
+		Image sprites[] = {walk, IDLE,jumpsquat,jumping,hovering,strike,landing};
+		for (Image sprite:sprites) {
+			g2.drawImage(sprite, x, y,  x - 36 - 67, y + 340 - 85 - 223,
+				animationFrame, 0, animationFrame + 200, 340, null);
+		}
+	}
+	
 }
