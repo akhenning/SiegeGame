@@ -209,7 +209,7 @@ public class Screen extends JPanel {
 		String raw_stage = null;
 
 		try {
-			file = new File("stages/1.txt");
+			file = new File("stages/2.txt");
 			in = new FileInputStream(file);
 			// out = new FileOutputStream("stages/1.txt");
 

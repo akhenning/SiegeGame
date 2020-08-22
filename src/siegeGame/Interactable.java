@@ -15,12 +15,9 @@ public class Interactable extends Tile {
 		super(x, y, width, height, id);
 	}
 
-	// not tested properly yet
 	public void draw(Graphics2D g2) {
-		g2.drawImage(target, Screen.scrollx + x, Screen.scrolly + y,width,height, null);
-		g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+		draw(g2,Screen.scrollx,Screen.scrolly);
 	}
-	
 
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
 		g2.drawImage(target, scrollx + x, scrolly + y,width,height, null);

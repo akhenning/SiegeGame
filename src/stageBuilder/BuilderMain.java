@@ -3,6 +3,7 @@ package stageBuilder;
 import java.awt.Dimension;
 
 import javax.swing.JFrame;
+
 import java.awt.Toolkit;
 
 /**
@@ -16,6 +17,7 @@ import java.awt.Toolkit;
 public class BuilderMain {
 
 	public static Dimension screenSize;
+	public static Dimension gameSize;
 
 	/**
 	 * main method for the program which creates and configures the frame for the
@@ -30,7 +32,10 @@ public class BuilderMain {
 		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
 		// frame.setUndecorated(true);
 		screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-
+		gameSize = new Dimension();
+		gameSize.width=screenSize.width*2;
+		gameSize.height=screenSize.height*2;
+		
 		frame.setTitle("Siege Game");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
@@ -42,18 +47,25 @@ public class BuilderMain {
 		// component.
 		frame.setVisible(true);
 
-		while (true) {
+		//while (true) {
 
 			canvas.nextFrame();
+					try {
+						Thread.sleep(50);
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					canvas.nextFrame();
 
-			try {
-				Thread.sleep(100);
-			} catch (InterruptedException e) {
+		//	try {
+		//		Thread.sleep(100);
+		//	} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		//		e.printStackTrace();
+		//	}
 
-		}
+		//}
 	}
 
 }

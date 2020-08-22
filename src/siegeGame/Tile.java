@@ -1,16 +1,17 @@
 package siegeGame;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.geom.Point2D;
 
 public class Tile {
-	int x;
-	int y;
-	int width;
-	int height;
-	int id;
+	protected int x;
+	protected int y;
+	protected int width;
+	protected int height;
+	protected int id;
 	boolean isVisible = false;
 	public static Image cobb_slope_right = Toolkit.getDefaultToolkit().getImage("assets/cobblestonesloperight.png");
 	public static Image cobb_slope_left = Toolkit.getDefaultToolkit().getImage("assets/cobblestoneslopeleft.png");
@@ -43,18 +44,7 @@ public class Tile {
 	}
 
 	public void draw(Graphics2D g2) {
-		 switch(id) {
-		  case 101:
-			g2.drawImage(cobb_slope_right, Screen.scrollx + x, Screen.scrolly + y,width,height, null);
-			//g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
-		    break;
-		  case 102:
-			g2.drawImage(cobb_slope_left, Screen.scrollx + x, Screen.scrolly + y,width,height, null);
-			//g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
-			break;
-		  default: 
-			g2.fillRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
-		}
+		draw(g2,Screen.scrollx,Screen.scrolly);
 	}
 	
 
@@ -71,6 +61,30 @@ public class Tile {
 		  default: 
 			g2.fillRect(scrollx + x, scrolly + y, width, height);
 		}
+	}
+	
+	public void drawSide(Graphics2D g2, int scrollx, int scrolly, int which) {
+		g2.setColor(Color.blue);
+		switch(which) {
+		case 0:
+			g2.drawLine(scrollx +x, scrolly +y, scrollx +x+width, scrolly +y);
+			break;
+		case 1:
+			g2.drawLine(scrollx +x+width, scrolly +y, scrollx +x+width, scrolly +y+height);
+			break;
+		case 2:
+			g2.drawLine(scrollx +x, scrolly +y+height, scrollx +x+width, scrolly +y+height);
+			break;
+		case 3:
+			g2.drawLine(scrollx +x, scrolly +y, scrollx +x, scrolly +y+height);
+			break;
+		}
+		g2.setColor(Color.black);
+	}
+	
+	public void goTo(double x, double y) {
+		this.x = (int)x;
+		this.y = (int)y;
 	}
 
 	// I could easily compress these two into one, but it would be slower 
@@ -164,6 +178,20 @@ public class Tile {
 			}
 			//return ((int)((px-(double)x)*slope))+y;
 		}
+	}
+	
+	public double[] getDifference(Point2D.Double point) {
+		double diff[] = new double[2];
+		diff[0] = point.getX()-x;
+		diff[1] = point.getY()-y;
+		return diff;
+	}
+	
+	public void resize(double dx, double dy, double dwidth, double dheight) {
+		x-=dx;
+		y-=dy;
+		width+=dwidth;
+		height+=dheight;
 	}
 	
 	public void checkIsVisible() {
