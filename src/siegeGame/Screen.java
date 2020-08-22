@@ -13,6 +13,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.BasicStroke;
 import java.awt.geom.Point2D;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class Screen extends JPanel {
 	/**
@@ -198,28 +201,62 @@ public class Screen extends JPanel {
 		return false;
 	}
 
+
 	public void loadLevel(int which) {
-		area = new ArrayList<Tile>();
-		area.add(new Tile(-200, 600, 2000, 400));
-		area.add(new Tile(200, 200, 200, 200));
-		// area.add(new Tile(600, 300, 200, 100));
-		area.add(new Tile(900, 0, 200, 100));
-		area.add(new Tile(0, 150, 200, 100));
-		area.add(new Tile(2200, 600, 200, 100));
-		interactables.add(new Interactable(1200, -2000, 200, 2200));
-		interactables.add(new Interactable(2000, -2000, 200, 2200));
-		area.add(new Tile(1000, -1000, 200, 1200));
-		area.add(new Tile(2200, -1000, 200, 1200));
-		area.add(new Tile(1000, 400, 200, 200, 101));
-		area.add(new Tile(1200, 400, 200, 200));
-		area.add(new Tile(1400, 200, 400, 200, 101));
-		area.add(new Tile(-200, 400, 200, 200, 102));
-		interactables.add(new Interactable(0, 400, 200, 200));
+
+		FileInputStream in = null;
+		File file = null;
+		String raw_stage = null;
+
+		try {
+			file = new File("stages/1.txt");
+			in = new FileInputStream(file);
+			// out = new FileOutputStream("stages/1.txt");
+
+			byte[] data = new byte[(int) file.length()];
+			in.read(data);
+
+			raw_stage = new String(data, "UTF-8");
+		} catch (Exception e) {
+			System.out.println("Error when reading stage file");
+		}
+		if (in != null) {
+			try {
+				in.close();
+			} catch (IOException e) {
+				System.out.println("Error when closing stage file");
+			}
+		}
 		
 
-		area.add(new Tile(2000, 200, 200, 200,10));
-		area.add(new Tile(3000, 200, 200, 200,10));
-		area.add(new Tile(4000, 200, 200, 200,10));
+		area = new ArrayList<Tile>();
+		String[] lines = raw_stage.split("\n");
+		for (String line:lines) {
+			String[] elements = line.split(",");
+			if (elements[0].equals("Tile")) {
+				try {
+					if(!elements[5].equals("")) {
+						area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4]), Integer.parseInt(elements[5])));
+					} else {
+						area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+					}
+				}catch(Exception e) {
+					System.out.println("Error reading stage element: "+line);
+				}
+			} else {
+				try {
+					if(!elements[5].equals("")) {
+						interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4]), Integer.parseInt(elements[5])));
+					} else {
+						interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+					}
+				}catch(Exception e) {
+					System.out.println(e+"Error reading stage element: "+line);
+				}
+			}
+			System.out.println(elements[5]);
+		}
+		
 	}
 
 	public Color randomColor() {

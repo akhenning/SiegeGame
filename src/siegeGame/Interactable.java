@@ -20,4 +20,14 @@ public class Interactable extends Tile {
 		g2.drawImage(target, Screen.scrollx + x, Screen.scrolly + y,width,height, null);
 		g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
 	}
+	
+
+	public void draw(Graphics2D g2, int scrollx, int scrolly) {
+		g2.drawImage(target, scrollx + x, scrolly + y,width,height, null);
+		g2.drawRect(scrollx + x, scrolly + y, width, height);
+	}
+	
+	public String toString() {
+		return "Interactable,"+x+","+y+","+width+","+height+","+id+",\n";
+	}
 }

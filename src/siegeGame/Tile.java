@@ -56,6 +56,22 @@ public class Tile {
 			g2.fillRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
 		}
 	}
+	
+
+	public void draw(Graphics2D g2, int scrollx, int scrolly) {
+		 switch(id) {
+		  case 101:
+			g2.drawImage(cobb_slope_right, scrollx + x, scrolly + y,width,height, null);
+			//g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+		    break;
+		  case 102:
+			g2.drawImage(cobb_slope_left, scrollx + x, scrolly + y,width,height, null);
+			//g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+			break;
+		  default: 
+			g2.fillRect(scrollx + x, scrolly + y, width, height);
+		}
+	}
 
 	// I could easily compress these two into one, but it would be slower 
 	// because I'd need to cast. So probably not worth stressing over
@@ -166,5 +182,9 @@ public class Tile {
 	}
 	public boolean isVisible() {
 		return isVisible;
+	}
+	
+	public String toString() {
+		return "Tile,"+x+","+y+","+width+","+height+","+id+",\n";
 	}
 }
