@@ -3,7 +3,10 @@ package stageBuilder;
 import javax.swing.JPanel;
 
 import siegeGame.Tile;
+import siegeGame.Screen.GameState;
+import siegeGame.Graphic;
 import siegeGame.Interactable;
+import siegeGame.Main;
 
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -36,23 +39,34 @@ public class BuilderScreen extends JPanel {
 	public static int scrolly = 0;
 
 	private ArrayList<Tile> area = new ArrayList<Tile>();
-	//private ArrayList<Interactable> interactables = new ArrayList<Interactable>();
+	// private ArrayList<Interactable> interactables = new
+	// ArrayList<Interactable>();
 	// RectObj finish=new RectObj(new Point2D.Double(3000,100),50,1000,Color.BLACK);
 	private boolean isShift = false;
 	private Tile lastActiveTile = null;
-	boolean dragMode = true;// true is drag, false is resize
+	private int mode = 0;// 0 is drag, 1 is resize, 2 is change, 3 is add
 	boolean canDrag = false;// true if currently dragging
 	boolean nowResize;// true is resize mode
 	private Point2D.Double lastPoint = null;
 	private double[] selectOffset = new double[2];
 	private int selectSide = 0;
+	private String currentLevel = "";
+	private int numSelected = 0;
 
 	private Font font = new Font("Serif", Font.PLAIN, 150);
+	private Font font2 = new Font("Serif", Font.PLAIN, 100);
 	public static Image E = Toolkit.getDefaultToolkit().getImage("assets/E key.png");
 	public static Image R = Toolkit.getDefaultToolkit().getImage("assets/R key.png");
+	private static Image selectbg = Toolkit.getDefaultToolkit().getImage("assets/selectbg1.png");
+
+	private enum GameState {
+		TITLE, LEVEL, SELECT
+	}
+
+	public GameState state = GameState.SELECT;
 
 	static int windowWidth = 0;
-	//private int currentLevel = 1;
+	// private int currentLevel = 1;
 
 	public BuilderScreen() {
 		setBackground(Color.WHITE);
@@ -61,7 +75,7 @@ public class BuilderScreen extends JPanel {
 		setFocusable(true);
 		addKeyListener(new KeysListener());
 		loadLevel("2");
-		//saveLevel("2");
+		// saveLevel("2");
 	}
 
 	public Dimension getPreferredSize() {
@@ -74,36 +88,62 @@ public class BuilderScreen extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setStroke(new BasicStroke(4));
-		g2.scale(zoom, zoom);
-		// g2.translate(-Main.screenSize.width/2+Main.screenSize.width/zoom/2,
-		// -Main.screenSize.height/2+Main.screenSize.height/zoom/2);
+		if (state == GameState.LEVEL) {
+			g2.scale(zoom, zoom);
+			// g2.translate(-Main.screenSize.width/2+Main.screenSize.width/zoom/2,
+			// -Main.screenSize.height/2+Main.screenSize.height/zoom/2);
 
-		for (Tile tile : area) {
-			tile.draw(g2, scrollx, scrolly);
-		}
-		//for (Interactable tile : interactables) {
-		//	tile.draw(g2, scrollx, scrolly);
-		//}
+			for (Tile tile : area) {
+				tile.draw(g2, scrollx, scrolly);
+			}
+			// for (Interactable tile : interactables) {
+			// tile.draw(g2, scrollx, scrolly);
+			// }
 
-		if (!dragMode && lastActiveTile != null) {
-			lastActiveTile.drawSide(g2, scrollx, scrolly, selectSide);
-		}
-		// todo lets just wrap this up and figure out why interactables arent ... oh.
-		// its because it's only checking the one.
+			if (mode == 1 && lastActiveTile != null) {
+				lastActiveTile.drawSide(g2, scrollx, scrolly, selectSide);
+			}
+			// todo lets just wrap this up and figure out why interactables arent ... oh.
+			// its because it's only checking the one.
 
-		int fontX = (int) (BuilderMain.gameSize.width * .65);
-		int fontY = (int) (BuilderMain.gameSize.height * .85);
-		g2.drawImage(E, (int) (BuilderMain.gameSize.width * .58), (int) (BuilderMain.gameSize.height * .775), null);
-		g2.setColor(Color.white);
-		g2.fillRect(fontX - 10, (int) (BuilderMain.gameSize.height * .75), 900, 200);
-		g2.setColor(Color.black);
-		g2.setFont(font);
-		if (dragMode) {
-			g2.drawString("Mode: Drag", fontX, fontY);
-		} else {
-			g2.drawString("Mode: Resize", fontX, fontY);
-			g2.drawString("Select a Side", (int) (BuilderMain.gameSize.width * .07), fontY);
-			g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+			int fontX = (int) (BuilderMain.gameSize.width * .65);
+			int fontY = (int) (BuilderMain.gameSize.height * .85);
+			g2.drawImage(E, (int) (BuilderMain.gameSize.width * .58), (int) (BuilderMain.gameSize.height * .775), null);
+			g2.setColor(Color.white);
+			g2.fillRect(fontX - 10, (int) (BuilderMain.gameSize.height * .75), 900, 200);
+			g2.setColor(Color.black);
+			g2.setFont(font);
+			if (mode == 0) {
+				g2.drawString("Mode: Drag", fontX, fontY);
+			} else if (mode == 1) {
+				g2.drawString("Mode: Resize", fontX, fontY);
+				g2.drawString("Select a Side", (int) (BuilderMain.gameSize.width * .07), fontY);
+				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+			} else if (mode == 2) {
+				g2.drawString("Mode: Change", fontX, fontY);
+				g2.drawString("Change Type", (int) (BuilderMain.gameSize.width * .07), fontY);
+				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+
+			} else if (mode == 3) {
+				g2.drawString("Mode: Add", fontX, fontY);
+				g2.drawString("Add", (int) (BuilderMain.gameSize.width * .07), fontY);
+				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+			}
+		} else if (state == GameState.SELECT) {
+			g2.setFont(font);
+			g2.fillRect(0, 1000, 2000, 9999);
+			g2.drawImage(selectbg, scrollx, scrolly, null);
+			int i = 0;
+			g2.setColor(Color.BLACK);
+			for (Tile tile : area) {
+				// if (tile.isVisible()) {
+				tile.draw(g2);
+				if (i == numSelected) {
+					tile.drawBoxAround(g2);
+				}
+				i++;
+				// }
+			}
 		}
 	}
 
@@ -118,62 +158,75 @@ public class BuilderScreen extends JPanel {
 
 	public void loadLevel(String which) {
 
-		FileInputStream in = null;
-		File file = null;
-		String raw_stage = null;
+		if (state == GameState.LEVEL) {
 
-		try {
-			file = new File("stages/"+which+".txt");
-			in = new FileInputStream(file);
-			// out = new FileOutputStream("stages/1.txt");
+			FileInputStream in = null;
+			File file = null;
+			String raw_stage = null;
 
-			byte[] data = new byte[(int) file.length()];
-			in.read(data);
-
-			raw_stage = new String(data, "UTF-8");
-		} catch (Exception e) {
-			System.out.println("Error when reading stage file");
-		}
-		if (in != null) {
 			try {
-				in.close();
-			} catch (IOException e) {
-				System.out.println("Error when closing stage file when reading");
-			}
-		}
+				file = new File("stages/" + which + ".txt");
+				in = new FileInputStream(file);
+				// out = new FileOutputStream("stages/1.txt");
 
-		area = new ArrayList<Tile>();
-		String[] lines = raw_stage.split("\n");
-		for (String line : lines) {
-			String[] elements = line.split(",");
-			if (elements[0].equals("Tile")) {
+				byte[] data = new byte[(int) file.length()];
+				in.read(data);
+
+				raw_stage = new String(data, "UTF-8");
+			} catch (Exception e) {
+				System.out.println("Error when reading stage file");
+			}
+			if (in != null) {
 				try {
-					if (!elements[5].equals("")) {
-						area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-								Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
-								Integer.parseInt(elements[5])));
-					} else {
-						area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-								Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-					}
-				} catch (Exception e) {
-					System.out.println("Error reading stage element: " + line);
-				}
-			} else {
-				try {
-					if (!elements[5].equals("")) {
-						area.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-								Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
-								Integer.parseInt(elements[5])));
-					} else {
-						area.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-								Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-					}
-				} catch (Exception e) {
-					System.out.println(e + "Error reading stage element: " + line);
+					in.close();
+				} catch (IOException e) {
+					System.out.println("Error when closing stage file when reading");
 				}
 			}
-			// System.out.println(elements[5]);
+
+			area = new ArrayList<Tile>();
+			String[] lines = raw_stage.split("\n");
+			for (String line : lines) {
+				String[] elements = line.split(",");
+				if (elements[0].equals("Tile")) {
+					try {
+						if (!elements[5].equals("")) {
+							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
+									Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
+									Integer.parseInt(elements[5])));
+						} else {
+							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
+									Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+						}
+					} catch (Exception e) {
+						System.out.println("Error reading stage element: " + line);
+					}
+				} else {
+					try {
+						if (!elements[5].equals("")) {
+							area.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
+									Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
+									Integer.parseInt(elements[5])));
+						} else {
+							area.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
+									Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+						}
+					} catch (Exception e) {
+						System.out.println(e + "Error reading stage element: " + line);
+					}
+				}
+				// System.out.println(elements[5]);
+			}
+		} else if (state == GameState.SELECT) {
+			File file = new File("stages");
+			String[] files = file.list();
+			area = new ArrayList<Tile>();
+			int i = 0;
+			for (String name : files) {
+				area.add(new Graphic(800, 150 * i + 50, 500, 100, 11));
+				area.get(area.size() - 1).setText(name.substring(0, name.length() - 4));
+				i++;
+			}
 		}
 
 	}
@@ -194,9 +247,9 @@ public class BuilderScreen extends JPanel {
 			for (Tile tile : area) {
 				out.write(tile.toString().getBytes());
 			}
-			//for (Interactable inter : interactables) {
-			//	out.write(inter.toString().getBytes());
-			//}
+			// for (Interactable inter : interactables) {
+			// out.write(inter.toString().getBytes());
+			// }
 
 			// byte[] data = new byte[(int) file.length()];
 
@@ -230,34 +283,61 @@ public class BuilderScreen extends JPanel {
 				// scrolly = 100;
 				break;
 			case KeyEvent.VK_A:
-				scrollx += 10;
-				if (isShift) {
-					scrollx += 30;
+				if (state != GameState.SELECT) {
+					scrollx += 10;
+					if (isShift) {
+						scrollx += 30;
+					}
 				}
 				break;
 			case KeyEvent.VK_D:
-				scrollx -= 10;
-				if (isShift) {
-					scrollx -= 30;
+
+				if (state != GameState.SELECT) {
+					scrollx -= 10;
+					if (isShift) {
+						scrollx -= 30;
+					}
 				}
 				break;
 			case KeyEvent.VK_W:
-				scrolly += 10;
-				if (isShift) {
-					scrolly += 30;
+				if (state == GameState.SELECT) {
+					numSelected -= 1;
+					if (numSelected < 0) {
+						numSelected = area.size() - 1;
+						scrolly = area.size() * -150 + 600;
+					}
+					if (area.get(numSelected).getScreenY() < 0) {
+						scrolly += 300;
+					}
+				} else {
+					scrolly += 10;
+					if (isShift) {
+						scrolly += 30;
+					}
 				}
 				break;
 			case KeyEvent.VK_S:
-				scrolly -= 10;
-				if (isShift) {
-					scrolly -= 30;
+
+				if (state == GameState.SELECT) {
+					numSelected += 1;
+					if (numSelected >= area.size()) {
+						numSelected = 0;
+						scrolly = 0;
+					}
+					if (area.get(numSelected).getScreenY() + 200 > Main.screenSize.height) {
+						scrolly -= 300;
+					}
+				} else {
+					scrolly -= 10;
+					if (isShift) {
+						scrolly -= 30;
+					}
 				}
 				break;
 			case KeyEvent.VK_E:
-				if (dragMode) {
-					dragMode = false;
-				} else {
-					dragMode = true;
+				mode += 1;
+				if (mode > 3) {
+					mode = 0;
 				}
 				break;
 			case KeyEvent.VK_R:
@@ -283,7 +363,15 @@ public class BuilderScreen extends JPanel {
 				BuilderMain.gameSize.height = (int) ((double) BuilderMain.screenSize.height / zoom);
 				break;
 			case KeyEvent.VK_ENTER:
-				saveLevel("2");
+				if (state == GameState.SELECT) {
+					currentLevel = area.get(numSelected).getText();
+					System.out.println(currentLevel);
+					state = GameState.LEVEL;
+					loadLevel(currentLevel);
+					// loadLevel();
+				} else {
+					saveLevel(currentLevel);
+				}
 				break;
 			default:
 
@@ -364,35 +452,37 @@ public class BuilderScreen extends JPanel {
 
 	public class MovementListener implements MouseMotionListener {
 		public void mouseDragged(MouseEvent e) {
-			//System.out.println("Trying: "+canDrag+" " +dragMode);
-			Point2D.Double point = new Point2D.Double(e.getPoint().getX()*2-scrollx, e.getPoint().getY()*2-scrolly);
-			if (dragMode) {
+			// System.out.println("Trying: "+canDrag+" " +dragMode);
+			Point2D.Double point = new Point2D.Double(e.getPoint().getX() * 2 - scrollx,
+					e.getPoint().getY() * 2 - scrolly);
+			if (mode != 1) {
 				if (canDrag) {
-					lastActiveTile.goTo(point.getX()-selectOffset[0], point.getY()-selectOffset[1]);
+					lastActiveTile.goTo(point.getX() - selectOffset[0], point.getY() - selectOffset[1]);
 					repaint();
 				}
 			} else {
 				if (canDrag && lastPoint != null) {
-					switch(selectSide) {
-						case 0:
-							// increase or decrease height only
-							lastActiveTile.resize(0, 0,0,point.getY()-lastPoint.getY());
-							break;
-						case 1:
-							// increase or decrease width and X
-							lastActiveTile.resize(-point.getX()+lastPoint.getX(), 0,-point.getX()+lastPoint.getX(),0);
-							break;
-						case 2:
-							// increase or decrease height and Y
-							lastActiveTile.resize(0,-point.getY()+lastPoint.getY(), 0,-point.getY()+lastPoint.getY());
-							break;
-						case 3:
-							// increase or decrease width only
-							lastActiveTile.resize(0, 0,point.getX()-lastPoint.getX(),0);
-							break;
+					switch (selectSide) {
+					case 0:
+						// increase or decrease height only
+						lastActiveTile.resize(0, 0, 0, point.getY() - lastPoint.getY());
+						break;
+					case 1:
+						// increase or decrease width and X
+						lastActiveTile.resize(-point.getX() + lastPoint.getX(), 0, -point.getX() + lastPoint.getX(), 0);
+						break;
+					case 2:
+						// increase or decrease height and Y
+						lastActiveTile.resize(0, -point.getY() + lastPoint.getY(), 0, -point.getY() + lastPoint.getY());
+						break;
+					case 3:
+						// increase or decrease width only
+						lastActiveTile.resize(0, 0, point.getX() - lastPoint.getX(), 0);
+						break;
 					}
-					//lastActiveTile.resize(-point.getX()+lastPoint.getX(), -point.getY()+lastPoint.getY());
-					//lastActiveTile.setRadius(lastActiveTile.getCenter().distance(point));
+					// lastActiveTile.resize(-point.getX()+lastPoint.getX(),
+					// -point.getY()+lastPoint.getY());
+					// lastActiveTile.setRadius(lastActiveTile.getCenter().distance(point));
 					repaint();
 				}
 			}

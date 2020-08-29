@@ -1,5 +1,6 @@
 package siegeGame;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -214,5 +215,23 @@ public class Tile {
 	
 	public String toString() {
 		return "Tile,"+x+","+y+","+width+","+height+","+id+",\n";
+	}
+	
+	public void setText(String name) {}
+	public String getText() {return "";}
+	public int getScreenY() {
+		return Screen.scrolly + y;
+	}
+
+	public void drawBoxAround(Graphics2D g2, int scrollx, int scrolly) {
+		g2.setStroke(new BasicStroke(6));
+		g2.setColor(Color.BLUE);
+		g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+		g2.setColor(Color.BLACK);
+		g2.setStroke(new BasicStroke(4));
+		
+	}
+	public void drawBoxAround(Graphics2D g2) {
+		drawBoxAround(g2,Screen.scrollx,Screen.scrolly);
 	}
 }

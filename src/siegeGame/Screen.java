@@ -9,8 +9,11 @@ import java.awt.event.KeyEvent;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.awt.BasicStroke;
 import java.awt.geom.Point2D;
 import java.io.File;
@@ -23,6 +26,10 @@ public class Screen extends JPanel {
 	 */
 	private static final long serialVersionUID = 1L;
 	public static double zoom = 1;
+	private static Image bg = Toolkit.getDefaultToolkit().getImage("assets/bg1.jpg");
+	private static Image selectbg = Toolkit.getDefaultToolkit().getImage("assets/selectbg1.png");
+	private static Image title = Toolkit.getDefaultToolkit().getImage("assets/title1.jpg");
+	private int bgDimensions[] = new int[2];
 
 	public static int scrollx = 0;
 	public static int scrolly = 0;
@@ -30,7 +37,9 @@ public class Screen extends JPanel {
 
 	private ArrayList<Tile> area = new ArrayList<Tile>();
 	private ArrayList<Interactable> interactables = new ArrayList<Interactable>();
+	private int numSelected = 0;
 	private Player player = new Player(this);
+	private Font font = new Font("Serif", Font.PLAIN, 100);
 	// RectObj finish=new RectObj(new Point2D.Double(3000,100),50,1000,Color.BLACK);
 	private boolean isShift = false;
 	private boolean isJump = false;
@@ -38,9 +47,12 @@ public class Screen extends JPanel {
 
 	static int windowWidth = 0;
 	// private int linearDirection = 0;
-	private int currentLevel = 1;
 	private double left = 0;
 	private double right = 0;
+	public enum GameState {
+		TITLE, LEVEL, SELECT
+	}
+	public GameState state = GameState.TITLE;
 
 	public Screen() {
 		setBackground(Color.WHITE);
@@ -48,7 +60,7 @@ public class Screen extends JPanel {
 		// addMouseMotionListener(new MovementListener());
 		setFocusable(true);
 		addKeyListener(new KeysListener());
-		loadLevel(currentLevel);
+		loadLevel("");
 	}
 
 	public Dimension getPreferredSize() {
@@ -61,40 +73,94 @@ public class Screen extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		g2.setStroke(new BasicStroke(4));
-		g2.scale(zoom, zoom);
-		//g2.translate(-Main.screenSize.width/2+Main.screenSize.width/zoom/2, -Main.screenSize.height/2+Main.screenSize.height/zoom/2);
-
-		if (first) {
-			first = false;
-			player.load(g2);
-		}
-
-		// System.out.println(offset*animationFrame);
-
-		for (Tile tile : area) {
-			if (tile.isVisible()) {
+		
+		if (state == GameState.LEVEL) {
+			g2.scale(zoom, zoom);
+			
+			//g2.translate(-Main.screenSize.width/2+Main.screenSize.width/zoom/2, -Main.screenSize.height/2+Main.screenSize.height/zoom/2);
+	
+			if (first) {
+				first = false;
+				player.load(g2);
+				int i=0;
+				while (bgDimensions[0]<=0) {
+					bgDimensions[0] = bg.getWidth(null);
+					bgDimensions[1] = bg.getHeight(null);
+					i++;
+					try {
+						Thread.sleep(100);
+					} catch (InterruptedException e) {
+					}
+					if (i>10) {
+						bgDimensions[0] = 1;
+						System.out.println("bad background image");
+					}
+				}
+			}
+			drawBG(g2);
+	
+			// System.out.println(offset*animationFrame);
+	
+			for (Tile tile : area) {
+				if (tile.isVisible()) {
+					tile.draw(g2);
+				}
+			}
+			for (Interactable tile : interactables) {
+				if (tile.isVisible()) {
+					tile.draw(g2);
+				}
+			}
+			player.draw(g2);
+			
+		} else if (state == GameState.TITLE) {
+			g2.setFont(font);
+			g2.drawImage(title,0,0,null);
+			g2.drawString("Press Enter",Main.screenSize.width/3,Main.screenSize.height/2);
+			for (Tile tile : area) {
 				tile.draw(g2);
 			}
-		}
-		for (Interactable tile : interactables) {
-			if (tile.isVisible()) {
-				tile.draw(g2);
+			
+		} else if (state == GameState.SELECT) {
+			g2.setFont(font);
+			g2.fillRect(0, 1000, 2000, 9999);
+			g2.drawImage(selectbg,scrollx,scrolly,null);
+			int i = 0;
+			g2.setColor(Color.BLACK);
+			for (Tile tile : area) {
+				//if (tile.isVisible()) {
+					tile.draw(g2);
+					if (i==numSelected) {
+						tile.drawBoxAround(g2);
+					}
+					i++;
+				//}
 			}
 		}
-		player.draw(g2);
+	}
+	
+	public void drawBG(Graphics2D g2) {
+		// we need to do a bigger think for this one
+		System.out.println(scrollx%bgDimensions[0]);
+		g2.drawImage(bg,scrollx%bgDimensions[0],scrolly%bgDimensions[1],null);
+		//g2.drawImage(bg,scrollx%bgDimensions[0]-bgDimensions[0],scrolly%bgDimensions[1],null);
+		//g2.drawImage(bg,(scrollx+2000/2)%bgDimensions[0]-bgDimensions[0],(scrolly/2)%bgDimensions[1]+bgDimensions[1],null);
+		//g2.drawImage(bg,(scrollx+2000/2)%bgDimensions[0],(scrolly/2)%bgDimensions[1]+bgDimensions[1],null);
 	}
 
 	public void nextFrame() {
-		// Make sure we don't waste time checking tiles out of frame
-		for (Tile tile : area) {
-			tile.checkIsVisible();
+		if (state == GameState.LEVEL) {
+			// Make sure we don't waste time checking tiles out of frame
+			for (Tile tile : area) {
+				tile.checkIsVisible();
+			}
+			for (Interactable tile : interactables) {
+				tile.checkIsVisible();
+			}
+	
+			// Player moves; calculating collision is also in here
+			player.calcMove(left + right, isShift, isJump);
 		}
-		for (Interactable tile : interactables) {
-			tile.checkIsVisible();
-		}
-
-		// Player moves; calculating collision is also in here
-		player.calcMove(left + right, isShift, isJump);
 
 		// Draw everything
 		repaint();
@@ -202,59 +268,75 @@ public class Screen extends JPanel {
 	}
 
 
-	public void loadLevel(int which) {
-
-		FileInputStream in = null;
-		File file = null;
-		String raw_stage = null;
-
-		try {
-			file = new File("stages/2.txt");
-			in = new FileInputStream(file);
-			// out = new FileOutputStream("stages/1.txt");
-
-			byte[] data = new byte[(int) file.length()];
-			in.read(data);
-
-			raw_stage = new String(data, "UTF-8");
-		} catch (Exception e) {
-			System.out.println("Error when reading stage file");
-		}
-		if (in != null) {
-			try {
-				in.close();
-			} catch (IOException e) {
-				System.out.println("Error when closing stage file");
-			}
-		}
+	public void loadLevel(String which) {
 		
+		if(state == GameState.LEVEL) {
 
-		area = new ArrayList<Tile>();
-		String[] lines = raw_stage.split("\n");
-		for (String line:lines) {
-			String[] elements = line.split(",");
-			if (elements[0].equals("Tile")) {
+			FileInputStream in = null;
+			File file = null;
+			String raw_stage = null;
+	
+			try {
+				file = new File("stages/"+which+".txt");
+				in = new FileInputStream(file);
+				// out = new FileOutputStream("stages/1.txt");
+	
+				byte[] data = new byte[(int) file.length()];
+				in.read(data);
+	
+				raw_stage = new String(data, "UTF-8");
+			} catch (Exception e) {
+				System.out.println("Error when reading stage file");
+			}
+			if (in != null) {
 				try {
-					if(!elements[5].equals("")) {
-						area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4]), Integer.parseInt(elements[5])));
-					} else {
-						area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-					}
-				}catch(Exception e) {
-					System.out.println("Error reading stage element: "+line);
-				}
-			} else {
-				try {
-					if(!elements[5].equals("")) {
-						interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4]), Integer.parseInt(elements[5])));
-					} else {
-						interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-					}
-				}catch(Exception e) {
-					System.out.println(e+"Error reading stage element: "+line);
+					in.close();
+				} catch (IOException e) {
+					System.out.println("Error when closing stage file");
 				}
 			}
-			System.out.println(elements[5]);
+			
+	
+			area = new ArrayList<Tile>();
+			String[] lines = raw_stage.split("\n");
+			for (String line:lines) {
+				String[] elements = line.split(",");
+				if (elements[0].equals("Tile")) {
+					try {
+						if(!elements[5].equals("")) {
+							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4]), Integer.parseInt(elements[5])));
+						} else {
+							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+						}
+					}catch(Exception e) {
+						System.out.println("Error reading stage element: "+line);
+					}
+				} else {
+					try {
+						if(!elements[5].equals("")) {
+							interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4]), Integer.parseInt(elements[5])));
+						} else {
+							interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]), Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+						}
+					}catch(Exception e) {
+						System.out.println(e+"Error reading stage element: "+line);
+					}
+				}
+				System.out.println(elements[5]);
+			}
+		} else if (state == GameState.TITLE){
+			area = new ArrayList<Tile>();
+			area.add(new Graphic(100,100,10));
+		} else if (state == GameState.SELECT) {
+			File file = new File ("stages");
+			String[] files = file.list();
+			area = new ArrayList<Tile>();
+			int i=0;
+	        for (String name : files) {
+	        	area.add(new Graphic(800,150*i+50,500,100,11));
+	        	area.get(area.size()-1).setText(name.substring(0, name.length()-4));
+	        	i++;
+	        }
 		}
 		
 	}
@@ -268,7 +350,20 @@ public class Screen extends JPanel {
 			int keyCode = e.getKeyCode();
 			switch (keyCode) {
 			case KeyEvent.VK_SPACE:
-				isJump = true;
+				if (state == GameState.LEVEL) {
+					isJump = true;
+				}
+				break;
+			case KeyEvent.VK_ENTER:
+				if (state == GameState.TITLE) {
+					state = GameState.SELECT;
+					loadLevel("");
+				} else if (state == GameState.SELECT) {
+					System.out.println(area.get(numSelected).getText());
+					state = GameState.LEVEL;
+					loadLevel(area.get(numSelected).getText());
+					//loadLevel();
+				}
 				break;
 			case 16:
 				isShift = true;
@@ -291,28 +386,56 @@ public class Screen extends JPanel {
 				}
 				break;
 			case KeyEvent.VK_UP:
-				zoom += .1;
-				if (zoom > 4) {
-					zoom = 4;
-				}
-				Main.gameSize.width=(int)((double)Main.screenSize.width/zoom);
-				Main.gameSize.height=(int)((double)Main.screenSize.height/zoom);
-				Main.scrollPos[0] = Main.gameSize.width/5;
-				Main.scrollPos[1] = Main.gameSize.width*2/3;
-				Main.scrollPos[2] = Main.gameSize.width/5;
-				Main.scrollPos[3] = Main.gameSize.width*2/5;
+				if (state == GameState.LEVEL) {
+					zoom += .5;
+					if (zoom > 1) {
+						zoom = 1;
+					}
+					Main.gameSize.width=(int)((double)Main.screenSize.width/zoom);
+					Main.gameSize.height=(int)((double)Main.screenSize.height/zoom);
+					Main.scrollPos[0] = Main.gameSize.width/5;
+					Main.scrollPos[1] = Main.gameSize.width*2/3;
+					Main.scrollPos[2] = Main.gameSize.width/5;
+					Main.scrollPos[3] = Main.gameSize.width*2/5;
+				} 
 				break;
 			case KeyEvent.VK_DOWN:
-				zoom -= .1;
-				if (zoom < .2) {
-					zoom = .2;
+				if (state == GameState.LEVEL) {
+					zoom -= .5;
+					if (zoom < .5) {
+						zoom = .5;
+					} 
+					Main.gameSize.width=(int)((double)Main.screenSize.width/zoom);
+					Main.gameSize.height=(int)((double)Main.screenSize.height/zoom);
+					Main.scrollPos[0] = Main.gameSize.width/5;
+					Main.scrollPos[1] = Main.gameSize.width*2/3;
+					Main.scrollPos[2] = Main.gameSize.width/5;
+					Main.scrollPos[3] = Main.gameSize.width*2/5;
+				} 
+				break;
+			case KeyEvent.VK_W:
+				if  (state == GameState.SELECT) {
+					numSelected -=1;
+					if (numSelected < 0) {
+						numSelected = area.size()-1;
+						scrolly=area.size()*-150 + 600;
+					}
+					if (area.get(numSelected).getScreenY()  < 0) {
+						scrolly+=300;
+					}
 				}
-				Main.gameSize.width=(int)((double)Main.screenSize.width/zoom);
-				Main.gameSize.height=(int)((double)Main.screenSize.height/zoom);
-				Main.scrollPos[0] = Main.gameSize.width/5;
-				Main.scrollPos[1] = Main.gameSize.width*2/3;
-				Main.scrollPos[2] = Main.gameSize.width/5;
-				Main.scrollPos[3] = Main.gameSize.width*2/5;
+				break;
+			case KeyEvent.VK_S:
+				if  (state == GameState.SELECT) {
+					numSelected +=1;
+					if (numSelected >= area.size()) {
+						numSelected = 0;
+						scrolly=0;
+					}
+					if (area.get(numSelected).getScreenY() +200 > Main.screenSize.height) {
+						scrolly-=300;
+					}
+				}
 				break;
 			default:
 
