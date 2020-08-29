@@ -122,6 +122,8 @@ public class Screen extends JPanel {
 			}
 			
 		} else if (state == GameState.SELECT) {
+			// todo check visibility on level icons
+			
 			g2.setFont(font);
 			g2.fillRect(0, 1000, 2000, 9999);
 			g2.drawImage(selectbg,scrollx,scrolly,null);
@@ -362,6 +364,8 @@ public class Screen extends JPanel {
 					System.out.println(area.get(numSelected).getText());
 					state = GameState.LEVEL;
 					loadLevel(area.get(numSelected).getText());
+					scrollx=0;
+					scrolly=0;
 					//loadLevel();
 				}
 				break;

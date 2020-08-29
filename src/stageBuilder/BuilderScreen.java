@@ -52,6 +52,9 @@ public class BuilderScreen extends JPanel {
 	private int selectSide = 0;
 	private String currentLevel = "";
 	private int numSelected = 0;
+	private static Image[] saveIcons = {Toolkit.getDefaultToolkit().getImage("assets/saved.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/save.png")};
+	private boolean hasChanges = false;
 
 	private Font font = new Font("Serif", Font.PLAIN, 150);
 	private Font font2 = new Font("Serif", Font.PLAIN, 100);
@@ -106,13 +109,22 @@ public class BuilderScreen extends JPanel {
 			// todo lets just wrap this up and figure out why interactables arent ... oh.
 			// its because it's only checking the one.
 
+			if (hasChanges) {
+				g2.drawImage(saveIcons[1], BuilderMain.gameSize.width-200, 0, null);
+			} else {
+				g2.drawImage(saveIcons[0], BuilderMain.gameSize.width-200, 0, null);
+			}
+
+			g2.setFont(font2);
 			int fontX = (int) (BuilderMain.gameSize.width * .65);
 			int fontY = (int) (BuilderMain.gameSize.height * .85);
+			g2.drawString(currentLevel, (int) (BuilderMain.gameSize.width * .8), 100);
+
+			g2.setFont(font);
 			g2.drawImage(E, (int) (BuilderMain.gameSize.width * .58), (int) (BuilderMain.gameSize.height * .775), null);
 			g2.setColor(Color.white);
 			g2.fillRect(fontX - 10, (int) (BuilderMain.gameSize.height * .75), 900, 200);
 			g2.setColor(Color.black);
-			g2.setFont(font);
 			if (mode == 0) {
 				g2.drawString("Mode: Drag", fontX, fontY);
 			} else if (mode == 1) {
@@ -130,16 +142,16 @@ public class BuilderScreen extends JPanel {
 				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			}
 		} else if (state == GameState.SELECT) {
-			g2.setFont(font);
+			g2.setFont(font2);
 			g2.fillRect(0, 1000, 2000, 9999);
 			g2.drawImage(selectbg, scrollx, scrolly, null);
 			int i = 0;
 			g2.setColor(Color.BLACK);
 			for (Tile tile : area) {
 				// if (tile.isVisible()) {
-				tile.draw(g2);
+				tile.draw(g2,scrollx,scrolly);
 				if (i == numSelected) {
-					tile.drawBoxAround(g2);
+					tile.drawBoxAround(g2,scrollx,scrolly);
 				}
 				i++;
 				// }
@@ -254,6 +266,7 @@ public class BuilderScreen extends JPanel {
 			// byte[] data = new byte[(int) file.length()];
 
 			out.flush();
+			hasChanges = false;
 
 		} catch (Exception e) {
 			System.out.println("Error when writing stage file");
@@ -306,7 +319,7 @@ public class BuilderScreen extends JPanel {
 						numSelected = area.size() - 1;
 						scrolly = area.size() * -150 + 600;
 					}
-					if (area.get(numSelected).getScreenY() < 0) {
+					if (area.get(numSelected).getScreenY(scrolly) < 0) {
 						scrolly += 300;
 					}
 				} else {
@@ -324,7 +337,7 @@ public class BuilderScreen extends JPanel {
 						numSelected = 0;
 						scrolly = 0;
 					}
-					if (area.get(numSelected).getScreenY() + 200 > Main.screenSize.height) {
+					if (area.get(numSelected).getScreenY(scrolly) + 200 > BuilderMain.screenSize.height) {
 						scrolly -= 300;
 					}
 				} else {
@@ -373,6 +386,9 @@ public class BuilderScreen extends JPanel {
 					saveLevel(currentLevel);
 				}
 				break;
+			case KeyEvent.VK_DELETE:
+				area.remove(lastActiveTile);
+				lastActiveTile = null;
 			default:
 
 			}
@@ -420,15 +436,17 @@ public class BuilderScreen extends JPanel {
 				canDrag = true;
 				selectOffset = lastActiveTile.getDifference(point);
 				lastPoint = point;
+				hasChanges = true;
 			} else {
 				lastActiveTile = null;// new Circle(new Point2D.Double(0, 0), 0, Color.WHITE);
 				for (Tile shape : area) {
-					System.out.println(shape.isInside(point));
+					//System.out.println(shape.isInside(point));
 					if (shape.isInside(point)) {
 						canDrag = true;
 						lastActiveTile = shape;
 						selectOffset = shape.getDifference(point);
 						lastPoint = point;
+						hasChanges = true;
 					}
 				}
 			}
@@ -443,9 +461,13 @@ public class BuilderScreen extends JPanel {
 		}
 
 		public void mouseReleased(MouseEvent e) {
+			if (lastActiveTile!=null) {
+				lastActiveTile.snap();
+			}
 			lastPoint = null;
 			canDrag = false;
 			nowResize = false;
+			repaint();
 			requestFocusInWindow();
 		}
 	}
@@ -458,6 +480,7 @@ public class BuilderScreen extends JPanel {
 			if (mode != 1) {
 				if (canDrag) {
 					lastActiveTile.goTo(point.getX() - selectOffset[0], point.getY() - selectOffset[1]);
+					hasChanges = true;
 					repaint();
 				}
 			} else {
@@ -483,6 +506,7 @@ public class BuilderScreen extends JPanel {
 					// lastActiveTile.resize(-point.getX()+lastPoint.getX(),
 					// -point.getY()+lastPoint.getY());
 					// lastActiveTile.setRadius(lastActiveTile.getCenter().distance(point));
+					hasChanges = true;
 					repaint();
 				}
 			}

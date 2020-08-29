@@ -195,6 +195,13 @@ public class Tile {
 		height+=dheight;
 	}
 	
+	public void snap() {
+		x = (int) (Math.round(((double)x)/20)*20);
+		y = (int) (Math.round(((double)y)/20)*20);
+		width = (int) (Math.round(((double)width)/10)*10);
+		height = (int) (Math.round(((double)height)/10)*10);
+	}
+	
 	public void checkIsVisible() {
 		// If the X value could be rendered
 		//if (id==10) {
@@ -222,11 +229,14 @@ public class Tile {
 	public int getScreenY() {
 		return Screen.scrolly + y;
 	}
+	public int getScreenY(int scrolly) {
+		return scrolly + y;
+	}
 
 	public void drawBoxAround(Graphics2D g2, int scrollx, int scrolly) {
 		g2.setStroke(new BasicStroke(6));
 		g2.setColor(Color.BLUE);
-		g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
+		g2.drawRect(scrollx + x, scrolly + y, width, height);
 		g2.setColor(Color.BLACK);
 		g2.setStroke(new BasicStroke(4));
 		
