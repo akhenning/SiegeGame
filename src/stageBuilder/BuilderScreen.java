@@ -3,10 +3,8 @@ package stageBuilder;
 import javax.swing.JPanel;
 
 import siegeGame.Tile;
-import siegeGame.Screen.GameState;
 import siegeGame.Graphic;
 import siegeGame.Interactable;
-import siegeGame.Main;
 
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -58,6 +56,7 @@ public class BuilderScreen extends JPanel {
 
 	private Font font = new Font("Serif", Font.PLAIN, 150);
 	private Font font2 = new Font("Serif", Font.PLAIN, 100);
+	private Font font3 = new Font("Serif", Font.PLAIN, 50);
 	public static Image E = Toolkit.getDefaultToolkit().getImage("assets/E key.png");
 	public static Image R = Toolkit.getDefaultToolkit().getImage("assets/R key.png");
 	private static Image selectbg = Toolkit.getDefaultToolkit().getImage("assets/selectbg1.png");
@@ -104,10 +103,9 @@ public class BuilderScreen extends JPanel {
 			// }
 
 			if (mode == 1 && lastActiveTile != null) {
+				g2.setFont(font3);
 				lastActiveTile.drawSide(g2, scrollx, scrolly, selectSide);
 			}
-			// todo lets just wrap this up and figure out why interactables arent ... oh.
-			// its because it's only checking the one.
 
 			if (hasChanges) {
 				g2.drawImage(saveIcons[1], BuilderMain.gameSize.width-200, 0, null);
@@ -360,20 +358,24 @@ public class BuilderScreen extends JPanel {
 				}
 				break;
 			case KeyEvent.VK_UP:
-				zoom += .1;
-				if (zoom > 4) {
-					zoom = 4;
+				if (state == GameState.LEVEL) {
+					zoom += .1;
+					if (zoom > 4) {
+						zoom = 4;
+					}
+					BuilderMain.gameSize.width = (int) ((double) BuilderMain.screenSize.width / zoom);
+					BuilderMain.gameSize.height = (int) ((double) BuilderMain.screenSize.height / zoom);
 				}
-				BuilderMain.gameSize.width = (int) ((double) BuilderMain.screenSize.width / zoom);
-				BuilderMain.gameSize.height = (int) ((double) BuilderMain.screenSize.height / zoom);
 				break;
 			case KeyEvent.VK_DOWN:
-				zoom -= .1;
-				if (zoom < .2) {
-					zoom = .2;
+				if (state == GameState.LEVEL) {
+					zoom -= .1;
+					if (zoom < .2) {
+						zoom = .2;
+					}
+					BuilderMain.gameSize.width = (int) ((double) BuilderMain.screenSize.width / zoom);
+					BuilderMain.gameSize.height = (int) ((double) BuilderMain.screenSize.height / zoom);
 				}
-				BuilderMain.gameSize.width = (int) ((double) BuilderMain.screenSize.width / zoom);
-				BuilderMain.gameSize.height = (int) ((double) BuilderMain.screenSize.height / zoom);
 				break;
 			case KeyEvent.VK_ENTER:
 				if (state == GameState.SELECT) {

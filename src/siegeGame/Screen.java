@@ -37,6 +37,7 @@ public class Screen extends JPanel {
 
 	private ArrayList<Tile> area = new ArrayList<Tile>();
 	private ArrayList<Interactable> interactables = new ArrayList<Interactable>();
+	private ArrayList<Particle> particles = new ArrayList<Particle>();
 	private int numSelected = 0;
 	private Player player = new Player(this);
 	private Font font = new Font("Serif", Font.PLAIN, 100);
@@ -139,11 +140,14 @@ public class Screen extends JPanel {
 				//}
 			}
 		}
+		for (Particle tile : particles) {
+			tile.draw(g2);
+		}
 	}
 	
 	public void drawBG(Graphics2D g2) {
 		// we need to do a bigger think for this one
-		System.out.println(scrollx%bgDimensions[0]);
+		//System.out.println(scrollx%bgDimensions[0]);
 		g2.drawImage(bg,scrollx%bgDimensions[0],scrolly%bgDimensions[1],null);
 		//g2.drawImage(bg,scrollx%bgDimensions[0]-bgDimensions[0],scrolly%bgDimensions[1],null);
 		//g2.drawImage(bg,(scrollx+2000/2)%bgDimensions[0]-bgDimensions[0],(scrolly/2)%bgDimensions[1]+bgDimensions[1],null);
@@ -163,6 +167,17 @@ public class Screen extends JPanel {
 			// Player moves; calculating collision is also in here
 			player.calcMove(left + right, isShift, isJump);
 		}
+		if (particles.size()>15) {
+			particles.remove(0);
+		}
+		for (int i=0; i<particles.size(); i++) {
+			particles.get(i).calcMove();
+			if (particles.get(i).shouldRemove()) {
+				particles.remove(i);
+				i-=1;
+			}
+		}
+		System.out.println(particles.size());
 
 		// Draw everything
 		repaint();
@@ -175,6 +190,34 @@ public class Screen extends JPanel {
 		int highest = 1000001;
 		// For every tile
 		for (Tile tile : area) {
+			if (tile.isVisible()) {
+				// See if either foot is inside something
+				if (tile.slopeState == SlopeState.NONE) {
+					if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
+						// player.setStandingOn(tile);
+						// If it is, save the lowest Y value
+						if (tile.y < highest) {
+							highest = tile.getHeight(rightFoot.getX());
+						}
+					}
+				} else if (tile.slopeState == SlopeState.RIGHT) {
+					// System.out.println("Checking for object");
+					if (tile.isInside(rightFoot)) {
+						// System.out.println("Successfully found object)");
+						if (tile.y < highest) {
+							highest = tile.getHeight(rightFoot.getX());
+						}
+					}
+				} else {
+					if (tile.isInside(leftFoot)) {
+						if (tile.y < highest) {
+							highest = tile.getHeight(leftFoot.getX());
+						}
+					}
+				}
+			}
+		}
+		for (Interactable tile : interactables) {
 			if (tile.isVisible()) {
 				// See if either foot is inside something
 				if (tile.slopeState == SlopeState.NONE) {
@@ -220,6 +263,17 @@ public class Screen extends JPanel {
 				}
 			}
 		}
+		for (Interactable tile : interactables) {
+			if (tile.isVisible()) {
+				if (tile.isInside(left) || tile.isInside(right)) {
+					// player.setStandingOn(tile);
+					// If it is, save the lowest Y value
+					if (tile.y > highest) {
+						highest = tile.getHeight(right.getX()) + tile.height;
+					}
+				}
+			}
+		}
 		return highest;
 	}
 
@@ -240,10 +294,26 @@ public class Screen extends JPanel {
 				}
 			}
 		}
+		for (Interactable tile : interactables) {
+			if (tile.isVisible() ) {
+				// See if either foot is inside something
+				if (tile.isInside(leftTop)) {
+					return tile.x + tile.width + 15 + 2;
+				} else if (tile.isInside(leftBot)) {
+					return tile.x + tile.width + 15 + 2;
+				} else if (tile.isInside(rightTop)) {
+					return tile.x - 75 - 2;
+				} else if (tile.isInside(rightBot)) {
+					return tile.x - 75 - 2;
+				}
+			}
+		}
 		return -1000001;
 	}
 
 	public boolean checkHitboxCollision(ArrayList<Hitbox> hitboxes) {
+		int dx = player.x - Screen.scrollx;
+		int dy = player.y - Screen.scrolly;
 		int point[];
 		for (Hitbox box : hitboxes) {
 			if (box.isActive()) {
@@ -251,15 +321,26 @@ public class Screen extends JPanel {
 					if (tile.isVisible()) {
 						for (int i = 1; i < 5; i++) {
 							point = box.getRelativePoint(i);
-							point[0] += player.x - Screen.scrollx;
-							point[1] += player.y - Screen.scrolly;
+							point[0] += dx;
+							point[1] += dy;
 							// if (i == 4) {
 							// System.out.println(
 							// point[0] + ", " + point[1] + " | " + tile.x + ", " + tile.y + " " + scrolly);
 							// }
 							if (tile.isInside(point)) {
 								// System.out.println("MADE CONTACT");
-								return true;
+								if (tile.interact()) {
+									return true;
+								} else {
+									int heightover4 =  tile.getHeight()/4;
+									int widthover4 =  tile.getWidth()/4;
+									particles.add(new Particle(tile.getX()+widthover4,tile.getY()+heightover4,heightover4/2,heightover4/2,1));
+									particles.add(new Particle(tile.getX()+(widthover4*3),tile.getY()+heightover4,heightover4/2,heightover4/2,1));
+									particles.add(new Particle(tile.getX()+widthover4,tile.getY()+(heightover4*3),heightover4/2,heightover4/2,1));
+									particles.add(new Particle(tile.getX()+(widthover4*3),tile.getY()+(heightover4*3),heightover4/2,heightover4/2,1));
+									interactables.remove(tile);
+									return false;
+								}
 							}
 						}
 					}
@@ -269,6 +350,24 @@ public class Screen extends JPanel {
 		return false;
 	}
 
+	public boolean checkDescendingStairs(Point2D.Double leftFoot, Point2D.Double rightFoot) {
+		for (Tile tile : area) {
+			if (tile.isVisible() && tile.getId()>=100) {
+				if (tile.slopeState == SlopeState.RIGHT) {
+					// System.out.println("Checking for object");
+					if (tile.isInside(rightFoot)) {
+						// System.out.println("Successfully found object)");
+						return true;
+					}
+				} else {
+					if (tile.isInside(leftFoot)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 
 	public void loadLevel(String which) {
 		
