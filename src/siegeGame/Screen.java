@@ -29,10 +29,12 @@ public class Screen extends JPanel {
 	private static Image bg = Toolkit.getDefaultToolkit().getImage("assets/bg1.jpg");
 	private static Image selectbg = Toolkit.getDefaultToolkit().getImage("assets/selectbg1.png");
 	private static Image title = Toolkit.getDefaultToolkit().getImage("assets/title1.jpg");
-	private int bgDimensions[] = new int[2];
+	private int bgDimensions[] = new int[2];  // 0 is x size of background image, 1 is y size.
 
 	public static int scrollx = 0;
 	public static int scrolly = 0;
+	public static int bgscrollx = 0;
+	public static int bgscrolly = 0;
 	private boolean first = true;
 
 	private ArrayList<Tile> area = new ArrayList<Tile>();
@@ -147,9 +149,41 @@ public class Screen extends JPanel {
 	
 	public void drawBG(Graphics2D g2) {
 		// we need to do a bigger think for this one
-		//System.out.println(scrollx%bgDimensions[0]);
-		g2.drawImage(bg,scrollx%bgDimensions[0],scrolly%bgDimensions[1],null);
-		//g2.drawImage(bg,scrollx%bgDimensions[0]-bgDimensions[0],scrolly%bgDimensions[1],null);
+		// Idea: make modified thing and control like this.
+		//if (bgscrollx 
+		System.out.println(bgscrollx+", "+(-2*bgDimensions[0])+", "+((bgDimensions[0]*-2)+Main.screenSize.width));
+		if (bgscrollx<-bgDimensions[0]+Main.screenSize.width) {
+			bgscrollx += bgDimensions[0];
+		} else if (bgscrollx>Main.screenSize.width) {
+			bgscrollx -= bgDimensions[0];
+		}
+		if (bgscrolly<-bgDimensions[1]+Main.screenSize.height) {
+			bgscrolly += bgDimensions[1];
+		} else if (bgscrolly>+Main.screenSize.height) {
+			bgscrolly -= bgDimensions[1];
+		}
+		System.out.println("Background culling: "+bgscrollx+", "+Main.screenSize.width+", "+(bgscrollx+bgDimensions[0])+", "+Main.screenSize.height);
+		if (((bgscrollx>Main.screenSize.width) || (bgscrollx+bgDimensions[0]<0)) || ((bgscrolly>Main.screenSize.height) || (bgscrolly+bgDimensions[1]<0))) {
+			System.out.println("Not printing bottom right");
+		} else {
+			g2.drawImage(bg,bgscrollx,bgscrolly,null);
+		}
+		if (((bgscrollx-bgDimensions[0]>Main.screenSize.width) || (bgscrollx<0)) || ((bgscrolly>Main.screenSize.height) || (bgscrolly+bgDimensions[1]<0))) {
+			System.out.println("Not printing bottom left");
+		} else {
+			g2.drawImage(bg,bgscrollx-bgDimensions[0],bgscrolly,null);
+		}
+		if (((bgscrollx>Main.screenSize.width) || (bgscrollx+bgDimensions[0]<0)) || ((bgscrolly-bgDimensions[1]>Main.screenSize.height) || (bgscrolly<0))) {
+			System.out.println("Not printing bottom right");
+		} else {
+			g2.drawImage(bg,bgscrollx,bgscrolly-bgDimensions[1],null);
+		}
+
+		if (((bgscrollx-bgDimensions[0]>Main.screenSize.width) || (bgscrollx<0)) || ((bgscrolly-bgDimensions[1]>Main.screenSize.height) || (bgscrolly<0))) {
+			System.out.println("Not printing top left");
+		} else {
+			g2.drawImage(bg,bgscrollx-bgDimensions[0],bgscrolly-bgDimensions[1],null);
+		}
 		//g2.drawImage(bg,(scrollx+2000/2)%bgDimensions[0]-bgDimensions[0],(scrolly/2)%bgDimensions[1]+bgDimensions[1],null);
 		//g2.drawImage(bg,(scrollx+2000/2)%bgDimensions[0],(scrolly/2)%bgDimensions[1]+bgDimensions[1],null);
 	}

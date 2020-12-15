@@ -437,17 +437,21 @@ public class Player {
 		// System.out.println(lity + " " + Main.scrollPos[2]+ " "+Main.scrollPos[3]);
 		if (litx > Main.scrollPos[1]) {
 			Screen.scrollx = Screen.scrollx - (int) (litx - Main.scrollPos[1]);
+			Screen.bgscrollx-= (int) (litx - Main.scrollPos[1])/2;
 			litx = Main.scrollPos[1];
 		} else if (litx < Main.scrollPos[0]) {
 			Screen.scrollx = Screen.scrollx + (int) (Main.scrollPos[0] - litx);
+			Screen.bgscrollx+= (int) (Main.scrollPos[0] - litx)/2;
 			litx = Main.scrollPos[0];
 		}
 		x = (int) litx;
 		if (lity > Main.scrollPos[3]) {
 			Screen.scrolly = Screen.scrolly - (int) (lity - Main.scrollPos[3]);
+			Screen.bgscrolly-= (int) (lity - Main.scrollPos[3])/2;
 			lity = Main.scrollPos[3];
 		} else if (lity < Main.scrollPos[2]) {
 			Screen.scrolly = Screen.scrolly + (int) (Main.scrollPos[2] - lity);
+			Screen.bgscrolly+= (int) (Main.scrollPos[2] - lity)/2;
 			lity = Main.scrollPos[2];
 		}
 		y = (int) lity;
