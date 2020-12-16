@@ -92,7 +92,7 @@ public class Tile {
 		}
 		g2.drawString(Integer.toString(height), scrollx + x + width, scrolly + y + (height / 2) + 25);
 		g2.drawString(Integer.toString(width), scrollx + x, scrolly + y + height + 50);
-		System.out.println(width);
+		// System.out.println(width); 
 		g2.setColor(Color.black);
 	}
 
@@ -154,7 +154,7 @@ public class Tile {
 
 	public boolean isInside(int[] point) {
 		if (id == 200) {
-			System.out.println("S's X: " + point[0]);
+			System.out.println("(in tile.java, isInside) S's X: " + point[0]);
 			System.out.println(
 					(point[0] >= x && point[0] <= x + width) + " " + (point[1] >= y && point[1] <= y + height));
 		}

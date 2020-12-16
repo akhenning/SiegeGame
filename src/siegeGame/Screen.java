@@ -49,6 +49,7 @@ public class Screen extends JPanel {
 
 	private boolean isShift = false;
 	private boolean isJump = false;
+	private boolean isAttack = false;
 	private int fade = 0;
 	private String fade_text = "TEST";
 	// private int direction = 1;
@@ -171,6 +172,9 @@ public class Screen extends JPanel {
 				Color fade_in = new Color(0,0,0,fade);
 				g2.setColor(fade_in);
 				fade -= (270-fade)/2;
+				if (fade<0) {
+					fade = 0;
+				}
 				fade_in_text = new Color(255,255,255,fade);
 			}
 			g2.fillRect(0, 0, 2000, 1500);
@@ -236,7 +240,7 @@ public class Screen extends JPanel {
 			}
 
 			// Player moves; calculating collision is also in here
-			player.calcMove(left + right, isShift, isJump);
+			player.calcMove(left + right, isShift, isJump, isAttack);
 		}
 		if (particles.size() > 15) {
 			particles.remove(0);
@@ -248,7 +252,7 @@ public class Screen extends JPanel {
 				i -= 1;
 			}
 		}
-		System.out.println(particles.size());
+		// System.out.println("Amount of particles in circulation:"+particles.size());
 
 		// Draw everything
 		repaint();
@@ -539,6 +543,11 @@ public class Screen extends JPanel {
 					isJump = true;
 				}
 				break;
+			case KeyEvent.VK_Q:
+				if (state == GameState.LEVEL) {
+					isAttack = true;
+				}
+				break;
 			case KeyEvent.VK_ENTER:
 				if (state == GameState.TITLE) {
 					state = GameState.SELECT;
@@ -637,6 +646,9 @@ public class Screen extends JPanel {
 			switch (keyCode) {
 			case KeyEvent.VK_SPACE:
 				isJump = false;
+				break;
+			case KeyEvent.VK_Q:
+				isAttack = false;
 				break;
 			case 16:
 				isShift = false;

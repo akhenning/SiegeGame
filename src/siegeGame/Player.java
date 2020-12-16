@@ -19,6 +19,7 @@ public class Player {
 	public static Image hovering = Toolkit.getDefaultToolkit().getImage("assets/hovering.png");
 	public static Image strike = Toolkit.getDefaultToolkit().getImage("assets/air_strike.png");
 	public static Image landing = Toolkit.getDefaultToolkit().getImage("assets/landing.png");
+	public static Image attack = Toolkit.getDefaultToolkit().getImage("assets/attack_fast.png");
 
 	private int direction = 1;
 	private double xspeed = 0;
@@ -32,13 +33,14 @@ public class Player {
 	private boolean isHitbox = false;
 	boolean onSlope = false;
 	double slope = 0;
+	private int attack_cooldown = 0;
 
 	public enum State {
-		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING
+		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, BASIC_ATTACK
 	}
 
 	public enum Animation {
-		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, IDLE, WALKING, NONE
+		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, IDLE, WALKING, BASIC_ATTACK, NONE
 	}
 
 	State state = State.GROUNDED;
@@ -67,6 +69,30 @@ public class Player {
 		// feet at 67, 223 when facing right
 		// System.out.println(state);
 		if (state != State.GROUNDED) {
+			if (state == State.BASIC_ATTACK) {
+				int offset = 325;
+				// Check if this is the first frame of the new animation
+				if (previousAnimation != Animation.BASIC_ATTACK) {
+					animationFrame = 0;
+					previousAnimation = Animation.BASIC_ATTACK;
+					width = MakeSureImageHasLoaded(attack);
+					System.out.println("Has set up normally" + width);
+				}
+
+				if (direction == 1) {
+					g2.drawImage(attack, x - 115, y - 85 - 155, offset + x - 115, y + 340 - 85 - 155,
+							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
+				} else {
+					g2.drawImage(attack, offset + x - 115 - 32, y - 85 - 155, x - 115 - 32, y + 340 - 85 - 155,
+							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
+				}
+				animationFrame += 1;
+				// check if end of animation without hardcoding number of frames
+				if (offset * animationFrame + 300 > width) {
+					state = State.GROUNDED;
+					System.out.println("Exited normally");
+				}
+			}
 			if (state == State.JUMPSQUAT) {
 				int offset = 300;
 				// Check if this is the first frame of the new animation
@@ -259,7 +285,7 @@ public class Player {
 					yoffset = -16 * (4 - (animationFrame - 5));
 				}
 			}
-			System.out.println(state + " " + animationFrame);
+			System.out.println("State and AnimationFrame:" + state + " " + animationFrame);
 			g2.setColor(Color.yellow);
 			g2.drawRect(x - 2, y - 2 + yoffset, 4, 4);
 			g2.setColor(Color.red);
@@ -282,14 +308,27 @@ public class Player {
 
 	}
 
-	public void calcMove(double xMove, boolean isShift, boolean isJump) {
+	public void calcMove(double xMove, boolean isShift, boolean isJump, boolean isAttack) {
 		boolean doLandingCheck = false;
 		isSpace = isJump;
 
 		if (yspeed > 35) {
 			yspeed = 35;
 		}
+		if (xspeed<.01 && xspeed > -.01) {
+			xspeed = 0;
+		}
 
+		// todo this needs checking
+		attack_cooldown -= 1;
+		if (isAttack && state == State.GROUNDED && attack_cooldown < 1) {
+			attack_cooldown = 23;
+			state = State.BASIC_ATTACK;
+		}
+		if (state == State.BASIC_ATTACK) {
+			xspeed*=.7;
+			litx += xspeed;
+		}
 		// System.out.println("start"+xspeed);
 		if (state == State.GROUNDED) {
 			if (xMove == 1) {
@@ -299,7 +338,9 @@ public class Player {
 			}
 		}
 		// System.out.println(lity+" "+Screen.scrolly+" " + (lity-Screen.scrolly));
+		// Check if smacking a bounce pad
 		if (isHitbox && screen.checkHitboxCollision(hitboxes)) {
+			// If so, transition to airborne state and go flying in opposite direction
 			state = State.JUMPING;
 			yspeed = -30;
 			direction *= -1;
@@ -310,7 +351,7 @@ public class Player {
 		}
 
 		// if not GROUNDED
-		if (state != State.GROUNDED) {
+		if (state != State.GROUNDED && state!=State.BASIC_ATTACK) {
 			// if not in JUMPSQUAT, increased movement
 			if (state == State.JUMPING || state == State.HOVERING || state == State.DESCENDING) {
 				// System.out.println("Airborne"+xspeed);
@@ -346,8 +387,9 @@ public class Player {
 			} else { // if in JUMPSQUAT, move slowly
 			}
 		} // transition from GROUNDED to jump squat
-		else if (state == State.GROUNDED && isJump) {
-			// System.out.println("Starting to jump");
+		else if (isJump && (state == State.GROUNDED || state == State.BASIC_ATTACK)) {
+			System.out.println("Starting to jump");
+
 			state = State.JUMPSQUAT;
 			xspeed *= .9;
 			litx += xspeed;
@@ -380,7 +422,8 @@ public class Player {
 			xspeed = 0;
 		}
 
-		if (state != State.GROUNDED && state != State.JUMPSQUAT && state != State.LANDING) {
+		if (state != State.GROUNDED && state != State.JUMPSQUAT && state != State.LANDING
+				&& state != State.BASIC_ATTACK) {
 			Point2D.Double leftHead;
 			Point2D.Double rightHead;
 			if (state == State.HOVERING) {
@@ -414,7 +457,7 @@ public class Player {
 				}
 			}
 		}
-		if (state == State.GROUNDED || doLandingCheck) {
+		if ((state == State.GROUNDED || state == State.BASIC_ATTACK) || doLandingCheck) {
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
@@ -437,21 +480,21 @@ public class Player {
 		// System.out.println(lity + " " + Main.scrollPos[2]+ " "+Main.scrollPos[3]);
 		if (litx > Main.scrollPos[1]) {
 			Screen.scrollx = Screen.scrollx - (int) (litx - Main.scrollPos[1]);
-			Screen.bgscrollx-= (int) (litx - Main.scrollPos[1])/2;
+			Screen.bgscrollx -= (int) (litx - Main.scrollPos[1]) / 2;
 			litx = Main.scrollPos[1];
 		} else if (litx < Main.scrollPos[0]) {
 			Screen.scrollx = Screen.scrollx + (int) (Main.scrollPos[0] - litx);
-			Screen.bgscrollx+= (int) (Main.scrollPos[0] - litx)/2;
+			Screen.bgscrollx += (int) (Main.scrollPos[0] - litx) / 2;
 			litx = Main.scrollPos[0];
 		}
 		x = (int) litx;
 		if (lity > Main.scrollPos[3]) {
 			Screen.scrolly = Screen.scrolly - (int) (lity - Main.scrollPos[3]);
-			Screen.bgscrolly-= (int) (lity - Main.scrollPos[3])/2;
+			Screen.bgscrolly -= (int) (lity - Main.scrollPos[3]) / 2;
 			lity = Main.scrollPos[3];
 		} else if (lity < Main.scrollPos[2]) {
 			Screen.scrolly = Screen.scrolly + (int) (Main.scrollPos[2] - lity);
-			Screen.bgscrolly+= (int) (Main.scrollPos[2] - lity)/2;
+			Screen.bgscrolly += (int) (Main.scrollPos[2] - lity) / 2;
 			lity = Main.scrollPos[2];
 		}
 		y = (int) lity;
@@ -471,7 +514,7 @@ public class Player {
 			failcase += 1;
 			try {
 				Thread.sleep(2);
-				width = jumping.getWidth(null);
+				width = image.getWidth(null);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
