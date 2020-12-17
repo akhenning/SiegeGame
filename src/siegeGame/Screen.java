@@ -126,8 +126,11 @@ public class Screen extends JPanel {
 			player.draw(g2);
 
 		} else if (state == GameState.TITLE) {
+			g2.setColor(Color.BLACK);
+			g2.fillRect(0, 0, 2000, 1500);
 			g2.setFont(font);
 			g2.drawImage(title, 0, 0, null);
+			g2.setColor(Color.WHITE);
 			g2.drawString("Press Enter", Main.screenSize.width / 3, Main.screenSize.height / 2);
 			for (Tile tile : area) {
 				tile.draw(g2);
@@ -543,7 +546,7 @@ public class Screen extends JPanel {
 					isJump = true;
 				}
 				break;
-			case KeyEvent.VK_Q:
+			case KeyEvent.VK_E:
 				if (state == GameState.LEVEL) {
 					isAttack = true;
 				}
@@ -565,6 +568,8 @@ public class Screen extends JPanel {
 				break;
 			case 16:
 				isShift = true;
+				break;
+			case KeyEvent.VK_R:
 				scrollx = 0;
 				scrolly = 100;
 				player.litx = 0;
@@ -576,7 +581,7 @@ public class Screen extends JPanel {
 			case KeyEvent.VK_D:
 				right = 1;
 				break;
-			case KeyEvent.VK_E:
+			case KeyEvent.VK_Q:
 				if (player.debug) {
 					player.debug = false;
 				} else {
@@ -647,7 +652,7 @@ public class Screen extends JPanel {
 			case KeyEvent.VK_SPACE:
 				isJump = false;
 				break;
-			case KeyEvent.VK_Q:
+			case KeyEvent.VK_E:
 				isAttack = false;
 				break;
 			case 16:

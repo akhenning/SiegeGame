@@ -4,11 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Player {
 	public boolean debug = true;
+	public final double GRAVITY = 1.5;
 
 	public static Image walk = Toolkit.getDefaultToolkit().getImage("assets/walk.png");
 	public static Image IDLE = Toolkit.getDefaultToolkit().getImage("assets/idle.png");
@@ -20,6 +22,7 @@ public class Player {
 	public static Image strike = Toolkit.getDefaultToolkit().getImage("assets/air_strike.png");
 	public static Image landing = Toolkit.getDefaultToolkit().getImage("assets/landing.png");
 	public static Image attack = Toolkit.getDefaultToolkit().getImage("assets/attack_fast.png");
+	public static Image[] skid = {Toolkit.getDefaultToolkit().getImage("assets/skid.png"),Toolkit.getDefaultToolkit().getImage("assets/skid2.png")};
 
 	private int direction = 1;
 	private double xspeed = 0;
@@ -78,6 +81,18 @@ public class Player {
 					width = MakeSureImageHasLoaded(attack);
 					System.out.println("Has set up normally" + width);
 				}
+				if (animationFrame == 10) {
+					isHitbox = true;
+					hitboxes.get(0).setActive(true, direction);
+					hitboxes.get(1).setActive(true, direction);
+				} else if (animationFrame == 12) {
+					hitboxes.get(0).setActive(false, direction);
+					hitboxes.get(1).setActive(false, direction);
+					hitboxes.get(2).setActive(true, direction);
+				} else if (animationFrame == 13) {
+					hitboxes.get(2).setActive(false, direction);
+					isHitbox = false;
+				}
 
 				if (direction == 1) {
 					g2.drawImage(attack, x - 115, y - 85 - 155, offset + x - 115, y + 340 - 85 - 155,
@@ -90,6 +105,7 @@ public class Player {
 				// check if end of animation without hardcoding number of frames
 				if (offset * animationFrame + 300 > width) {
 					state = State.GROUNDED;
+					animationFrame = 0;
 					System.out.println("Exited normally");
 				}
 			}
@@ -97,6 +113,10 @@ public class Player {
 				int offset = 300;
 				// Check if this is the first frame of the new animation
 				if (previousAnimation != Animation.JUMPSQUAT) {
+					isHitbox = false;
+					for (Hitbox box : hitboxes) {
+						box.setActive(false, direction);
+					}
 					animationFrame = 0;
 					previousAnimation = Animation.JUMPSQUAT;
 					width = MakeSureImageHasLoaded(jumpsquat);
@@ -109,7 +129,7 @@ public class Player {
 							y + 340 - 85 - 223, offset * animationFrame, 0, offset * animationFrame + offset, 340,
 							null);
 				}
-				animationFrame += 1;
+				animationFrame += 2;
 				// if (offset * animationFrame + 300 > width) {
 				// animationFrame -= 1;
 				// state = State.JUMPING;
@@ -118,6 +138,10 @@ public class Player {
 				int offset = 300;
 				// Check if this is the first frame of the new animation
 				if (previousAnimation != Animation.JUMPING) {
+					isHitbox = false;
+					for (Hitbox box : hitboxes) {
+						box.setActive(false, direction);
+					}
 					animationFrame = 0;
 					previousAnimation = Animation.JUMPING;
 					width = MakeSureImageHasLoaded(jumping);
@@ -214,6 +238,7 @@ public class Player {
 			} else if (state == State.LANDING) {
 				int offset = 300;
 				if (previousAnimation != Animation.LANDING) {
+					isHitbox = false;
 					for (Hitbox box : hitboxes) {
 						box.setActive(false, direction);
 					}
@@ -228,7 +253,7 @@ public class Player {
 					g2.drawImage(landing, offset + x - 36 - 67 - 32, y - 85 - 223, x - 36 - 67 - 32, y + 340 - 85 - 223,
 							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
 				}
-				animationFrame += 1;
+				animationFrame += 2;
 				if (offset * animationFrame + 300 > width) {
 					state = State.GROUNDED;
 				}
@@ -259,12 +284,30 @@ public class Player {
 				previousAnimation = Animation.WALKING;
 				width = MakeSureImageHasLoaded(walk);
 			}
-			if (direction == 1) {
-				g2.drawImage(walk, x - 5 - 67, y + 4 - 223, x + 195 - 67, y + 250 + 4 - 223, offset * animationFrame, 0,
-						offset * animationFrame + 200, 250, null);
+			// Special skidding animation for high speeds
+			if (Math.abs(xspeed)>10) {
+				// This is kind of slow, but only runs when skidding so it's probably fine
+				AffineTransform trans = new AffineTransform();
+				// trans rights
+				if (direction == 1) {
+					trans.translate((double)(x+72),(double)(y ));
+					trans.rotate( Math.toRadians(Math.abs(8-animationFrame)-10) );
+					trans.translate(-144, 15-223);
+					g2.drawImage(skid[0],trans,null);
+				} else {
+					trans.translate((double)(x),(double)(y ));
+					trans.rotate( Math.toRadians(-Math.abs(8-animationFrame)+10) );
+					trans.translate(-72, 15-223);
+					g2.drawImage(skid[1],trans,null);
+				}
 			} else {
-				g2.drawImage(walk, x + 195 - 67 - 4, y + 4 - 223, x - 5 - 67 - 4, y + 250 + 4 - 223,
-						offset * animationFrame, 0, offset * animationFrame + 200, 250, null);
+				if (direction == 1) {
+					g2.drawImage(walk, x - 5 - 67, y + 4 - 223, x + 195 - 67, y + 250 + 4 - 223, offset * animationFrame, 0,
+							offset * animationFrame + 200, 250, null);
+				} else {
+					g2.drawImage(walk, x + 195 - 67 - 4, y + 4 - 223, x - 5 - 67 - 4, y + 250 + 4 - 223,
+							offset * animationFrame, 0, offset * animationFrame + 200, 250, null);
+				}
 			}
 			animationFrame += 1;
 			if (offset * animationFrame + 300 > width) {
@@ -319,14 +362,16 @@ public class Player {
 			xspeed = 0;
 		}
 
-		// todo this needs checking
-		attack_cooldown -= 1;
-		if (isAttack && state == State.GROUNDED && attack_cooldown < 1) {
-			attack_cooldown = 23;
+		// Check for start of attack
+		//attack_cooldown -= 1;
+		if (isAttack && state == State.GROUNDED) {
+			System.out.println("Attacking");
+			//attack_cooldown = 19;
 			state = State.BASIC_ATTACK;
 		}
+		// Handle movement while attacking
 		if (state == State.BASIC_ATTACK) {
-			xspeed*=.7;
+			xspeed*=.8;
 			litx += xspeed;
 		}
 		// System.out.println("start"+xspeed);
@@ -351,14 +396,17 @@ public class Player {
 		}
 
 		// if not GROUNDED
-		if (state != State.GROUNDED && state!=State.BASIC_ATTACK) {
-			// if not in JUMPSQUAT, increased movement
+		if (state != State.GROUNDED) {
+			// if not in JUMPSQUAT, then in the air; this handles air maneuverability
 			if (state == State.JUMPING || state == State.HOVERING || state == State.DESCENDING) {
 				// System.out.println("Airborne"+xspeed);
 				if (state == State.HOVERING && isJump) {
-					yspeed -= .75;
+					yspeed += .25;
+				} else if (state == State.JUMPING && isJump) {
+					yspeed += GRAVITY-.5;
+				} else {
+					yspeed += GRAVITY;
 				}
-				yspeed += 1;
 				lity += yspeed;
 				xspeed = xspeed + (xMove);
 				litx += xspeed;
@@ -387,16 +435,25 @@ public class Player {
 			} else { // if in JUMPSQUAT, move slowly
 			}
 		} // transition from GROUNDED to jump squat
-		else if (isJump && (state == State.GROUNDED || state == State.BASIC_ATTACK)) {
-			System.out.println("Starting to jump");
-
+		else if (isJump && state == State.GROUNDED) {
+			//System.out.println("Starting to jump");
 			state = State.JUMPSQUAT;
 			xspeed *= .9;
 			litx += xspeed;
-		} // if GROUNDED and not in JUMPSQUAT
+		} // if GROUNDED and not in JUMPSQUAT, then handle walking stuff
 		else {
 			// System.out.println("WALKING");
 			xspeed = xMove * 5.5;
+			if (isShift) {
+				xspeed *= 3;
+			}
+			litx += xspeed;
+		}
+		
+		// All good games have jump-cancelling
+		if (isJump && state == State.BASIC_ATTACK) {
+			state = State.JUMPSQUAT;
+			xspeed *= .8;
 			litx += xspeed;
 		}
 
@@ -412,18 +469,11 @@ public class Player {
 				yoffset = -16 * (5 - (animationFrame - 5));
 			}
 		}
-		Point2D.Double left = new Point2D.Double(litx - Screen.scrollx - 15, lity - 45 - Screen.scrolly + yoffset);
-		Point2D.Double left2 = new Point2D.Double(litx - Screen.scrollx - 15, lity - 150 - Screen.scrolly + yoffset);
-		Point2D.Double right = new Point2D.Double(litx - Screen.scrollx + 77, lity - 45 - Screen.scrolly + yoffset);
-		Point2D.Double right2 = new Point2D.Double(litx - Screen.scrollx + 77, lity - 150 - Screen.scrolly + yoffset);
-		int wallLevel = screen.checkHorizontalCollision(left, left2, right, right2);
-		if (wallLevel != -1000001) {
-			litx = wallLevel + Screen.scrollx;
-			xspeed = 0;
-		}
 
+		// Check if (airborne) player has their HEAD in a CEILING or are about to LAND
 		if (state != State.GROUNDED && state != State.JUMPSQUAT && state != State.LANDING
 				&& state != State.BASIC_ATTACK) {
+			// Find location of head (animation dependent)
 			Point2D.Double leftHead;
 			Point2D.Double rightHead;
 			if (state == State.HOVERING) {
@@ -437,10 +487,12 @@ public class Player {
 				leftHead = new Point2D.Double(litx - Screen.scrollx, lity - 180 - Screen.scrolly);
 				rightHead = new Point2D.Double(litx - Screen.scrollx + 62, lity - 180 - Screen.scrolly);
 			}
+			// Check if head in ceiling
 			int ceilingLevel = screen.checkCeilingCollision(leftHead, rightHead);
 			if (ceilingLevel != -1000001) {
+				// If so, stop upwards movement and move player to below the collision point.
 				yspeed = 0;
-				lity = ceilingLevel + 180 + Screen.scrolly - yoffset + 5;
+				lity = ceilingLevel + 180 + Screen.scrolly - yoffset; //+ 5;
 			}
 
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly + yoffset);
@@ -457,10 +509,24 @@ public class Player {
 				}
 			}
 		}
+		
+		// Check if player is inside of a WALL. If so, shunt them back to in front of it.
+		Point2D.Double left = new Point2D.Double(litx - Screen.scrollx - 15, lity - 45 - Screen.scrolly + yoffset);
+		Point2D.Double left2 = new Point2D.Double(litx - Screen.scrollx - 15, lity - 150 - Screen.scrolly + yoffset);
+		Point2D.Double right = new Point2D.Double(litx - Screen.scrollx + 77, lity - 45 - Screen.scrolly + yoffset);
+		Point2D.Double right2 = new Point2D.Double(litx - Screen.scrollx + 77, lity - 150 - Screen.scrolly + yoffset);
+		int wallLevel = screen.checkHorizontalCollision(left, left2, right, right2);
+		if (wallLevel != -1000001) {
+			litx = wallLevel + Screen.scrollx;
+			xspeed = 0;
+		}
+		
+		// Check case where grounded player walks off of the ground (i.e. ledge)
 		if ((state == State.GROUNDED || state == State.BASIC_ATTACK) || doLandingCheck) {
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
+			// This means that nothing is below the player
 			if (groundLevel == 1000001) {
 				if (screen.checkDescendingStairs(new Point2D.Double(leftFoot.getX(), leftFoot.getY() + 10),
 						new Point2D.Double(rightFoot.getX(), rightFoot.getY() + 10))) {
