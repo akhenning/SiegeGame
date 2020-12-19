@@ -46,6 +46,12 @@ public class Screen extends JPanel {
 	private Player player = new Player(this);
 	private Font font = new Font("Serif", Font.PLAIN, 100);
 	private Font fade_font = new Font("Serif", Font.PLAIN, 200);
+	private Font text_font = new Font("Serif", Font.PLAIN, 50);
+	
+	public boolean activeText = false;
+	private int textBoxNum = -1;
+	private int[] textScrollNum = {-1,-1};
+	private ArrayList<ArrayList<String>> text =  new ArrayList<ArrayList<String>>();
 
 	private boolean isShift = false;
 	private boolean isJump = false;
@@ -157,6 +163,54 @@ public class Screen extends JPanel {
 		for (Particle tile : particles) {
 			tile.draw(g2);
 		}
+		
+		// Secion handling text boxes
+		if (activeText) {
+			// Draw box itself
+			g2.setColor(Color.WHITE);
+			g2.fillRect(0, Main.gameSize.height*2/3, Main.gameSize.width, Main.gameSize.height);
+			g2.setColor(Color.BLACK);
+			g2.drawRect(0, Main.gameSize.height*2/3, Main.gameSize.width, Main.gameSize.height);
+			g2.setFont(text_font);
+
+			System.out.println("Test"+"potato".substring(0,0));
+			if (textScrollNum[0]==-1) {
+				int times = 0;
+				//System.out.println(text.toString()+", "+textBoxNum);
+				for (String line : text.get(textBoxNum)) {
+					g2.drawString(line, 100, (Main.screenSize.height *3 / 4) +(times * 50));
+					times+=1;
+				}
+			} else {
+				int times = 0;
+				for (String line : text.get(textBoxNum)) {
+					if (times < textScrollNum[0]) {
+						g2.drawString(line, 100, Main.screenSize.height *3 / 4+(times * 50));
+						times+=1;
+					}
+					else if (times == textScrollNum[0]){
+						System.out.println("Attempting to substring string: " + line +" with length "+line.length()+" into substring 0, "+textScrollNum[1]);
+						g2.drawString(line.substring(0,textScrollNum[1]-1), 100, Main.screenSize.height *3 / 4+(times * 50));
+						times+=1;
+					}
+				}
+				//System.out.println("Updating scroll values for line "+text.get(textBoxNum).get(textScrollNum[0])+". Now: " + textScrollNum[0] +", "+textScrollNum[1]);
+				textScrollNum[1] +=1;
+				if (text.get(textBoxNum).get(textScrollNum[0]).length()<textScrollNum[1]) {
+					System.out.println("Incrementing line. Now: " + textScrollNum[0] +", "+textScrollNum[1]);
+					textScrollNum[0] +=1;
+					textScrollNum[1] =1;
+					if (text.get(textBoxNum).size()<=textScrollNum[0]) {
+						System.out.println("Reached end at: " + textScrollNum[0] +", "+textScrollNum[1]);
+						textScrollNum[0] =-1;
+						textScrollNum[1] =-1;
+					}
+				}
+			}
+		}
+		
+		
+		
 		
 		// put fade-in above 
 		if (fade > 0) {
@@ -453,15 +507,17 @@ public class Screen extends JPanel {
 
 	public void loadLevel(String which) {
 
+		// If loading a level
 		if (state == GameState.LEVEL) {
 
 			FileInputStream in = null;
 			File file = null;
 			String raw_stage = null;
 
+			// Find level data of that stage
 			fade_text = which;
 			try {
-				file = new File("stages/" + which + ".txt");
+				file = new File("stages/" + which + "/level.txt");
 				in = new FileInputStream(file);
 				// out = new FileOutputStream("stages/1.txt");
 
@@ -480,6 +536,7 @@ public class Screen extends JPanel {
 				}
 			}
 
+			// Process level file
 			area = new ArrayList<Tile>();
 			String[] lines = raw_stage.split("\n");
 			for (String line : lines) {
@@ -514,10 +571,69 @@ public class Screen extends JPanel {
 				}
 				System.out.println(elements[5]);
 			}
+
+			
+			// Read text file
+			FileInputStream text_in = null;
+			File text_file = null;
+			String raw_text = null;
+			try {
+				text_file = new File("stages/" + which + "/text.txt");
+				text_in = new FileInputStream(text_file);
+				// out = new FileOutputStream("stages/1.txt");
+
+				byte[] data = new byte[(int) text_file.length()];
+				text_in.read(data);
+
+				raw_text = new String(data, "UTF-8");
+			} catch (Exception e) {
+				// Might want to make this set the final variable to something else other than null
+				//System.out.println("Error when reading stage file");
+			}
+			if (text_in != null) {
+				try {
+					text_in.close();
+				} catch (IOException e) {
+					System.out.println("Error when closing text file");
+				}
+			}
+			if (raw_text!=null){
+				activeText = true;
+				System.out.println(raw_text);
+				String[] text_lines = raw_text.split("\n");
+				System.out.println(text_lines);
+				for (String line : text_lines) {
+					String[] words = line.split(" ");
+					ArrayList<String> quip = new ArrayList<String>();
+					for (String word : words) {
+						// todo edge case of long words
+						if (quip.size() == 0){
+							quip.add(word);
+						}
+						else if(quip.get(quip.size()-1).length() + word.length() < 30) {
+							String newStr = quip.get(quip.size()-1) + " "+ word;
+							quip.set(quip.size()-1,newStr);
+						} else {
+							quip.add(word);
+						}
+					}
+						
+				
+					text.add(quip);
+				}
+				textBoxNum = 0;
+				textScrollNum[0] = 0;
+				textScrollNum[1] = 1;
+				System.out.println(text);
+			}
+			
+			
+		// If title screen, don't really need to do anythign special
 		} else if (state == GameState.TITLE) {
 			area = new ArrayList<Tile>();
 			area.add(new Graphic(100, 100, 10));
 			fade_text = "";
+		// if loading level select
 		} else if (state == GameState.SELECT) {
 			File file = new File("stages");
 			String[] files = file.list();
@@ -525,7 +641,7 @@ public class Screen extends JPanel {
 			int i = 0;
 			for (String name : files) {
 				area.add(new Graphic(800, 150 * i + 50, 500, 100, 11));
-				area.get(area.size() - 1).setText(name.substring(0, name.length() - 4));
+				area.get(area.size() - 1).setText(name);//.substring(0, name.length() - 4));
 				i++;
 			}
 			fade_text = "";
@@ -564,6 +680,18 @@ public class Screen extends JPanel {
 					scrollx = 0;
 					scrolly = 0;
 					// loadLevel();
+				} else {
+					if (textScrollNum[0] == -1 && textScrollNum[1] == -1) {
+						textBoxNum+=1;
+						textScrollNum[0] = 0;
+						textScrollNum[1] = 1;
+						if(textBoxNum>=text.size()) {
+							activeText = false;
+						}
+					} else {
+						textScrollNum[0] = -1;
+						textScrollNum[1] = -1;
+					}
 				}
 				break;
 			case 16:

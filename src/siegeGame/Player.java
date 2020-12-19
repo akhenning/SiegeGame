@@ -291,13 +291,17 @@ public class Player {
 				// trans rights
 				if (direction == 1) {
 					trans.translate((double)(x+72),(double)(y ));
-					trans.rotate( Math.toRadians(Math.abs(8-animationFrame)-10) );
-					trans.translate(-144, 15-223);
+					if (animationFrame<8) {
+						trans.rotate( Math.toRadians(Math.abs(4-animationFrame)-15) );
+					} else {
+						trans.rotate( Math.toRadians(Math.abs(12-animationFrame)-15) );
+					}
+					trans.translate(-130, 15-223); //144
 					g2.drawImage(skid[0],trans,null);
 				} else {
 					trans.translate((double)(x),(double)(y ));
-					trans.rotate( Math.toRadians(-Math.abs(8-animationFrame)+10) );
-					trans.translate(-72, 15-223);
+					trans.rotate( Math.toRadians(-Math.abs(8-animationFrame)/2+15) );
+					trans.translate(-62, 15-223); //72
 					g2.drawImage(skid[1],trans,null);
 				}
 			} else {
