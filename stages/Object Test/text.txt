@@ -1,0 +1,2 @@
+[SiegeNormal] This stage is where I have tested new objects, and the way I interact with them. 
+[SiegeLion] For that matter, when I talk, is it Siege who is talking, or the dev...?

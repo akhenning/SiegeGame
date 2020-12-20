@@ -1,6 +1,6 @@
-Hello, and welcome to Siege Game (temp).
-This is a test file.
-I am your playable character, Siege, leader of the Glascow gang.
-
-Yorushiku.
+[SiegeNormal] Hello, and welcome to Siege Game (temp).
+[SiegeNormal] This is a test file.
 テストをします。
+[SiegeEnigmatic] I am your playable character, Siege, leader of the Glascow gang.
+[SiegeNormal] 
+[SiegeNormal] Yorushiku.

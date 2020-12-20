@@ -21,37 +21,43 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class Screen extends JPanel {
-	/**
-	 * TODO; only way to fix priority issue is by making walls one-way, which 
-	 * we should have done from the beginning...
-	 */
+	// Dunno what this does
 	private static final long serialVersionUID = 1L;
+	// Controls zoom of entire game area
 	public static double zoom = 1;
+	// Image[s] for backgrounds
 	private static Image bg = Toolkit.getDefaultToolkit().getImage("assets/bg1.jpg");
-			//Toolkit.getDefaultToolkit().getImage("assets/carlymonster_clouds.jpg");
+	// Toolkit.getDefaultToolkit().getImage("assets/carlymonster_clouds.jpg");
 	private static Image selectbg = Toolkit.getDefaultToolkit().getImage("assets/selectbg1.png");
 	private static Image title = Toolkit.getDefaultToolkit().getImage("assets/title1.jpg");
-	private int bgDimensions[] = new int[2]; // 0 is x size of background image, 1 is y size.
+	private static Image[] face_images = { Toolkit.getDefaultToolkit().getImage("assets/SiegeNormal.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeLion.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeEnigmatic.png")};
+	private int bgDimensions[] = new int[2]; // Size of bg; 0 is x of background image, 1 is y.
 
+	// Handles scroll for player and background
 	public static int scrollx = 0;
 	public static int scrolly = 0;
 	public static int bgscrollx = 0;
 	public static int bgscrolly = 0;
 	private boolean first = true;
 
+	// Collection of level objects
 	private ArrayList<Tile> area = new ArrayList<Tile>();
 	private ArrayList<Interactable> interactables = new ArrayList<Interactable>();
 	private ArrayList<Particle> particles = new ArrayList<Particle>();
 	private int numSelected = 0;
 	private Player player = new Player(this);
+
+	// Fonts and texts for speech bubbles
 	private Font font = new Font("Serif", Font.PLAIN, 100);
 	private Font fade_font = new Font("Serif", Font.PLAIN, 200);
 	private Font text_font = new Font("Serif", Font.PLAIN, 50);
-	
 	public boolean activeText = false;
 	private int textBoxNum = -1;
-	private int[] textScrollNum = {-1,-1};
-	private ArrayList<ArrayList<String>> text =  new ArrayList<ArrayList<String>>();
+	private int[] textScrollNum = { -1, -1 };
+	private ArrayList<ArrayList<String>> text = new ArrayList<ArrayList<String>>();
+	private ArrayList<Image> faces = new ArrayList<Image>();
 
 	private boolean isShift = false;
 	private boolean isJump = false;
@@ -163,88 +169,109 @@ public class Screen extends JPanel {
 		for (Particle tile : particles) {
 			tile.draw(g2);
 		}
-		
+
 		// Secion handling text boxes
 		if (activeText) {
 			// Draw box itself
 			g2.setColor(Color.WHITE);
-			g2.fillRect(0, Main.gameSize.height*2/3, Main.gameSize.width, Main.gameSize.height);
+			g2.fillRect(0, Main.gameSize.height * 3 / 4, Main.gameSize.width, Main.gameSize.height);
 			g2.setColor(Color.BLACK);
-			g2.drawRect(0, Main.gameSize.height*2/3, Main.gameSize.width, Main.gameSize.height);
-			g2.setFont(text_font);
+			g2.drawRect(0, Main.gameSize.height * 3 / 4, Main.gameSize.width, Main.gameSize.height);
+			if (zoom == 1) {
+				g2.setFont(text_font);
+			} else {
+				g2.setFont(font);
+			}
+			int offset = (int) (50 / zoom);
 
-			System.out.println("Test"+"potato".substring(0,0));
-			if (textScrollNum[0]==-1) {
+			System.out.println("Test" + "potato".substring(0, 0));
+			int dist_from_side = 0;
+			if (faces.get(textBoxNum) == null) {
+				dist_from_side = Main.gameSize.width / 10;
+			} else {
+				dist_from_side = Main.gameSize.width / 4;
+			}
+			if (textScrollNum[0] == -1) {
 				int times = 0;
-				//System.out.println(text.toString()+", "+textBoxNum);
+				// System.out.println(text.toString()+", "+textBoxNum);
 				for (String line : text.get(textBoxNum)) {
-					g2.drawString(line, 100, (Main.screenSize.height *3 / 4) +(times * 50));
-					times+=1;
+					g2.drawString(line, dist_from_side, (Main.gameSize.height * 41 / 50) + (times * offset));
+					times += 1;
 				}
 			} else {
 				int times = 0;
 				for (String line : text.get(textBoxNum)) {
 					if (times < textScrollNum[0]) {
-						g2.drawString(line, 100, Main.screenSize.height *3 / 4+(times * 50));
-						times+=1;
-					}
-					else if (times == textScrollNum[0]){
-						System.out.println("Attempting to substring string: " + line +" with length "+line.length()+" into substring 0, "+textScrollNum[1]);
-						g2.drawString(line.substring(0,textScrollNum[1]-1), 100, Main.screenSize.height *3 / 4+(times * 50));
-						times+=1;
+						g2.drawString(line, dist_from_side, Main.gameSize.height * 41 / 50 + (times * offset));
+						times += 1;
+					} else if (times == textScrollNum[0]) {
+						System.out.println("Attempting to substring string: " + line + " with length " + line.length()
+								+ " into substring 0, " + textScrollNum[1]);
+						g2.drawString(line.substring(0, textScrollNum[1] - 1), dist_from_side,
+								Main.gameSize.height * 41 / 50 + (times * offset));
+						times += 1;
 					}
 				}
-				//System.out.println("Updating scroll values for line "+text.get(textBoxNum).get(textScrollNum[0])+". Now: " + textScrollNum[0] +", "+textScrollNum[1]);
-				textScrollNum[1] +=1;
-				if (text.get(textBoxNum).get(textScrollNum[0]).length()<textScrollNum[1]) {
-					System.out.println("Incrementing line. Now: " + textScrollNum[0] +", "+textScrollNum[1]);
-					textScrollNum[0] +=1;
-					textScrollNum[1] =1;
-					if (text.get(textBoxNum).size()<=textScrollNum[0]) {
-						System.out.println("Reached end at: " + textScrollNum[0] +", "+textScrollNum[1]);
-						textScrollNum[0] =-1;
-						textScrollNum[1] =-1;
+				if (fade<=0) {
+					textScrollNum[1] += 1;
+				}
+				if (text.get(textBoxNum).get(textScrollNum[0]).length() < textScrollNum[1]) {
+					System.out.println("Incrementing line. Now: " + textScrollNum[0] + ", " + textScrollNum[1]);
+					textScrollNum[0] += 1;
+					textScrollNum[1] = 1;
+					if (text.get(textBoxNum).size() <= textScrollNum[0]) {
+						System.out.println("Reached end at: " + textScrollNum[0] + ", " + textScrollNum[1]);
+						textScrollNum[0] = -1;
+						textScrollNum[1] = -1;
 					}
 				}
 			}
+			if (faces.get(textBoxNum) != null) {
+				int off = (int) (270 / zoom);
+				g2.setColor(Color.WHITE);
+				g2.fillRect(offset/2, Main.gameSize.height - off- (offset*3/2),
+						off,off);
+				//g2.fillRect(offset/2, Main.gameSize.height * 2 / 3 - offset, Main.gameSize.height / 4,
+				//		Main.gameSize.height / 4);
+				g2.setColor(Color.BLACK);
+				g2.drawRect(offset/2, Main.gameSize.height - off- (offset*3/2),
+						off,off);
+				g2.drawImage(faces.get(textBoxNum), offset/2, Main.gameSize.height - off- (offset*3/2),
+						off,off, null);
+			}
 		}
-		
-		
-		
-		
-		// put fade-in above 
+
+		// put fade-in above
 		if (fade > 0) {
 			g2.setFont(fade_font);
 			// if above 300, reduce by one (black) until is normal alpha
 			Color fade_in_text = null;
-			if (fade>300) {
+			if (fade > 300) {
 				g2.setColor(Color.BLACK);
-				fade -=1;
-				if (fade<=300) {
+				fade -= 1;
+				if (fade <= 300) {
 					fade = 255;
 				}
 				fade_in_text = Color.WHITE;
 			} else {
 				// if normal alpha, fade out.
-				Color fade_in = new Color(0,0,0,fade);
+				Color fade_in = new Color(0, 0, 0, fade);
 				g2.setColor(fade_in);
-				fade -= (270-fade)/2;
-				if (fade<0) {
+				fade -= (270 - fade) / 2;
+				if (fade < 0) {
 					fade = 0;
 				}
-				fade_in_text = new Color(255,255,255,fade);
+				fade_in_text = new Color(255, 255, 255, fade);
 			}
 			g2.fillRect(0, 0, 2000, 1500);
 			g2.setColor(fade_in_text);
 			g2.drawString(fade_text, Main.screenSize.width / 3, Main.screenSize.height / 2);
 		}
-		
+
 	}
 
 	public void drawBG(Graphics2D g2) {
-		// we need to do a bigger think for this one
-		// System.out.println(bgscrollx+", "+(-2*bgDimensions[0])+",
-		// "+((bgDimensions[0]*-2)+Main.screenSize.width));
+		
 		if (bgscrollx < -bgDimensions[0] + Main.gameSize.width) {
 			bgscrollx += bgDimensions[0];
 		} else if (bgscrollx > Main.gameSize.width) {
@@ -255,8 +282,9 @@ public class Screen extends JPanel {
 		} else if (bgscrolly > +Main.gameSize.height) {
 			bgscrolly -= bgDimensions[1];
 		}
-		//System.out.println("Background culling: " + bgscrollx + ", " + Main.gameSize.width + ", "
-		//		+ (bgscrollx + bgDimensions[0]) + ", " + Main.gameSize.height);
+		// System.out.println("Background culling: " + bgscrollx + ", " +
+		// Main.gameSize.width + ", "
+		// + (bgscrollx + bgDimensions[0]) + ", " + Main.gameSize.height);
 		if (((bgscrollx > Main.gameSize.width) || (bgscrollx + bgDimensions[0] < 0))
 				|| ((bgscrolly > Main.gameSize.height) || (bgscrolly + bgDimensions[1] < 0))) {
 			// System.out.println("Not printing bottom right");
@@ -572,7 +600,6 @@ public class Screen extends JPanel {
 				System.out.println(elements[5]);
 			}
 
-			
 			// Read text file
 			FileInputStream text_in = null;
 			File text_file = null;
@@ -587,8 +614,9 @@ public class Screen extends JPanel {
 
 				raw_text = new String(data, "UTF-8");
 			} catch (Exception e) {
-				// Might want to make this set the final variable to something else other than null
-				//System.out.println("Error when reading stage file");
+				// Might want to make this set the final variable to something else other than
+				// null
+				// System.out.println("Error when reading stage file");
 			}
 			if (text_in != null) {
 				try {
@@ -597,43 +625,54 @@ public class Screen extends JPanel {
 					System.out.println("Error when closing text file");
 				}
 			}
-			if (raw_text!=null){
+			if (raw_text != null) {
 				activeText = true;
-				System.out.println(raw_text);
+				// System.out.println(raw_text);
 				String[] text_lines = raw_text.split("\n");
-				System.out.println(text_lines);
+				// System.out.println(text_lines);
 				for (String line : text_lines) {
 					String[] words = line.split(" ");
+					switch (words[0]) {
+						case "[SiegeNormal]":
+							faces.add(face_images[0]);
+							break;
+						case "[SiegeEnigmatic]":
+							faces.add(face_images[2]);
+							break;
+						case "[SiegeLion]":
+							faces.add(face_images[1]);
+							break;
+						default:
+							faces.add(null);
+					}
 					ArrayList<String> quip = new ArrayList<String>();
 					for (String word : words) {
-						// todo edge case of long words
-						if (quip.size() == 0){
-							quip.add(word);
-						}
-						else if(quip.get(quip.size()-1).length() + word.length() < 30) {
-							String newStr = quip.get(quip.size()-1) + " "+ word;
-							quip.set(quip.size()-1,newStr);
-						} else {
-							quip.add(word);
+						if (word.charAt(0) != '[') {
+							if (quip.size() == 0) {
+								quip.add(word);
+							} else if (quip.get(quip.size() - 1).length() + word.length() < 50) {
+								String newStr = quip.get(quip.size() - 1) + " " + word;
+								quip.set(quip.size() - 1, newStr);
+							} else {
+								quip.add(word);
+							}
 						}
 					}
-						
-				
+
 					text.add(quip);
 				}
 				textBoxNum = 0;
 				textScrollNum[0] = 0;
 				textScrollNum[1] = 1;
-				System.out.println(text);
+				// System.out.println(text);
 			}
-			
-			
-		// If title screen, don't really need to do anythign special
+
+			// If title screen, don't really need to do anythign special
 		} else if (state == GameState.TITLE) {
 			area = new ArrayList<Tile>();
 			area.add(new Graphic(100, 100, 10));
 			fade_text = "";
-		// if loading level select
+			// if loading level select
 		} else if (state == GameState.SELECT) {
 			File file = new File("stages");
 			String[] files = file.list();
@@ -641,7 +680,7 @@ public class Screen extends JPanel {
 			int i = 0;
 			for (String name : files) {
 				area.add(new Graphic(800, 150 * i + 50, 500, 100, 11));
-				area.get(area.size() - 1).setText(name);//.substring(0, name.length() - 4));
+				area.get(area.size() - 1).setText(name);// .substring(0, name.length() - 4));
 				i++;
 			}
 			fade_text = "";
@@ -682,10 +721,10 @@ public class Screen extends JPanel {
 					// loadLevel();
 				} else {
 					if (textScrollNum[0] == -1 && textScrollNum[1] == -1) {
-						textBoxNum+=1;
+						textBoxNum += 1;
 						textScrollNum[0] = 0;
 						textScrollNum[1] = 1;
-						if(textBoxNum>=text.size()) {
+						if (textBoxNum >= text.size()) {
 							activeText = false;
 						}
 					} else {
