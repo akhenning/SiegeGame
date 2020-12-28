@@ -175,7 +175,7 @@ public class BuilderScreen extends JPanel {
 			String raw_stage = null;
 
 			try {
-				file = new File("stages/" + which + ".txt");
+				file = new File("stages/" + which + "/level.txt");
 				in = new FileInputStream(file);
 				// out = new FileOutputStream("stages/1.txt");
 
@@ -234,7 +234,7 @@ public class BuilderScreen extends JPanel {
 			int i = 0;
 			for (String name : files) {
 				area.add(new Graphic(800, 150 * i + 50, 500, 100, 11));
-				area.get(area.size() - 1).setText(name.substring(0, name.length() - 4));
+				area.get(area.size() - 1).setText(name);// .substring(0, name.length() - 4));
 				i++;
 			}
 		}
@@ -242,11 +242,12 @@ public class BuilderScreen extends JPanel {
 	}
 
 	public void saveLevel(String name) {
+		System.out.println("Saved.");
 		FileOutputStream out = null;
 		File file = null;
 
 		try {
-			file = new File("stages/" + name + ".txt");
+			file = new File("stages/" + name + "/level.txt");
 
 			if (!file.exists()) {
 				file.createNewFile();

@@ -79,7 +79,6 @@ public class Player {
 					animationFrame = 0;
 					previousAnimation = Animation.BASIC_ATTACK;
 					width = MakeSureImageHasLoaded(attack);
-					System.out.println("Has set up normally" + width);
 				}
 				if (animationFrame == 10) {
 					isHitbox = true;
@@ -600,8 +599,8 @@ public class Player {
 	public void load(Graphics2D g2) {
 		Image sprites[] = { walk, IDLE, jumpsquat, jumping, hovering, strike, landing };
 		for (Image sprite : sprites) {
-			g2.drawImage(sprite, x, y, x - 36 - 67, y + 340 - 85 - 223, animationFrame, 0, animationFrame + 200, 340,
-					null);
+			g2.drawImage(sprite, 0, 0, null);
+			//g2.drawImage(sprite, x, y, x - 36 - 67, y + 340 - 85 - 223, animationFrame, 0, animationFrame + 200, 340, null);
 		}
 	}
 

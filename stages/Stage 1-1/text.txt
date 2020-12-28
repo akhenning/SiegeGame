@@ -1,0 +1,9 @@
+[SiegeNormal] Hello, and welcome to Siege Game (tentative).
+[SiegeEnigmatic] I am your playable character, Siege. Gang leader, and highest-rank Vanguard at Rhodes Island.
+[SiegeEnigmatic] Yorushiku.
+[SiegeNormal] This is the first stage, and the first tutorial.
+[SiegeNormal] First, let's walk over to the large "?", and we will get started.
+[break] break
+[SiegeNormal] Great job. Now we can get started.
+[SiegeLion] Well, no, this build is still in early testing, but still...
+[SiegeNormal] Let's start with something simple. Jump over this small obstacle with "Space".

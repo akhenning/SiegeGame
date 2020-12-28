@@ -16,6 +16,7 @@ import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.BasicStroke;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -23,17 +24,25 @@ import java.io.IOException;
 public class Screen extends JPanel {
 	// Dunno what this does
 	private static final long serialVersionUID = 1L;
+	// Well, I needed a way to signify a break point in a list of images that wasn't null...
+	private static final Image BREAK_POINT_SIGNIFIER = Toolkit.getDefaultToolkit().getImage("");
 	// Controls zoom of entire game area
 	public static double zoom = 1;
 	// Image[s] for backgrounds
 	private static Image bg = Toolkit.getDefaultToolkit().getImage("assets/bg1.jpg");
+	// Size of bg images; 0 is x of background image, 1 is y.
+	private int bgDimensions[] = new int[2]; 
 	// Toolkit.getDefaultToolkit().getImage("assets/carlymonster_clouds.jpg");
+	// Enter key prompt image
+	private static Image key = Toolkit.getDefaultToolkit().getImage("assets/enter.png");
+	// Background for stage select
 	private static Image selectbg = Toolkit.getDefaultToolkit().getImage("assets/selectbg1.png");
+	// Title screen background
 	private static Image title = Toolkit.getDefaultToolkit().getImage("assets/title1.jpg");
+	// Face images for use in text boxes
 	private static Image[] face_images = { Toolkit.getDefaultToolkit().getImage("assets/SiegeNormal.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/SiegeLion.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/SiegeEnigmatic.png")};
-	private int bgDimensions[] = new int[2]; // Size of bg; 0 is x of background image, 1 is y.
 
 	// Handles scroll for player and background
 	public static int scrollx = 0;
@@ -50,9 +59,11 @@ public class Screen extends JPanel {
 	private Player player = new Player(this);
 
 	// Fonts and texts for speech bubbles
+	private final int CHARS_PER_LINE = 50;
 	private Font font = new Font("Serif", Font.PLAIN, 100);
 	private Font fade_font = new Font("Serif", Font.PLAIN, 200);
-	private Font text_font = new Font("Serif", Font.PLAIN, 50);
+	private Font text_fonts[] = {new Font("Serif", Font.PLAIN, 40), 
+			new Font("Serif", Font.PLAIN, 80)};
 	public boolean activeText = false;
 	private int textBoxNum = -1;
 	private int[] textScrollNum = { -1, -1 };
@@ -85,6 +96,7 @@ public class Screen extends JPanel {
 		addKeyListener(new KeysListener());
 		loadLevel("");
 	}
+	
 
 	public Dimension getPreferredSize() {
 		Dimension d = new Dimension(350, 300);
@@ -95,14 +107,20 @@ public class Screen extends JPanel {
 		windowWidth = (int) getSize().getWidth();
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setStroke(new BasicStroke(4));
+		int zoom_mult = 1;
+		if (zoom==.5) {
+			zoom_mult =2;
+		}
+		g2.setStroke(new BasicStroke(4*zoom_mult));
 
 		if (state == GameState.LEVEL) {
 			g2.scale(zoom, zoom);
+			
 
 			// g2.translate(-Main.screenSize.width/2+Main.screenSize.width/zoom/2,
 			// -Main.screenSize.height/2+Main.screenSize.height/zoom/2);
 
+			// For first time this method is run, set a few things up
 			if (first) {
 				first = false;
 				player.load(g2);
@@ -120,6 +138,16 @@ public class Screen extends JPanel {
 						System.out.println("bad background image");
 					}
 				}
+				
+				// Load all images?
+				ArrayList<Image> sprites = new ArrayList<Image>();
+				for (Image face : face_images) {
+					sprites.add(face);
+				}
+				for (Image sprite : sprites) {
+					g2.drawImage(sprite, 0, 0, null);
+				}
+				sprites = null;
 			}
 			drawBG(g2);
 
@@ -172,72 +200,79 @@ public class Screen extends JPanel {
 
 		// Secion handling text boxes
 		if (activeText) {
-			// Draw box itself
-			g2.setColor(Color.WHITE);
-			g2.fillRect(0, Main.gameSize.height * 3 / 4, Main.gameSize.width, Main.gameSize.height);
-			g2.setColor(Color.BLACK);
-			g2.drawRect(0, Main.gameSize.height * 3 / 4, Main.gameSize.width, Main.gameSize.height);
-			if (zoom == 1) {
-				g2.setFont(text_font);
+			if (BREAK_POINT_SIGNIFIER.equals(faces.get(textBoxNum))) {
+				activeText = false;
 			} else {
-				g2.setFont(font);
-			}
-			int offset = (int) (50 / zoom);
-
-			System.out.println("Test" + "potato".substring(0, 0));
-			int dist_from_side = 0;
-			if (faces.get(textBoxNum) == null) {
-				dist_from_side = Main.gameSize.width / 10;
-			} else {
-				dist_from_side = Main.gameSize.width / 4;
-			}
-			if (textScrollNum[0] == -1) {
-				int times = 0;
-				// System.out.println(text.toString()+", "+textBoxNum);
-				for (String line : text.get(textBoxNum)) {
-					g2.drawString(line, dist_from_side, (Main.gameSize.height * 41 / 50) + (times * offset));
-					times += 1;
-				}
-			} else {
-				int times = 0;
-				for (String line : text.get(textBoxNum)) {
-					if (times < textScrollNum[0]) {
-						g2.drawString(line, dist_from_side, Main.gameSize.height * 41 / 50 + (times * offset));
-						times += 1;
-					} else if (times == textScrollNum[0]) {
-						System.out.println("Attempting to substring string: " + line + " with length " + line.length()
-								+ " into substring 0, " + textScrollNum[1]);
-						g2.drawString(line.substring(0, textScrollNum[1] - 1), dist_from_side,
-								Main.gameSize.height * 41 / 50 + (times * offset));
-						times += 1;
-					}
-				}
-				if (fade<=0) {
-					textScrollNum[1] += 1;
-				}
-				if (text.get(textBoxNum).get(textScrollNum[0]).length() < textScrollNum[1]) {
-					System.out.println("Incrementing line. Now: " + textScrollNum[0] + ", " + textScrollNum[1]);
-					textScrollNum[0] += 1;
-					textScrollNum[1] = 1;
-					if (text.get(textBoxNum).size() <= textScrollNum[0]) {
-						System.out.println("Reached end at: " + textScrollNum[0] + ", " + textScrollNum[1]);
-						textScrollNum[0] = -1;
-						textScrollNum[1] = -1;
-					}
-				}
-			}
-			if (faces.get(textBoxNum) != null) {
-				int off = (int) (270 / zoom);
+				// Draw box itself
 				g2.setColor(Color.WHITE);
-				g2.fillRect(offset/2, Main.gameSize.height - off- (offset*3/2),
-						off,off);
-				//g2.fillRect(offset/2, Main.gameSize.height * 2 / 3 - offset, Main.gameSize.height / 4,
-				//		Main.gameSize.height / 4);
+				g2.fillRect(0, Main.gameSize.height * 3 / 4, Main.gameSize.width, Main.gameSize.height);
 				g2.setColor(Color.BLACK);
-				g2.drawRect(offset/2, Main.gameSize.height - off- (offset*3/2),
-						off,off);
-				g2.drawImage(faces.get(textBoxNum), offset/2, Main.gameSize.height - off- (offset*3/2),
-						off,off, null);
+				g2.drawRect(0, Main.gameSize.height * 3 / 4, Main.gameSize.width, Main.gameSize.height);
+				if (zoom == 1) {
+					g2.setFont(text_fonts[0]);
+				} else {
+					g2.setFont(text_fonts[1]);
+				}
+				int offset = (int) (40 / zoom);
+	
+				int dist_from_side = 0;
+				if (faces.get(textBoxNum) == null) {
+					dist_from_side = Main.gameSize.width / 10;
+				} else {
+					dist_from_side = (int) (Main.gameSize.width / (4.4));
+				}
+				if (text.get(textBoxNum).size() > 0) {
+					if (textScrollNum[0] == -1) {
+						int times = 0;
+						// System.out.println(text.toString()+", "+textBoxNum);
+						for (String line : text.get(textBoxNum)) {
+							g2.drawString(line, dist_from_side, (Main.gameSize.height * 4 / 5) + (times * offset));
+							times += 1;
+						}
+						g2.drawImage(key, Main.gameSize.width- (212*zoom_mult), Main.gameSize.height * 4/5, 212*zoom_mult, 91*zoom_mult, null); //212x91
+					} else {
+						int times = 0;
+						for (String line : text.get(textBoxNum)) {
+							if (times < textScrollNum[0]) {
+								g2.drawString(line, dist_from_side, Main.gameSize.height * 4 / 5 + (times * offset));
+								times += 1;
+							} else if (times == textScrollNum[0]) {
+								//System.out.println("Attempting to substring string: " + line + " with length " + line.length()
+								//		+ " into substring 0, " + textScrollNum[1]);
+								g2.drawString(line.substring(0, textScrollNum[1] - 1), dist_from_side,
+										Main.gameSize.height * 4 / 5 + (times * offset));
+								times += 1;
+							}
+						}
+						if (fade<=0) {
+							textScrollNum[1] += 1;
+						}
+						if (text.get(textBoxNum).get(textScrollNum[0]).length() < textScrollNum[1]) {
+							//System.out.println("Incrementing line. Now: " + textScrollNum[0] + ", " + textScrollNum[1]);
+							textScrollNum[0] += 1;
+							textScrollNum[1] = 1;
+							if (text.get(textBoxNum).size() <= textScrollNum[0]) {
+								//System.out.println("Reached end at: " + textScrollNum[0] + ", " + textScrollNum[1]);
+								textScrollNum[0] = -1;
+								textScrollNum[1] = -1;
+							}
+						}
+					}
+				}
+				if (faces.get(textBoxNum) != null) {
+					int off = (int) (270 / zoom);
+					int off2 = (int) (50 / zoom);
+					g2.setColor(Color.WHITE);
+					g2.fillRect(off2/2, Main.gameSize.height - off- (off2*3/2),
+							off,off);
+					//g2.fillRect(offset/2, Main.gameSize.height * 2 / 3 - offset, Main.gameSize.height / 4,
+					//		Main.gameSize.height / 4);
+					g2.setColor(Color.BLACK);
+					g2.drawRect(off2/2, Main.gameSize.height - off- (off2*3/2),
+							off,off);
+					g2.drawImage(faces.get(textBoxNum), off2/2, Main.gameSize.height - off- (off2*3/2),
+							off,off, null);
+				}
 			}
 		}
 
@@ -378,31 +413,34 @@ public class Screen extends JPanel {
 			}
 		}
 		for (Interactable tile : interactables) {
-			if (tile.isVisible()) {
+			if (tile.isVisible() && tile.hasInteraction()) {
 				// See if either foot is inside something
 				if (tile.slopeState == SlopeState.NONE) {
 					if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
 						// player.setStandingOn(tile);
 						// If it is, save the lowest Y value
-						if (tile.y < highest) {
-							highest = tile.getHeight(rightFoot.getX());
+						if (tile.isTangible()) {
+							if (tile.y < highest) {
+								highest = tile.getHeight(rightFoot.getX());
+							}
 						}
 					}
-				} else if (tile.slopeState == SlopeState.RIGHT) {
+					// I commented the below, because it shouldn't ever matter
+				}// else if (tile.slopeState == SlopeState.RIGHT) {
 					// System.out.println("Checking for object");
-					if (tile.isInside(rightFoot)) {
+				//	if (tile.isInside(rightFoot)) {
 						// System.out.println("Successfully found object)");
-						if (tile.y < highest) {
-							highest = tile.getHeight(rightFoot.getX());
-						}
-					}
-				} else {
-					if (tile.isInside(leftFoot)) {
-						if (tile.y < highest) {
-							highest = tile.getHeight(leftFoot.getX());
-						}
-					}
-				}
+				//		if (tile.y < highest) {
+				//			highest = tile.getHeight(rightFoot.getX());
+				//		}
+				//	}
+				//} else {
+				//	if (tile.isInside(leftFoot)) {
+				//		if (tile.y < highest) {
+				//			highest = tile.getHeight(leftFoot.getX());
+				//		}
+				//	}
+				//}
 			}
 		}
 		return highest;
@@ -416,7 +454,7 @@ public class Screen extends JPanel {
 			if (tile.isVisible()) {
 				if (tile.isInside(left) || tile.isInside(right)) {
 					// player.setStandingOn(tile);
-					// If it is, save the lowest Y value
+					// If it is inside, save the lowest Y value
 					if (tile.y > highest) {
 						highest = tile.getHeight(right.getX()) + tile.height;
 					}
@@ -424,12 +462,14 @@ public class Screen extends JPanel {
 			}
 		}
 		for (Interactable tile : interactables) {
-			if (tile.isVisible()) {
+			if (tile.isVisible() && tile.hasInteraction()) {
 				if (tile.isInside(left) || tile.isInside(right)) {
 					// player.setStandingOn(tile);
 					// If it is, save the lowest Y value
-					if (tile.y > highest) {
-						highest = tile.getHeight(right.getX()) + tile.height;
+					if (tile.isTangible()) {
+						if (tile.y > highest) {
+							highest = tile.getHeight(right.getX()) + tile.height;
+						}
 					}
 				}
 			}
@@ -455,16 +495,63 @@ public class Screen extends JPanel {
 			}
 		}
 		for (Interactable tile : interactables) {
-			if (tile.isVisible()) {
+			if (tile.isVisible() && tile.hasInteraction()) {
+				if (tile.getId() == 71) {
+					System.out.println("Error: Interactable with no contact Interaction is registered as having one.");
+				}
 				// See if either foot is inside something
 				if (tile.isInside(leftTop)) {
-					return tile.x + tile.width + 15 + 2;
+					if (tile.isTangible()) {
+						return tile.x + tile.width + 15 + 2;
+					}
+					if(tile.getId() == 70 ) {
+						if (!activeText) {
+							tile.interact();
+							activeText = true;
+							textBoxNum = tile.getData();
+							textScrollNum[0] = 0;
+							textScrollNum[1] = 1;
+						}
+					}
 				} else if (tile.isInside(leftBot)) {
-					return tile.x + tile.width + 15 + 2;
+					if (tile.isTangible()) {
+						return tile.x + tile.width + 15 + 2;
+					}
+					if(tile.getId() == 70 ) {
+						if (!activeText) {
+							tile.interact();
+							activeText = true;
+							textBoxNum = tile.getData();
+							textScrollNum[0] = 0;
+							textScrollNum[1] = 1;
+						}
+					}
 				} else if (tile.isInside(rightTop)) {
-					return tile.x - 75 - 2;
+					if (tile.isTangible()) {
+						return tile.x - 75 - 2;
+					}
+					if(tile.getId() == 70 ) {
+						if (!activeText) {
+							tile.interact();
+							activeText = true;
+							textBoxNum = tile.getData();
+							textScrollNum[0] = 0;
+							textScrollNum[1] = 1;
+						}
+					}
 				} else if (tile.isInside(rightBot)) {
-					return tile.x - 75 - 2;
+					if (tile.isTangible()) {
+						return tile.x - 75 - 2;
+					}
+					if(tile.getId() == 70 ) {
+						if (!activeText) {
+							tile.interact();
+							activeText = true;
+							textBoxNum = tile.getData();
+							textScrollNum[0] = 0;
+							textScrollNum[1] = 1;
+						}
+					}
 				}
 			}
 		}
@@ -483,15 +570,12 @@ public class Screen extends JPanel {
 							point = box.getRelativePoint(i);
 							point[0] += dx;
 							point[1] += dy;
-							// if (i == 4) {
-							// System.out.println(
-							// point[0] + ", " + point[1] + " | " + tile.x + ", " + tile.y + " " + scrolly);
-							// }
 							if (tile.isInside(point)) {
 								// System.out.println("MADE CONTACT");
-								if (tile.interact()) {
+								int effect = tile.interact();
+								if (effect == 1) {
 									return true;
-								} else {
+								} else if (effect==0){
 									int heightover4 = tile.getHeight() / 4;
 									int widthover4 = tile.getWidth() / 4;
 									particles.add(new Particle(tile.getX() + widthover4, tile.getY() + heightover4,
@@ -504,6 +588,12 @@ public class Screen extends JPanel {
 											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
 									interactables.remove(tile);
 									return false;
+								}
+								else if (effect==2) {	
+									activeText = true;
+									textBoxNum = tile.getData();
+									textScrollNum[0] = 0;
+									textScrollNum[1] = 1;
 								}
 							}
 						}
@@ -584,15 +674,16 @@ public class Screen extends JPanel {
 					}
 				} else {
 					try {
-						if (!elements[5].equals("")) {
+						//if (!elements[5].equals("")) {
 							interactables.add(new Interactable(Integer.parseInt(elements[1]),
 									Integer.parseInt(elements[2]), Integer.parseInt(elements[3]),
-									Integer.parseInt(elements[4]), Integer.parseInt(elements[5])));
-						} else {
-							interactables
-									.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-											Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-						}
+									Integer.parseInt(elements[4]), Integer.parseInt(elements[5]),
+									Integer.parseInt(elements[6])));
+						//} else {
+						//	interactables
+						//			.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
+						//					Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+						//}
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
@@ -631,6 +722,7 @@ public class Screen extends JPanel {
 				String[] text_lines = raw_text.split("\n");
 				// System.out.println(text_lines);
 				for (String line : text_lines) {
+					double line_length = CHARS_PER_LINE;
 					String[] words = line.split(" ");
 					switch (words[0]) {
 						case "[SiegeNormal]":
@@ -642,15 +734,20 @@ public class Screen extends JPanel {
 						case "[SiegeLion]":
 							faces.add(face_images[1]);
 							break;
+						case "[break]":
+							faces.add(BREAK_POINT_SIGNIFIER);
+							break;
 						default:
 							faces.add(null);
+							line_length*=1.25;
 					}
+					
 					ArrayList<String> quip = new ArrayList<String>();
 					for (String word : words) {
 						if (word.charAt(0) != '[') {
 							if (quip.size() == 0) {
 								quip.add(word);
-							} else if (quip.get(quip.size() - 1).length() + word.length() < 50) {
+							} else if (quip.get(quip.size() - 1).length() + word.length() < line_length) {
 								String newStr = quip.get(quip.size() - 1) + " " + word;
 								quip.set(quip.size() - 1, newStr);
 							} else {

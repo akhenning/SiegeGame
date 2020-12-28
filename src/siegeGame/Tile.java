@@ -325,10 +325,10 @@ public class Tile {
 		drawBoxAround(g2, Screen.scrollx, Screen.scrolly);
 	}
 
-	// return true if effects Siege
+	// return 1 if effects Siege, 2 if changes text
 	// Will eventually need to make more complicated if we want to add buttons or
 	// something
-	public boolean interact() {
-		return false;
+	public int interact() {
+		return 0;
 	}
 }
