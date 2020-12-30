@@ -9,9 +9,14 @@ public class Interactable extends Tile {
 	public static Image gravel = Toolkit.getDefaultToolkit().getImage("assets/gravel.png"); // ID 60
 	public static Image q_mark = Toolkit.getDefaultToolkit().getImage("assets/question mark.png"); // ID 70
 	public static Image q_mark_activated = Toolkit.getDefaultToolkit().getImage("assets/question mark activated.png"); // ID 71
+	public static Image finish = Toolkit.getDefaultToolkit().getImage("assets/finish.png"); // ID 0
+	
+	// Data that Interactable may hold, other than basic action; for example, which text box Q_Mark should send you to.
 	private int data = -1;
+	
 	// Whether an object can be stood on
 	private boolean isTangible = true;
+	
 	// Whether moving against the object has an effect;
 	// Note that all Interactables have interaction when hit.
 	private boolean hasInteraction = true;
@@ -25,7 +30,7 @@ public class Interactable extends Tile {
 	
 	public Interactable(int x, int y, int width, int height, int id, int information) {
 		super(x, y, width, height, id);
-		if (id == 70) {
+		if (id == 70 || id==0) {
 			isTangible = false;
 		}
 		data = information;
@@ -37,6 +42,10 @@ public class Interactable extends Tile {
 
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
 		switch (id) {
+		case 0:
+			g2.drawImage(finish, scrollx + x, scrolly + y,width,height, null);
+			g2.drawRect(scrollx + x, scrolly + y, width, height);
+			break;
 		case 50:
 			g2.drawImage(target, scrollx + x, scrolly + y,width,height, null);
 			g2.drawRect(scrollx + x, scrolly + y, width, height);

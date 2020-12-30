@@ -24,14 +24,15 @@ import java.io.IOException;
 public class Screen extends JPanel {
 	// Dunno what this does
 	private static final long serialVersionUID = 1L;
-	// Well, I needed a way to signify a break point in a list of images that wasn't null...
+	// Well, I needed a way to signify a break point in a list of images that wasn't
+	// null...
 	private static final Image BREAK_POINT_SIGNIFIER = Toolkit.getDefaultToolkit().getImage("");
 	// Controls zoom of entire game area
 	public static double zoom = 1;
 	// Image[s] for backgrounds
 	private static Image bg = Toolkit.getDefaultToolkit().getImage("assets/bg1.jpg");
 	// Size of bg images; 0 is x of background image, 1 is y.
-	private int bgDimensions[] = new int[2]; 
+	private int bgDimensions[] = new int[2];
 	// Toolkit.getDefaultToolkit().getImage("assets/carlymonster_clouds.jpg");
 	// Enter key prompt image
 	private static Image key = Toolkit.getDefaultToolkit().getImage("assets/enter.png");
@@ -42,7 +43,7 @@ public class Screen extends JPanel {
 	// Face images for use in text boxes
 	private static Image[] face_images = { Toolkit.getDefaultToolkit().getImage("assets/SiegeNormal.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/SiegeLion.png"),
-			Toolkit.getDefaultToolkit().getImage("assets/SiegeEnigmatic.png")};
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeEnigmatic.png") };
 
 	// Handles scroll for player and background
 	public static int scrollx = 0;
@@ -62,8 +63,7 @@ public class Screen extends JPanel {
 	private final int CHARS_PER_LINE = 50;
 	private Font font = new Font("Serif", Font.PLAIN, 100);
 	private Font fade_font = new Font("Serif", Font.PLAIN, 200);
-	private Font text_fonts[] = {new Font("Serif", Font.PLAIN, 40), 
-			new Font("Serif", Font.PLAIN, 80)};
+	private Font text_fonts[] = { new Font("Serif", Font.PLAIN, 40), new Font("Serif", Font.PLAIN, 80) };
 	public boolean activeText = false;
 	private int textBoxNum = -1;
 	private int[] textScrollNum = { -1, -1 };
@@ -96,7 +96,6 @@ public class Screen extends JPanel {
 		addKeyListener(new KeysListener());
 		loadLevel("");
 	}
-	
 
 	public Dimension getPreferredSize() {
 		Dimension d = new Dimension(350, 300);
@@ -108,14 +107,13 @@ public class Screen extends JPanel {
 		super.paintComponent(g);
 		Graphics2D g2 = (Graphics2D) g;
 		int zoom_mult = 1;
-		if (zoom==.5) {
-			zoom_mult =2;
+		if (zoom == .5) {
+			zoom_mult = 2;
 		}
-		g2.setStroke(new BasicStroke(4*zoom_mult));
+		g2.setStroke(new BasicStroke(4 * zoom_mult));
 
 		if (state == GameState.LEVEL) {
 			g2.scale(zoom, zoom);
-			
 
 			// g2.translate(-Main.screenSize.width/2+Main.screenSize.width/zoom/2,
 			// -Main.screenSize.height/2+Main.screenSize.height/zoom/2);
@@ -138,7 +136,7 @@ public class Screen extends JPanel {
 						System.out.println("bad background image");
 					}
 				}
-				
+
 				// Load all images?
 				ArrayList<Image> sprites = new ArrayList<Image>();
 				for (Image face : face_images) {
@@ -214,7 +212,7 @@ public class Screen extends JPanel {
 					g2.setFont(text_fonts[1]);
 				}
 				int offset = (int) (40 / zoom);
-	
+
 				int dist_from_side = 0;
 				if (faces.get(textBoxNum) == null) {
 					dist_from_side = Main.gameSize.width / 10;
@@ -229,7 +227,8 @@ public class Screen extends JPanel {
 							g2.drawString(line, dist_from_side, (Main.gameSize.height * 4 / 5) + (times * offset));
 							times += 1;
 						}
-						g2.drawImage(key, Main.gameSize.width- (212*zoom_mult), Main.gameSize.height * 4/5, 212*zoom_mult, 91*zoom_mult, null); //212x91
+						g2.drawImage(key, Main.gameSize.width - (212 * zoom_mult), Main.gameSize.height * 4 / 5,
+								212 * zoom_mult, 91 * zoom_mult, null); // 212x91
 					} else {
 						int times = 0;
 						for (String line : text.get(textBoxNum)) {
@@ -237,22 +236,25 @@ public class Screen extends JPanel {
 								g2.drawString(line, dist_from_side, Main.gameSize.height * 4 / 5 + (times * offset));
 								times += 1;
 							} else if (times == textScrollNum[0]) {
-								//System.out.println("Attempting to substring string: " + line + " with length " + line.length()
-								//		+ " into substring 0, " + textScrollNum[1]);
+								// System.out.println("Attempting to substring string: " + line + " with length
+								// " + line.length()
+								// + " into substring 0, " + textScrollNum[1]);
 								g2.drawString(line.substring(0, textScrollNum[1] - 1), dist_from_side,
 										Main.gameSize.height * 4 / 5 + (times * offset));
 								times += 1;
 							}
 						}
-						if (fade<=0) {
+						if (fade <= 0) {
 							textScrollNum[1] += 1;
 						}
 						if (text.get(textBoxNum).get(textScrollNum[0]).length() < textScrollNum[1]) {
-							//System.out.println("Incrementing line. Now: " + textScrollNum[0] + ", " + textScrollNum[1]);
+							// System.out.println("Incrementing line. Now: " + textScrollNum[0] + ", " +
+							// textScrollNum[1]);
 							textScrollNum[0] += 1;
 							textScrollNum[1] = 1;
 							if (text.get(textBoxNum).size() <= textScrollNum[0]) {
-								//System.out.println("Reached end at: " + textScrollNum[0] + ", " + textScrollNum[1]);
+								// System.out.println("Reached end at: " + textScrollNum[0] + ", " +
+								// textScrollNum[1]);
 								textScrollNum[0] = -1;
 								textScrollNum[1] = -1;
 							}
@@ -263,15 +265,14 @@ public class Screen extends JPanel {
 					int off = (int) (270 / zoom);
 					int off2 = (int) (50 / zoom);
 					g2.setColor(Color.WHITE);
-					g2.fillRect(off2/2, Main.gameSize.height - off- (off2*3/2),
-							off,off);
-					//g2.fillRect(offset/2, Main.gameSize.height * 2 / 3 - offset, Main.gameSize.height / 4,
-					//		Main.gameSize.height / 4);
+					g2.fillRect(off2 / 2, Main.gameSize.height - off - (off2 * 3 / 2), off, off);
+					// g2.fillRect(offset/2, Main.gameSize.height * 2 / 3 - offset,
+					// Main.gameSize.height / 4,
+					// Main.gameSize.height / 4);
 					g2.setColor(Color.BLACK);
-					g2.drawRect(off2/2, Main.gameSize.height - off- (off2*3/2),
-							off,off);
-					g2.drawImage(faces.get(textBoxNum), off2/2, Main.gameSize.height - off- (off2*3/2),
-							off,off, null);
+					g2.drawRect(off2 / 2, Main.gameSize.height - off - (off2 * 3 / 2), off, off);
+					g2.drawImage(faces.get(textBoxNum), off2 / 2, Main.gameSize.height - off - (off2 * 3 / 2), off, off,
+							null);
 				}
 			}
 		}
@@ -306,7 +307,7 @@ public class Screen extends JPanel {
 	}
 
 	public void drawBG(Graphics2D g2) {
-		
+
 		if (bgscrollx < -bgDimensions[0] + Main.gameSize.width) {
 			bgscrollx += bgDimensions[0];
 		} else if (bgscrollx > Main.gameSize.width) {
@@ -426,21 +427,21 @@ public class Screen extends JPanel {
 						}
 					}
 					// I commented the below, because it shouldn't ever matter
-				}// else if (tile.slopeState == SlopeState.RIGHT) {
+				} // else if (tile.slopeState == SlopeState.RIGHT) {
 					// System.out.println("Checking for object");
-				//	if (tile.isInside(rightFoot)) {
-						// System.out.println("Successfully found object)");
-				//		if (tile.y < highest) {
-				//			highest = tile.getHeight(rightFoot.getX());
-				//		}
-				//	}
-				//} else {
-				//	if (tile.isInside(leftFoot)) {
-				//		if (tile.y < highest) {
-				//			highest = tile.getHeight(leftFoot.getX());
-				//		}
-				//	}
-				//}
+					// if (tile.isInside(rightFoot)) {
+					// System.out.println("Successfully found object)");
+					// if (tile.y < highest) {
+					// highest = tile.getHeight(rightFoot.getX());
+					// }
+					// }
+					// } else {
+					// if (tile.isInside(leftFoot)) {
+					// if (tile.y < highest) {
+					// highest = tile.getHeight(leftFoot.getX());
+					// }
+					// }
+					// }
 			}
 		}
 		return highest;
@@ -477,6 +478,8 @@ public class Screen extends JPanel {
 		return highest;
 	}
 
+	// Method to check if the horizontal contact points of the player are 
+	// in contact with anything
 	public int checkHorizontalCollision(Point2D.Double leftTop, Point2D.Double leftBot, Point2D.Double rightTop,
 			Point2D.Double rightBot) {
 		// For every tile
@@ -484,6 +487,8 @@ public class Screen extends JPanel {
 			if (tile.isVisible() && tile.id < 100) {
 				// See if either foot is inside something
 				if (tile.isInside(leftTop)) {
+					// If so, return the location that the player should
+					// be snapped to
 					return tile.x + tile.width + 15 + 2;
 				} else if (tile.isInside(leftBot)) {
 					return tile.x + tile.width + 15 + 2;
@@ -494,17 +499,21 @@ public class Screen extends JPanel {
 				}
 			}
 		}
+		// for every Interactable
 		for (Interactable tile : interactables) {
 			if (tile.isVisible() && tile.hasInteraction()) {
+				// This should be removed eventually
 				if (tile.getId() == 71) {
 					System.out.println("Error: Interactable with no contact Interaction is registered as having one.");
 				}
 				// See if either foot is inside something
 				if (tile.isInside(leftTop)) {
+					// Do this if the object can be stood on/ran into
 					if (tile.isTangible()) {
 						return tile.x + tile.width + 15 + 2;
 					}
-					if(tile.getId() == 70 ) {
+					// If the object is an un-activated question mark
+					if (tile.getId() == 70) {
 						if (!activeText) {
 							tile.interact();
 							activeText = true;
@@ -512,12 +521,16 @@ public class Screen extends JPanel {
 							textScrollNum[0] = 0;
 							textScrollNum[1] = 1;
 						}
+					// If the object is a finish line
+					} else if (tile.getId() == 0) {
+						;
+						return -1000001;
 					}
 				} else if (tile.isInside(leftBot)) {
 					if (tile.isTangible()) {
 						return tile.x + tile.width + 15 + 2;
 					}
-					if(tile.getId() == 70 ) {
+					if (tile.getId() == 70) {
 						if (!activeText) {
 							tile.interact();
 							activeText = true;
@@ -530,7 +543,7 @@ public class Screen extends JPanel {
 					if (tile.isTangible()) {
 						return tile.x - 75 - 2;
 					}
-					if(tile.getId() == 70 ) {
+					if (tile.getId() == 70) {
 						if (!activeText) {
 							tile.interact();
 							activeText = true;
@@ -538,12 +551,15 @@ public class Screen extends JPanel {
 							textScrollNum[0] = 0;
 							textScrollNum[1] = 1;
 						}
+					} else if (tile.getId() == 0) {
+						levelAdvance();
+						return -1000001;
 					}
 				} else if (tile.isInside(rightBot)) {
 					if (tile.isTangible()) {
 						return tile.x - 75 - 2;
 					}
-					if(tile.getId() == 70 ) {
+					if (tile.getId() == 70) {
 						if (!activeText) {
 							tile.interact();
 							activeText = true;
@@ -558,7 +574,11 @@ public class Screen extends JPanel {
 		return -1000001;
 	}
 
+	// Checks if the player is attacking something
+	// Passes in all hitboxes, and checks if anything is within the active ones.
 	public boolean checkHitboxCollision(ArrayList<Hitbox> hitboxes) {
+		// calculate location of player relative to the level, since the hitboxes
+		// themselves are only relative to the player
 		int dx = player.x - Screen.scrollx;
 		int dy = player.y - Screen.scrolly;
 		int point[];
@@ -566,16 +586,22 @@ public class Screen extends JPanel {
 			if (box.isActive()) {
 				for (Interactable tile : interactables) {
 					if (tile.isVisible()) {
+						// For each corner of the hitbox, find the hitboxes' location in the game
+						// (which is different from the player-relative location stored in the object)
 						for (int i = 1; i < 5; i++) {
 							point = box.getRelativePoint(i);
 							point[0] += dx;
 							point[1] += dy;
+							// If there is a point of contact;
 							if (tile.isInside(point)) {
-								// System.out.println("MADE CONTACT");
+								// Check for the type of interaction
 								int effect = tile.interact();
+								// If it has a bouncing effect
 								if (effect == 1) {
 									return true;
-								} else if (effect==0){
+									// if it breaks upon contact
+								} else if (effect == 0) {
+									// Create new particles with semirandom properties in area of tile
 									int heightover4 = tile.getHeight() / 4;
 									int widthover4 = tile.getWidth() / 4;
 									particles.add(new Particle(tile.getX() + widthover4, tile.getY() + heightover4,
@@ -586,10 +612,12 @@ public class Screen extends JPanel {
 											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
 									particles.add(new Particle(tile.getX() + (widthover4 * 3),
 											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
+									// Remove the tile from the list
 									interactables.remove(tile);
 									return false;
-								}
-								else if (effect==2) {	
+									// If is a text box prompt (? mark)
+								} else if (effect == 2) {
+									// Tell the game to activate text boxes, and move to the proper box
 									activeText = true;
 									textBoxNum = tile.getData();
 									textScrollNum[0] = 0;
@@ -604,16 +632,26 @@ public class Screen extends JPanel {
 		return false;
 	}
 
+	// Method that handles desending staircases.
+	// In the case where the player steps from solid ground onto air, this method
+	// is called to check if they are simply decending a staircase.
+	// Note that leftFoot and rightFoot are offset from the player's actual feet
+	// location to check if there is something below them.
 	public boolean checkDescendingStairs(Point2D.Double leftFoot, Point2D.Double rightFoot) {
+		// For all tiles
 		for (Tile tile : area) {
+			// If a staircase near player
 			if (tile.isVisible() && tile.getId() >= 100) {
+				// If right-facing staircase
 				if (tile.slopeState == SlopeState.RIGHT) {
-					// System.out.println("Checking for object");
+					// Check if there is a staircase right below the right foot, basically
 					if (tile.isInside(rightFoot)) {
 						// System.out.println("Successfully found object)");
 						return true;
 					}
+				// If left-facing staircase
 				} else {
+					// Check if there is a staircase right below the left foot, basically
 					if (tile.isInside(leftFoot)) {
 						return true;
 					}
@@ -623,7 +661,57 @@ public class Screen extends JPanel {
 		return false;
 	}
 
+	// Method to advance the level, usually after finishing.
+	// Currently simply moves to the next level.
+	// Eventually needs much more fanfare.
+	public void levelAdvance() {
+		// Reset all values edited during the level's progress
+		scrollx = 0;
+		scrolly = 0;
+		bgscrollx = 0;
+		bgscrolly = 0;
+		activeText = false;
+		textBoxNum = -1;
+		textScrollNum[0] = -1;
+		textScrollNum[1] = -1;
+		numSelected = 0;
+		player = new Player(this);
+
+		// And prepare to load the next level
+		state = GameState.LEVEL;
+		fade = 320;
+		// todo-determine the next level (fairly easy, provided more levels exist)
+		loadLevel("1");
+	}
+
+	// Method to return to level select from level
+	// Eventually needs a y/n prompt
+	public void exitLevel() {
+		// Reset all values edited during the level's progress
+		scrollx = 0;
+		scrolly = 0;
+		bgscrollx = 0;
+		bgscrolly = 0;
+		activeText = false;
+		textBoxNum = -1;
+		textScrollNum[0] = -1;
+		textScrollNum[1] = -1;
+		numSelected = 0;
+		player = new Player(this);
+
+		// And load level select
+		fade = 310;
+		state = GameState.SELECT;
+		loadLevel("");
+	}
+
 	public void loadLevel(String which) {
+		// Clear everything
+		text = new ArrayList<ArrayList<String>>();
+		faces = new ArrayList<Image>();
+		area = new ArrayList<Tile>();
+		interactables = new ArrayList<Interactable>();
+		particles = new ArrayList<Particle>();
 
 		// If loading a level
 		if (state == GameState.LEVEL) {
@@ -655,7 +743,6 @@ public class Screen extends JPanel {
 			}
 
 			// Process level file
-			area = new ArrayList<Tile>();
 			String[] lines = raw_stage.split("\n");
 			for (String line : lines) {
 				String[] elements = line.split(",");
@@ -674,16 +761,16 @@ public class Screen extends JPanel {
 					}
 				} else {
 					try {
-						//if (!elements[5].equals("")) {
-							interactables.add(new Interactable(Integer.parseInt(elements[1]),
-									Integer.parseInt(elements[2]), Integer.parseInt(elements[3]),
-									Integer.parseInt(elements[4]), Integer.parseInt(elements[5]),
-									Integer.parseInt(elements[6])));
-						//} else {
-						//	interactables
-						//			.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-						//					Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-						//}
+						// if (!elements[5].equals("")) {
+						interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
+								Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
+								Integer.parseInt(elements[5]), Integer.parseInt(elements[6])));
+						// } else {
+						// interactables
+						// .add(new Interactable(Integer.parseInt(elements[1]),
+						// Integer.parseInt(elements[2]),
+						// Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+						// }
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
@@ -725,23 +812,23 @@ public class Screen extends JPanel {
 					double line_length = CHARS_PER_LINE;
 					String[] words = line.split(" ");
 					switch (words[0]) {
-						case "[SiegeNormal]":
-							faces.add(face_images[0]);
-							break;
-						case "[SiegeEnigmatic]":
-							faces.add(face_images[2]);
-							break;
-						case "[SiegeLion]":
-							faces.add(face_images[1]);
-							break;
-						case "[break]":
-							faces.add(BREAK_POINT_SIGNIFIER);
-							break;
-						default:
-							faces.add(null);
-							line_length*=1.25;
+					case "[SiegeNormal]":
+						faces.add(face_images[0]);
+						break;
+					case "[SiegeEnigmatic]":
+						faces.add(face_images[2]);
+						break;
+					case "[SiegeLion]":
+						faces.add(face_images[1]);
+						break;
+					case "[break]":
+						faces.add(BREAK_POINT_SIGNIFIER);
+						break;
+					default:
+						faces.add(null);
+						line_length *= 1.25;
 					}
-					
+
 					ArrayList<String> quip = new ArrayList<String>();
 					for (String word : words) {
 						if (word.charAt(0) != '[') {
@@ -904,6 +991,11 @@ public class Screen extends JPanel {
 					}
 				}
 				break;
+			case KeyEvent.VK_ESCAPE:
+				if (state == GameState.LEVEL) {
+					state = GameState.SELECT;
+					exitLevel();
+				}
 			default:
 
 			}
