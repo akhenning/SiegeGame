@@ -1,4 +1,4 @@
-[SiegeNormal] Hello, and welcome to Siege Game (tentative).
+[SiegeNormal] Hello, and welcome to the tutorial of Siege Game (tentative).
 [SiegeEnigmatic] I am your playable character, Siege. Gang leader, and highest-rank Vanguard at Rhodes Island.
 [SiegeEnigmatic] Yorushiku.
 [SiegeNormal] This is the first stage, and the first tutorial.
@@ -9,4 +9,14 @@
 [break] break
 [SiegeEnigmatic] Fantastic job. Next, we have a wall that is too high to jump over normally.
 [SiegeEnigmatic] In order to jump higher and get more air, I can attack the [green] bounce pads and bounce away from them.
-[SiegeEnigmatic] Let's try attacking the [green] bounce pad with "E", and see if we can bounce over the obstacle and finish the level!
+[SiegeEnigmatic] Let's try attacking the [green] bounce pad with "E", and see if we can bounce over the obstacle.
+[break] break
+[SiegeEnigmatic] Excellent!
+[SiegeNormal] This attacking move is the main way you will interact with your environment. For example, you can attack these text prompters to have them play again.
+[SiegeNormal] Next, let's use the same attacking move ("E") to break these destructable blocks to the right.
+[break] break
+[SiegeNormal] Great. Now, there is only one more thing left to teach.
+[SiegeNormal] Basically, when you hold the space button instead of tapping it, it will cause me to get much more air.
+[SiegeNormal] Let's use this method to get on the platform up and to the left of this wall.
+[break] break
+[SiegeNormal] Congratulations on completing the tutorial! Move left to finish the level.

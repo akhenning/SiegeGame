@@ -36,24 +36,6 @@ public class Interactable extends Tile {
 			isTangible = false;
 		}
 		data = information;
-		
-		switch (id) {
-		case 99:
-			type = "Finish element";
-			break;
-		case 50:
-			type = "Bounce pad";
-			break;
-		case 60:
-			type = "Destructable block";
-			break;
-		case 70:
-			type = "Text continuer";
-			break;
-		case 71:
-			type = "Activated text continuer";
-			break;
-		}
 	}
 
 	public void draw(Graphics2D g2) {
@@ -86,6 +68,23 @@ public class Interactable extends Tile {
 	}
 	
 	public String toString() {
+		switch (id) {
+		case 99:
+			type = "Finish element";
+			break;
+		case 50:
+			type = "Bounce pad";
+			break;
+		case 60:
+			type = "Destructable block";
+			break;
+		case 70:
+			type = "Text continuer";
+			break;
+		case 71:
+			type = "Activated text continuer";
+			break;
+		}
 		return "Interactable,\t"+x+",\t"+y+",\t"+width+",\t"+height+",\t"+id+",\t"+data+",\t"+type+"\n";
 	}
 	

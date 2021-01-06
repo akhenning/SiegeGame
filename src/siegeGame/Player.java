@@ -21,7 +21,8 @@ public class Player {
 	public static Image strike = Toolkit.getDefaultToolkit().getImage("assets/air_strike.png");
 	public static Image landing = Toolkit.getDefaultToolkit().getImage("assets/landing.png");
 	public static Image attack = Toolkit.getDefaultToolkit().getImage("assets/attack_fast.png");
-	public static Image[] skid = {Toolkit.getDefaultToolkit().getImage("assets/skid.png"),Toolkit.getDefaultToolkit().getImage("assets/skid2.png")};
+	public static Image[] skid = { Toolkit.getDefaultToolkit().getImage("assets/skid.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/skid2.png") };
 
 	private int direction = 1;
 	private double xspeed = 0;
@@ -35,6 +36,7 @@ public class Player {
 	private boolean isHitbox = false;
 	boolean onSlope = false;
 	double slope = 0;
+	private final double WALK_SPEED = 8;
 
 	public enum State {
 		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, BASIC_ATTACK
@@ -282,29 +284,29 @@ public class Player {
 				width = MakeSureImageHasLoaded(walk);
 			}
 			// Special skidding animation for high speeds
-			if (Math.abs(xspeed)>10) {
+			if (Math.abs(xspeed) > 10) {
 				// This is kind of slow, but only runs when skidding so it's probably fine
 				AffineTransform trans = new AffineTransform();
 				// trans rights
 				if (direction == 1) {
-					trans.translate((double)(x+72),(double)(y ));
-					if (animationFrame<8) {
-						trans.rotate( Math.toRadians(Math.abs(4-animationFrame)-15) );
+					trans.translate((double) (x + 72), (double) (y));
+					if (animationFrame < 8) {
+						trans.rotate(Math.toRadians(Math.abs(4 - animationFrame) - 15));
 					} else {
-						trans.rotate( Math.toRadians(Math.abs(12-animationFrame)-15) );
+						trans.rotate(Math.toRadians(Math.abs(12 - animationFrame) - 15));
 					}
-					trans.translate(-130, 15-223); //144
-					g2.drawImage(skid[0],trans,null);
+					trans.translate(-130, 15 - 223); // 144
+					g2.drawImage(skid[0], trans, null);
 				} else {
-					trans.translate((double)(x),(double)(y ));
-					trans.rotate( Math.toRadians(-Math.abs(8-animationFrame)/2+15) );
-					trans.translate(-62, 15-223); //72
-					g2.drawImage(skid[1],trans,null);
+					trans.translate((double) (x), (double) (y));
+					trans.rotate(Math.toRadians(-Math.abs(8 - animationFrame) / 2 + 15));
+					trans.translate(-62, 15 - 223); // 72
+					g2.drawImage(skid[1], trans, null);
 				}
 			} else {
 				if (direction == 1) {
-					g2.drawImage(walk, x - 5 - 67, y + 4 - 223, x + 195 - 67, y + 250 + 4 - 223, offset * animationFrame, 0,
-							offset * animationFrame + 200, 250, null);
+					g2.drawImage(walk, x - 5 - 67, y + 4 - 223, x + 195 - 67, y + 250 + 4 - 223,
+							offset * animationFrame, 0, offset * animationFrame + 200, 250, null);
 				} else {
 					g2.drawImage(walk, x + 195 - 67 - 4, y + 4 - 223, x - 5 - 67 - 4, y + 250 + 4 - 223,
 							offset * animationFrame, 0, offset * animationFrame + 200, 250, null);
@@ -331,16 +333,19 @@ public class Player {
 			}
 			System.out.println("State and AnimationFrame:" + state + " " + animationFrame);
 			g2.setColor(Color.yellow);
-			g2.drawRect(x - 2, y - 2 + yoffset, 4, 4);
+			// Feet I think
+			g2.drawRect(x - 2 + 15, y - 2 + yoffset, 4, 4);
 			g2.setColor(Color.red);
-			g2.drawRect(x - 2 + 62, y - 2 + yoffset, 4, 4);
+			g2.drawRect(x - 2 + 47, y - 2 + yoffset, 4, 4);
 
 			g2.drawRect(x - 17, y - 47 + yoffset, 4, 4); // left
 			g2.drawRect(x + 75, y - 47 + yoffset, 4, 4);
 			g2.drawRect(x - 17, y - 152 + yoffset, 4, 4); // left
 			g2.drawRect(x + 75, y - 152 + yoffset, 4, 4);
-			g2.drawRect(x - 2, y - 182 + yoffset, 4, 4);
-			g2.drawRect(x - 2 + 62, y - 182 + yoffset, 4, 4);
+
+			// Head I think
+			g2.drawRect(x - 2 + 15, y - 182 + yoffset, 4, 4);
+			g2.drawRect(x - 2 + 47, y - 182 + yoffset, 4, 4);
 
 			for (Hitbox box : hitboxes) {
 				if (box.isActive()) {
@@ -359,20 +364,25 @@ public class Player {
 		if (yspeed > 35) {
 			yspeed = 35;
 		}
-		if (xspeed<.01 && xspeed > -.01) {
+		if (xspeed < .01 && xspeed > -.01) {
 			xspeed = 0;
+		}
+		if (xspeed < -35) {
+			xspeed = -35;
+		} else if (xspeed > 35) {
+			xspeed = 35;
 		}
 
 		// Check for start of attack
-		//attack_cooldown -= 1;
+		// attack_cooldown -= 1;
 		if (isAttack && state == State.GROUNDED) {
 			System.out.println("Attacking");
-			//attack_cooldown = 19;
+			// attack_cooldown = 19;
 			state = State.BASIC_ATTACK;
 		}
 		// Handle movement while attacking
 		if (state == State.BASIC_ATTACK) {
-			xspeed*=.8;
+			xspeed *= .8;
 			litx += xspeed;
 		}
 		// System.out.println("start"+xspeed);
@@ -404,7 +414,7 @@ public class Player {
 				if (state == State.HOVERING && isJump) {
 					yspeed += .25;
 				} else if (state == State.JUMPING && isJump) {
-					yspeed += GRAVITY-.5;
+					yspeed += GRAVITY - .5;
 				} else {
 					yspeed += GRAVITY;
 				}
@@ -426,8 +436,8 @@ public class Player {
 					xspeed *= .7;
 					litx += xspeed;
 
-					Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly);
-					Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly);
+					Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx +15, lity - Screen.scrolly);
+					Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 47, lity - Screen.scrolly);
 					int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 					if (groundLevel != 1000001) {
 						lity = groundLevel + Screen.scrolly;
@@ -437,20 +447,20 @@ public class Player {
 			}
 		} // transition from GROUNDED to jump squat
 		else if (isJump && state == State.GROUNDED) {
-			//System.out.println("Starting to jump");
+			// System.out.println("Starting to jump");
 			state = State.JUMPSQUAT;
 			xspeed *= .9;
 			litx += xspeed;
 		} // if GROUNDED and not in JUMPSQUAT, then handle walking stuff
 		else {
 			// System.out.println("WALKING");
-			xspeed = xMove * 5.5;
+			xspeed = xMove * WALK_SPEED;
 			if (isShift) {
-				xspeed *= 3;
+				xspeed *= 2;
 			}
 			litx += xspeed;
 		}
-		
+
 		// All good games have jump-cancelling
 		if (isJump && state == State.BASIC_ATTACK) {
 			state = State.JUMPSQUAT;
@@ -478,20 +488,19 @@ public class Player {
 			Point2D.Double leftHead;
 			Point2D.Double rightHead;
 			if (state == State.HOVERING) {
-				leftHead = new Point2D.Double(litx - Screen.scrollx, lity - 250 - Screen.scrolly);
-				rightHead = new Point2D.Double(litx - Screen.scrollx + 62, lity - 250 - Screen.scrolly);
+				leftHead = new Point2D.Double(litx - Screen.scrollx +15, lity - 250 - Screen.scrolly);
+				rightHead = new Point2D.Double(litx - Screen.scrollx + 47, lity - 250 - Screen.scrolly);
 			} else if (state == State.JUMPING) {
-				leftHead = new Point2D.Double(litx - Screen.scrollx, lity - 180 - Screen.scrolly - animationFrame * 5);
-				rightHead = new Point2D.Double(litx - Screen.scrollx + 62,
+				leftHead = new Point2D.Double(litx - Screen.scrollx + 15, lity - 180 - Screen.scrolly - animationFrame * 5);
+				rightHead = new Point2D.Double(litx - Screen.scrollx + 47,
 						lity - 180 - Screen.scrolly - animationFrame * 5);
 			} else {
-				leftHead = new Point2D.Double(litx - Screen.scrollx, lity - 180 - Screen.scrolly);
-				rightHead = new Point2D.Double(litx - Screen.scrollx + 62, lity - 180 - Screen.scrolly);
+				leftHead = new Point2D.Double(litx - Screen.scrollx +15, lity - 180 - Screen.scrolly);
+				rightHead = new Point2D.Double(litx - Screen.scrollx + 47, lity - 180 - Screen.scrolly);
 			}
 
-
-			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly + yoffset);
-			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly + yoffset);
+			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + 15, lity - Screen.scrolly + yoffset);
+			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 47, lity - Screen.scrolly + yoffset);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 			if (groundLevel != 1000001) {
 				// System.out.println("FORCED LANDING");
@@ -508,12 +517,13 @@ public class Player {
 				if (ceilingLevel != -1000001) {
 					// If so, stop upwards movement and move player to below the collision point.
 					yspeed = 0;
-					lity = ceilingLevel + 180 + Screen.scrolly - yoffset; //+ 5;
+					lity = ceilingLevel + 180 + Screen.scrolly - yoffset; // + 5;
 				}
 			}
 		}
-		
-		// Check if player is inside of a WALL. If so, shunt them back to in front of it.
+
+		// Check if player is inside of a WALL. If so, shunt them back to in front of
+		// it.
 		Point2D.Double left = new Point2D.Double(litx - Screen.scrollx - 15, lity - 45 - Screen.scrolly + yoffset);
 		Point2D.Double left2 = new Point2D.Double(litx - Screen.scrollx - 15, lity - 150 - Screen.scrolly + yoffset);
 		Point2D.Double right = new Point2D.Double(litx - Screen.scrollx + 77, lity - 45 - Screen.scrolly + yoffset);
@@ -523,11 +533,11 @@ public class Player {
 			litx = wallLevel + Screen.scrollx;
 			xspeed = 0;
 		}
-		
+
 		// Check case where grounded player walks off of the ground (i.e. ledge)
 		if ((state == State.GROUNDED || state == State.BASIC_ATTACK) || doLandingCheck) {
-			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly);
-			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly);
+			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + 15, lity - Screen.scrolly);
+			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 47, lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 			// This means that nothing is below the player
 			if (groundLevel == 1000001) {
@@ -600,7 +610,8 @@ public class Player {
 		Image sprites[] = { walk, IDLE, jumpsquat, jumping, hovering, strike, landing };
 		for (Image sprite : sprites) {
 			g2.drawImage(sprite, 0, 0, null);
-			//g2.drawImage(sprite, x, y, x - 36 - 67, y + 340 - 85 - 223, animationFrame, 0, animationFrame + 200, 340, null);
+			// g2.drawImage(sprite, x, y, x - 36 - 67, y + 340 - 85 - 223, animationFrame,
+			// 0, animationFrame + 200, 340, null);
 		}
 	}
 

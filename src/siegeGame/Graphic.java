@@ -62,6 +62,18 @@ public class Graphic extends Tile {
 		}
 	}
 	
+	public String toString() {
+		switch (id) {
+		case 10:
+			type = "Nian lying down";
+			break;
+		case 11:
+			type = "Level selector graphic (should not be in level file)";
+			break;
+		}
+		return "Graphic,\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + id + ",\t"+type+"\n";
+	}
+	
 	public void setText(String text) {
 		this.text = text;
 	} 

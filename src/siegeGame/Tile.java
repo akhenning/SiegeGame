@@ -35,7 +35,7 @@ public class Tile {
 	SlopeState slopeState = SlopeState.NONE;
 	
 	// To make the level files a bit more legible
-	protected String type = "";
+	protected String type = "Unrecognized";
 
 	public Tile(int x, int y, int width, int height) {
 		this(x, y, width, height, 0);
@@ -56,16 +56,6 @@ public class Tile {
 				slopeState = SlopeState.LEFT;
 				slope = -((double) height) / ((double) width);
 			}
-		}
-		switch (id) {
-		case 101:
-			type = "Right-leaning slope";
-			break;
-		case 102:
-			type = "Left-leaning slope";
-			break;
-		default:
-			type = "Basic black block";
 		}
 	}
 
@@ -257,6 +247,17 @@ public class Tile {
 	}
 
 	public String toString() {
+		switch (id) {
+		case 101:
+			type = "Right-leaning slope";
+			break;
+		case 102:
+			type = "Left-leaning slope";
+			break;
+		case 0:
+			type = "Basic black block";
+			break;
+		}
 		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + id + ",\t"+type+"\n";
 	}
 
@@ -329,6 +330,7 @@ public class Tile {
 		if (id>=50 && id <100) {
 			System.out.println("Incorrect method of changing object to Interactable.");
 		}
+
 	}
 
 	public boolean shouldRemove() {

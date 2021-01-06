@@ -23,7 +23,7 @@ import java.io.IOException;
 public class Screen extends JPanel {
 	// Dunno what this does
 	private static final long serialVersionUID = 1L;
-	
+
 	// Well, I needed a way to signify a break point in a list of images that wasn't
 	// null...
 	private static final Image BREAK_POINT_SIGNIFIER = Toolkit.getDefaultToolkit().getImage("");
@@ -43,7 +43,8 @@ public class Screen extends JPanel {
 	// Face images for use in text boxes
 	private static Image[] face_images = { Toolkit.getDefaultToolkit().getImage("assets/SiegeNormal.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/SiegeLion.png"),
-			Toolkit.getDefaultToolkit().getImage("assets/SiegeEnigmatic.png") };
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeEnigmatic.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/nian.png") };
 
 	// Handles scroll for player and background
 	public static int scrollx = 0;
@@ -55,6 +56,7 @@ public class Screen extends JPanel {
 	// Collection of level objects
 	private ArrayList<Tile> area = new ArrayList<Tile>();
 	private ArrayList<Interactable> interactables = new ArrayList<Interactable>();
+	private ArrayList<Graphic> graphics = new ArrayList<Graphic>();
 	private ArrayList<Particle> particles = new ArrayList<Particle>();
 	private int numSelected = 0;
 	private Player player = new Player(this);
@@ -69,6 +71,7 @@ public class Screen extends JPanel {
 	private int[] textScrollNum = { -1, -1 };
 	private ArrayList<ArrayList<String>> text = new ArrayList<ArrayList<String>>();
 	private ArrayList<Image> faces = new ArrayList<Image>();
+	private ArrayList<String> faceNames = new ArrayList<String>();
 
 	private boolean isShift = false;
 	private boolean isJump = false;
@@ -161,6 +164,11 @@ public class Screen extends JPanel {
 					tile.draw(g2);
 				}
 			}
+			for (Graphic tile : graphics) {
+				if (tile.isVisible()) {
+					tile.draw(g2);
+				}
+			}
 			player.draw(g2);
 
 		} else if (state == GameState.TITLE) {
@@ -198,7 +206,7 @@ public class Screen extends JPanel {
 
 		// Secion handling text boxes
 		if (activeText) {
-			if(textBoxNum == -1) {
+			if (textBoxNum == -1) {
 				System.err.println("ERROR: Text box with no assigned text box");
 				textBoxNum = 0;
 			}
@@ -269,14 +277,16 @@ public class Screen extends JPanel {
 					int off = (int) (270 / zoom);
 					int off2 = (int) (50 / zoom);
 					g2.setColor(Color.WHITE);
-					g2.fillRect(off2 / 2, Main.gameSize.height - off - (off2 * 3 / 2), off, off);
+					g2.fillRect(off2 / 2, Main.gameSize.height - off - (off2 * 5 / 2), off, off);
 					// g2.fillRect(offset/2, Main.gameSize.height * 2 / 3 - offset,
 					// Main.gameSize.height / 4,
 					// Main.gameSize.height / 4);
 					g2.setColor(Color.BLACK);
-					g2.drawRect(off2 / 2, Main.gameSize.height - off - (off2 * 3 / 2), off, off);
-					g2.drawImage(faces.get(textBoxNum), off2 / 2, Main.gameSize.height - off - (off2 * 3 / 2), off, off,
+					g2.drawImage(faces.get(textBoxNum), off2 / 2, Main.gameSize.height - off - (off2 * 5 / 2), off, off,
 							null);
+					g2.drawRect(off2 / 2, Main.gameSize.height - off - (off2 * 5 / 2), off, off);
+					g2.drawRect(off2 / 2, Main.gameSize.height - (off2 * 5 / 2), off, off2 * 5 / 4);
+					g2.drawString(faceNames.get(textBoxNum), off2 * 2 / 3, Main.gameSize.height - (off2 * 7 / 4));
 				}
 			}
 		}
@@ -363,10 +373,19 @@ public class Screen extends JPanel {
 			for (Interactable tile : interactables) {
 				tile.checkIsVisible();
 			}
+			for (Graphic tile : graphics) {
+				tile.checkIsVisible();
+			}
 
-			// Player moves; calculating collision is also in here
-			player.calcMove(left + right, isShift, isJump, isAttack);
+			// Player moves; calculating collision is also handled in this method
+			if (fade < 50) {
+				player.calcMove(left + right, isShift, isJump, isAttack);
+			} else {
+				player.calcMove(0, false, false, false);
+			}
 		}
+		
+		// Avoid particle flooding
 		if (particles.size() > 15) {
 			particles.remove(0);
 		}
@@ -482,7 +501,7 @@ public class Screen extends JPanel {
 		return highest;
 	}
 
-	// Method to check if the horizontal contact points of the player are 
+	// Method to check if the horizontal contact points of the player are
 	// in contact with anything
 	public int checkHorizontalCollision(Point2D.Double leftTop, Point2D.Double leftBot, Point2D.Double rightTop,
 			Point2D.Double rightBot) {
@@ -525,7 +544,7 @@ public class Screen extends JPanel {
 							textScrollNum[0] = 0;
 							textScrollNum[1] = 1;
 						}
-					// If the object is a finish line
+						// If the object is a finish line
 					} else if (tile.getId() == 99) {
 						levelAdvance(tile.getData());
 						return -1000001;
@@ -653,7 +672,7 @@ public class Screen extends JPanel {
 						// System.out.println("Successfully found object)");
 						return true;
 					}
-				// If left-facing staircase
+					// If left-facing staircase
 				} else {
 					// Check if there is a staircase right below the left foot, basically
 					if (tile.isInside(leftFoot)) {
@@ -686,18 +705,17 @@ public class Screen extends JPanel {
 		fade = 320;
 		String next_lvl = "Stage 1-1";
 		switch (next) {
-			case 1:
-				next_lvl = "Stage 1-1";
-				break;
-			case 2:
-				next_lvl = "Stage 1-2";
-				break;
-			default:
-				System.err.println("Error: Finish element has no assigned destination");
-				next_lvl = "1";
+		case 1:
+			next_lvl = "Stage 1-1";
+			break;
+		case 2:
+			next_lvl = "Stage 1-2";
+			break;
+		default:
+			System.err.println("Error: Finish element has no assigned destination");
+			next_lvl = "Default";
 		}
-				
-				
+
 		// todo-determine the next level (fairly easy, provided more levels exist)
 		loadLevel(next_lvl);
 	}
@@ -727,6 +745,7 @@ public class Screen extends JPanel {
 		// Clear everything
 		text = new ArrayList<ArrayList<String>>();
 		faces = new ArrayList<Image>();
+		faceNames = new ArrayList<String>();
 		area = new ArrayList<Tile>();
 		interactables = new ArrayList<Interactable>();
 		particles = new ArrayList<Particle>();
@@ -766,34 +785,32 @@ public class Screen extends JPanel {
 				String[] elements = line.split(",");
 				if (elements[0].trim().equals("Tile")) {
 					try {
-						//if (!elements[5].equals("")) {
 						area.add(new Tile(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
 								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
 								Integer.parseInt(elements[5].trim())));
-						//} else {
-						//	area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-						//			Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-						//}
 					} catch (Exception e) {
 						System.out.println("Error reading stage element: " + line);
 					}
+				} else if (elements[0].trim().equals("Graphic")) {
+					try {
+						graphics.add(new Graphic(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim())));
+
+						System.out.println("Graphic has been added properly");
+					} catch (Exception e) {
+						System.out.println(e + "Error reading stage element: " + line);
+					}
 				} else {
 					try {
-						// if (!elements[5].equals("")) {
-						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
-								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
-								Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
-						// } else {
-						// interactables
-						// .add(new Interactable(Integer.parseInt(elements[1]),
-						// Integer.parseInt(elements[2]),
-						// Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-						// }
+						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
 				}
-				System.out.println(elements[5]);
 			}
 
 			// Read text file
@@ -832,18 +849,27 @@ public class Screen extends JPanel {
 					switch (words[0]) {
 					case "[SiegeNormal]":
 						faces.add(face_images[0]);
+						faceNames.add("Siege");
 						break;
 					case "[SiegeEnigmatic]":
 						faces.add(face_images[2]);
+						faceNames.add("Siege");
 						break;
 					case "[SiegeLion]":
 						faces.add(face_images[1]);
+						faceNames.add("Siege");
+						break;
+					case "[Nian]":
+						faces.add(face_images[3]);
+						faceNames.add("Nian");
 						break;
 					case "[break]":
 						faces.add(BREAK_POINT_SIGNIFIER);
+						faceNames.add("");
 						break;
 					default:
 						faces.add(null);
+						faceNames.add("");
 						line_length *= 1.25;
 					}
 

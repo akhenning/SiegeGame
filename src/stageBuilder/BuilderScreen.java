@@ -5,6 +5,7 @@ import javax.swing.JPanel;
 import siegeGame.Tile;
 import siegeGame.Graphic;
 import siegeGame.Interactable;
+import siegeGame.Player;
 
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -186,6 +187,8 @@ public class BuilderScreen extends JPanel {
 				// }
 			}
 		}
+		g2.drawImage(Player.IDLE, 300+scrollx, 300+scrolly, 200 + 300+scrollx, 300 + 250+scrolly, 0, 0,
+						 200, 250, null);
 	}
 
 	public void nextFrame() {
@@ -236,6 +239,14 @@ public class BuilderScreen extends JPanel {
 								Integer.parseInt(elements[5].trim())));
 					} catch (Exception e) {
 						System.out.println("Error reading stage element: " + line);
+					}
+				} else if (elements[0].trim().equals("Graphic")) {
+					try {
+						area.add(new Graphic(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
+								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
+								Integer.parseInt(elements[5].trim())));
+					} catch (Exception e) {
+						System.out.println(e + "Error reading stage element: " + line);
 					}
 				} else {
 					try {
@@ -486,8 +497,8 @@ public class BuilderScreen extends JPanel {
 
 		public void mousePressed(MouseEvent e) {
 
-			Point2D.Double point = new Point2D.Double(e.getPoint().getX() * 2 - scrollx,
-					e.getPoint().getY() * 2 - scrolly);
+			Point2D.Double point = new Point2D.Double(e.getPoint().getX()/zoom - scrollx,
+					e.getPoint().getY()/zoom - scrolly);
 			if (lastActiveTile != null && lastActiveTile.isInside(point)) {
 				canDrag = true;
 				selectOffset = lastActiveTile.getDifference(point);
@@ -531,7 +542,7 @@ public class BuilderScreen extends JPanel {
 		}
 
 		public void mouseReleased(MouseEvent e) {
-			if (lastActiveTile != null) {
+			if (lastActiveTile != null && !(lastActiveTile instanceof Graphic)) {
 				lastActiveTile.snap();
 			}
 			lastPoint = null;
@@ -545,8 +556,8 @@ public class BuilderScreen extends JPanel {
 	public class MovementListener implements MouseMotionListener {
 		public void mouseDragged(MouseEvent e) {
 			// System.out.println("Trying: "+canDrag+" " +dragMode);
-			Point2D.Double point = new Point2D.Double(e.getPoint().getX() * 2 - scrollx,
-					e.getPoint().getY() * 2 - scrolly);
+			Point2D.Double point = new Point2D.Double(e.getPoint().getX()/zoom - scrollx,
+					e.getPoint().getY()/zoom - scrolly);
 			if (mode != 1) {
 				if (canDrag) {
 					lastActiveTile.goTo(point.getX() - selectOffset[0], point.getY() - selectOffset[1]);
