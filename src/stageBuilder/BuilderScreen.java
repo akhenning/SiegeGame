@@ -33,6 +33,21 @@ public class BuilderScreen extends JPanel {
 	private static final long serialVersionUID = 1L;
 	public static double zoom = .5;
 
+	public class TileType {
+		public int id;
+		public boolean isInteractable;
+		public String description;
+
+		public TileType(int id, boolean isInteractable, String description) {
+			this.id = id;
+			this.isInteractable = isInteractable;
+			this.description = description;
+		}
+	}
+
+	public ArrayList<TileType> TileTypes = new ArrayList<TileType>();
+	public int current_type = 0;
+
 	public static int scrollx = 0;
 	public static int scrolly = 0;
 
@@ -50,8 +65,8 @@ public class BuilderScreen extends JPanel {
 	private int selectSide = 0;
 	private String currentLevel = "";
 	private int numSelected = 0;
-	private static Image[] saveIcons = {Toolkit.getDefaultToolkit().getImage("assets/saved.png"),
-			Toolkit.getDefaultToolkit().getImage("assets/save.png")};
+	private static Image[] saveIcons = { Toolkit.getDefaultToolkit().getImage("assets/saved.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/save.png") };
 	private boolean hasChanges = false;
 
 	private Font font = new Font("Serif", Font.PLAIN, 150);
@@ -71,6 +86,15 @@ public class BuilderScreen extends JPanel {
 	// private int currentLevel = 1;
 
 	public BuilderScreen() {
+		TileTypes.add(new TileType(0, false, "Basic black square."));
+		TileTypes.add(new TileType(101, false, "Right-facing slope"));
+		TileTypes.add(new TileType(102, false, "Left-facing slope"));
+		TileTypes.add(new TileType(50, true, "Basic bounce pad"));
+		TileTypes.add(new TileType(60, true, "Basic destructable block"));
+		TileTypes.add(new TileType(70, true, "Basic text prompter"));
+		TileTypes.add(new TileType(71, true, "Basic activated text prompter"));
+		TileTypes.add(new TileType(99, true, "Basic finish element"));
+
 		setBackground(Color.WHITE);
 		addMouseListener(new ClickListener());
 		addMouseMotionListener(new MovementListener());
@@ -102,21 +126,29 @@ public class BuilderScreen extends JPanel {
 			// tile.draw(g2, scrollx, scrolly);
 			// }
 
+			if (lastActiveTile!=null) {
+				g2.setColor(Color.blue);
+				g2.drawRect(lastActiveTile.getX()+ scrollx, scrolly+lastActiveTile.getY(), lastActiveTile.getWidth(), lastActiveTile.getHeight());
+			}
+			g2.setColor(Color.black);
 			if (mode == 1 && lastActiveTile != null) {
 				g2.setFont(font3);
 				lastActiveTile.drawSide(g2, scrollx, scrolly, selectSide);
 			}
 
 			if (hasChanges) {
-				g2.drawImage(saveIcons[1], BuilderMain.gameSize.width-200, 0, null);
+				g2.drawImage(saveIcons[1], BuilderMain.gameSize.width - 200, 0, null);
 			} else {
-				g2.drawImage(saveIcons[0], BuilderMain.gameSize.width-200, 0, null);
+				g2.drawImage(saveIcons[0], BuilderMain.gameSize.width - 200, 0, null);
 			}
 
 			g2.setFont(font2);
 			int fontX = (int) (BuilderMain.gameSize.width * .65);
 			int fontY = (int) (BuilderMain.gameSize.height * .85);
 			g2.drawString(currentLevel, (int) (BuilderMain.gameSize.width * .8), 100);
+			if (mode==3) {
+				g2.drawString("Adding: "+TileTypes.get(current_type).description, (int) (BuilderMain.gameSize.width * .07), fontY);
+			}
 
 			g2.setFont(font);
 			g2.drawImage(E, (int) (BuilderMain.gameSize.width * .58), (int) (BuilderMain.gameSize.height * .775), null);
@@ -136,7 +168,6 @@ public class BuilderScreen extends JPanel {
 
 			} else if (mode == 3) {
 				g2.drawString("Mode: Add", fontX, fontY);
-				g2.drawString("Add", (int) (BuilderMain.gameSize.width * .07), fontY);
 				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			}
 		} else if (state == GameState.SELECT) {
@@ -147,9 +178,9 @@ public class BuilderScreen extends JPanel {
 			g2.setColor(Color.BLACK);
 			for (Tile tile : area) {
 				// if (tile.isVisible()) {
-				tile.draw(g2,scrollx,scrolly);
+				tile.draw(g2, scrollx, scrolly);
 				if (i == numSelected) {
-					tile.drawBoxAround(g2,scrollx,scrolly);
+					tile.drawBoxAround(g2, scrollx, scrolly);
 				}
 				i++;
 				// }
@@ -198,29 +229,19 @@ public class BuilderScreen extends JPanel {
 			String[] lines = raw_stage.split("\n");
 			for (String line : lines) {
 				String[] elements = line.split(",");
-				if (elements[0].equals("Tile")) {
+				if (elements[0].trim().equals("Tile")) {
 					try {
-						if (!elements[5].equals("")) {
-							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-									Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
-									Integer.parseInt(elements[5])));
-						} else {
-							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-									Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-						}
+						area.add(new Tile(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
+								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
+								Integer.parseInt(elements[5].trim())));
 					} catch (Exception e) {
 						System.out.println("Error reading stage element: " + line);
 					}
 				} else {
 					try {
-						if (!elements[5].equals("")) {
-							area.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-									Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
-									Integer.parseInt(elements[5])));
-						} else {
-							area.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-									Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-						}
+						area.add(new Interactable(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
+								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
+								Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
@@ -296,18 +317,18 @@ public class BuilderScreen extends JPanel {
 				break;
 			case KeyEvent.VK_A:
 				if (state != GameState.SELECT) {
-					scrollx += 10;
+					scrollx += 20;
 					if (isShift) {
-						scrollx += 30;
+						scrollx += 60;
 					}
 				}
 				break;
 			case KeyEvent.VK_D:
 
 				if (state != GameState.SELECT) {
-					scrollx -= 10;
+					scrollx -= 20;
 					if (isShift) {
-						scrollx -= 30;
+						scrollx -= 60;
 					}
 				}
 				break;
@@ -322,9 +343,9 @@ public class BuilderScreen extends JPanel {
 						scrolly += 300;
 					}
 				} else {
-					scrolly += 10;
+					scrolly += 20;
 					if (isShift) {
-						scrolly += 30;
+						scrolly += 60;
 					}
 				}
 				break;
@@ -340,9 +361,9 @@ public class BuilderScreen extends JPanel {
 						scrolly -= 300;
 					}
 				} else {
-					scrolly -= 10;
+					scrolly -= 20;
 					if (isShift) {
-						scrolly -= 30;
+						scrolly -= 60;
 					}
 				}
 				break;
@@ -352,10 +373,42 @@ public class BuilderScreen extends JPanel {
 					mode = 0;
 				}
 				break;
-			case KeyEvent.VK_R:
-				selectSide += 1;
-				if (selectSide > 3) {
-					selectSide = 0;
+			case KeyEvent.VK_Q:
+				switch (mode) {
+				case 1:
+					selectSide += 1;
+					if (selectSide > 3) {
+						selectSide = 0;
+					}
+					break;
+				case 2:
+					current_type += 1;
+					if (current_type >= TileTypes.size()) {
+						current_type = 0;
+					}
+					if (TileTypes.get(current_type).isInteractable == lastActiveTile.isInteractable()) {
+						lastActiveTile.setId(TileTypes.get(current_type).id);
+					} else if (TileTypes.get(current_type).isInteractable) {
+						// if is not Interactable, but becoming one.
+						Interactable temp = new Interactable(lastActiveTile.getX(), lastActiveTile.getY(),
+								lastActiveTile.getWidth(), lastActiveTile.getHeight(), TileTypes.get(current_type).id);
+						area.set(area.indexOf(lastActiveTile), temp);
+						lastActiveTile = temp;
+					} else {
+						// if is currently Interactable, but becoming Tile.
+						Tile temp = new Tile(lastActiveTile.getX(), lastActiveTile.getY(),
+								lastActiveTile.getWidth(), lastActiveTile.getHeight(), TileTypes.get(current_type).id);
+						area.set(area.indexOf(lastActiveTile), temp);
+						lastActiveTile = temp;
+					}
+					hasChanges = true;
+					break;
+				case 3:
+					current_type += 1;
+					if (current_type >= TileTypes.size()) {
+						current_type = 0;
+					}
+					break;
 				}
 				break;
 			case KeyEvent.VK_UP:
@@ -443,14 +496,28 @@ public class BuilderScreen extends JPanel {
 			} else {
 				lastActiveTile = null;// new Circle(new Point2D.Double(0, 0), 0, Color.WHITE);
 				for (Tile shape : area) {
-					//System.out.println(shape.isInside(point));
+					// System.out.println(shape.isInside(point));
 					if (shape.isInside(point)) {
 						canDrag = true;
 						lastActiveTile = shape;
 						selectOffset = shape.getDifference(point);
 						lastPoint = point;
 						hasChanges = true;
+						current_type = 0;
 					}
+				}
+				if (lastActiveTile == null && mode == 3) {
+					if (TileTypes.get(current_type).isInteractable) {
+						lastActiveTile = new Interactable(0, 0, 200, 200, TileTypes.get(current_type).id);
+					} else {
+						lastActiveTile = new Tile(0, 0, 200, 200, TileTypes.get(current_type).id);
+					}
+					lastActiveTile.goTo(point.getX()-100,point.getY()-100);
+					canDrag = true;
+					area.add(lastActiveTile);
+					selectOffset = lastActiveTile.getDifference(point);
+					lastPoint = point;
+					hasChanges = true;
 				}
 			}
 			// System.out.println(point.getX());
@@ -464,7 +531,7 @@ public class BuilderScreen extends JPanel {
 		}
 
 		public void mouseReleased(MouseEvent e) {
-			if (lastActiveTile!=null) {
+			if (lastActiveTile != null) {
 				lastActiveTile.snap();
 			}
 			lastPoint = null;
@@ -518,6 +585,9 @@ public class BuilderScreen extends JPanel {
 		}
 
 		public void mouseMoved(MouseEvent e) {
+			lastPoint = new Point2D.Double(e.getPoint().getX() * 2 - scrollx,
+					e.getPoint().getY() * 2 - scrolly);
+			requestFocusInWindow();
 		}
 	}
 }

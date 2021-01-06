@@ -5,5 +5,8 @@
 [SiegeNormal] First, let's walk over to the large "?", and we will get started.
 [break] break
 [SiegeNormal] Great job. Now we can get started.
-[SiegeLion] Well, no, this build is still in early testing, but still...
-[SiegeNormal] Let's start with something simple. Jump over this small obstacle with "Space".
+[SiegeNormal] Let's start with something simple. Jump over this small obstacle, and then the gap, with "Space".
+[break] break
+[SiegeEnigmatic] Fantastic job. Next, we have a wall that is too high to jump over normally.
+[SiegeEnigmatic] In order to jump higher and get more air, I can attack the [green] bounce pads and bounce away from them.
+[SiegeEnigmatic] Let's try attacking the [green] bounce pad with "E", and see if we can bounce over the obstacle and finish the level!

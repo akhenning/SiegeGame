@@ -5,7 +5,9 @@ import javax.swing.JPanel;
 import siegeGame.Tile.SlopeState;
 
 import java.awt.event.KeyListener;
+import java.awt.geom.Point2D;
 import java.awt.event.KeyEvent;
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.awt.Dimension;
@@ -14,9 +16,6 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
-import java.awt.BasicStroke;
-import java.awt.geom.Point2D;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -24,6 +23,7 @@ import java.io.IOException;
 public class Screen extends JPanel {
 	// Dunno what this does
 	private static final long serialVersionUID = 1L;
+	
 	// Well, I needed a way to signify a break point in a list of images that wasn't
 	// null...
 	private static final Image BREAK_POINT_SIGNIFIER = Toolkit.getDefaultToolkit().getImage("");
@@ -198,6 +198,10 @@ public class Screen extends JPanel {
 
 		// Secion handling text boxes
 		if (activeText) {
+			if(textBoxNum == -1) {
+				System.err.println("ERROR: Text box with no assigned text box");
+				textBoxNum = 0;
+			}
 			if (BREAK_POINT_SIGNIFIER.equals(faces.get(textBoxNum))) {
 				activeText = false;
 			} else {
@@ -522,8 +526,8 @@ public class Screen extends JPanel {
 							textScrollNum[1] = 1;
 						}
 					// If the object is a finish line
-					} else if (tile.getId() == 0) {
-						;
+					} else if (tile.getId() == 99) {
+						levelAdvance(tile.getData());
 						return -1000001;
 					}
 				} else if (tile.isInside(leftBot)) {
@@ -551,8 +555,8 @@ public class Screen extends JPanel {
 							textScrollNum[0] = 0;
 							textScrollNum[1] = 1;
 						}
-					} else if (tile.getId() == 0) {
-						levelAdvance();
+					} else if (tile.getId() == 99) {
+						levelAdvance(tile.getData());
 						return -1000001;
 					}
 				} else if (tile.isInside(rightBot)) {
@@ -664,7 +668,7 @@ public class Screen extends JPanel {
 	// Method to advance the level, usually after finishing.
 	// Currently simply moves to the next level.
 	// Eventually needs much more fanfare.
-	public void levelAdvance() {
+	public void levelAdvance(int next) {
 		// Reset all values edited during the level's progress
 		scrollx = 0;
 		scrolly = 0;
@@ -680,8 +684,22 @@ public class Screen extends JPanel {
 		// And prepare to load the next level
 		state = GameState.LEVEL;
 		fade = 320;
+		String next_lvl = "Stage 1-1";
+		switch (next) {
+			case 1:
+				next_lvl = "Stage 1-1";
+				break;
+			case 2:
+				next_lvl = "Stage 1-2";
+				break;
+			default:
+				System.err.println("Error: Finish element has no assigned destination");
+				next_lvl = "1";
+		}
+				
+				
 		// todo-determine the next level (fairly easy, provided more levels exist)
-		loadLevel("1");
+		loadLevel(next_lvl);
 	}
 
 	// Method to return to level select from level
@@ -746,25 +764,25 @@ public class Screen extends JPanel {
 			String[] lines = raw_stage.split("\n");
 			for (String line : lines) {
 				String[] elements = line.split(",");
-				if (elements[0].equals("Tile")) {
+				if (elements[0].trim().equals("Tile")) {
 					try {
-						if (!elements[5].equals("")) {
-							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-									Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
-									Integer.parseInt(elements[5])));
-						} else {
-							area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-									Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
-						}
+						//if (!elements[5].equals("")) {
+						area.add(new Tile(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
+								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
+								Integer.parseInt(elements[5].trim())));
+						//} else {
+						//	area.add(new Tile(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
+						//			Integer.parseInt(elements[3]), Integer.parseInt(elements[4])));
+						//}
 					} catch (Exception e) {
 						System.out.println("Error reading stage element: " + line);
 					}
 				} else {
 					try {
 						// if (!elements[5].equals("")) {
-						interactables.add(new Interactable(Integer.parseInt(elements[1]), Integer.parseInt(elements[2]),
-								Integer.parseInt(elements[3]), Integer.parseInt(elements[4]),
-								Integer.parseInt(elements[5]), Integer.parseInt(elements[6])));
+						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
+								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
+								Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
 						// } else {
 						// interactables
 						// .add(new Interactable(Integer.parseInt(elements[1]),
@@ -933,10 +951,10 @@ public class Screen extends JPanel {
 				right = 1;
 				break;
 			case KeyEvent.VK_Q:
-				if (player.debug) {
-					player.debug = false;
+				if (Main.debug) {
+					Main.debug = false;
 				} else {
-					player.debug = true;
+					Main.debug = true;
 				}
 				break;
 			case KeyEvent.VK_UP:

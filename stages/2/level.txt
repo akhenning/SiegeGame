@@ -1,17 +1,16 @@
-Tile,-200,600,2000,400,0,
-Tile,448,-76,238,370,0,
-Tile,900,0,200,100,0,
-Tile,0,150,200,100,0,
-Tile,1934,846,200,100,0,
-Interactable,1200,-2000,200,2200,50,-1,
-Interactable,2000,-2000,200,2200,50,-1,
-Tile,1000,-1000,200,1200,0,
-Tile,2200,-1000,200,1200,0,
-Tile,1000,400,200,200,101,
-Tile,1200,400,200,200,0,
-Tile,1400,200,400,200,101,
-Tile,-200,400,200,200,102,
-Interactable,-562,310,358,294,50,-1,
-Tile,2000,200,200,200,10,
-Tile,3000,200,200,200,10,
-Tile,4000,200,200,200,10,
+Tile,		-200,	600,	2000,	400,	0,	Basic black block
+Tile,		900,	0,	200,	100,	0,	Basic black block
+Tile,		0,	150,	200,	100,	0,	Basic black block
+Tile,		2200,	600,	200,	100,	0,	Basic black block
+Interactable,	1200,	-2000,	200,	2200,	50,	-1,	Bounce pad
+Interactable,	2000,	-2000,	200,	2200,	50,	-1,	Bounce pad
+Tile,		1000,	-1000,	200,	1200,	0,	Basic black block
+Tile,		2200,	-1000,	200,	1200,	0,	Basic black block
+Tile,		1000,	400,	200,	200,	101,	Right-leaning slope
+Tile,		1200,	400,	200,	200,	0,	Basic black block
+Tile,		1400,	200,	400,	200,	101,	Right-leaning slope
+Tile,		-200,	400,	200,	200,	102,	Left-leaning slope
+Interactable,	0,	400,	200,	200,	50,	-1,	Bounce pad
+Tile,		2000,	200,	200,	200,	10,	Basic black block
+Tile,		3000,	200,	200,	200,	10,	Basic black block
+Tile,		4000,	200,	200,	200,	10,	Basic black block

@@ -18,6 +18,7 @@ public class Main {
 	public static Dimension screenSize;
 	public static Dimension gameSize;
 	public static int scrollPos[] = {0,0,0,0};
+	public static boolean debug = true;
 	/**
 	 * main method for the program which creates and configures the frame for the
 	 * program

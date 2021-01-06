@@ -15,7 +15,8 @@ import java.awt.geom.Point2D;
 // 101 = right slope
 // 102 = left slope
 
-public class Tile {
+public class Tile {	
+	
 	protected int x;
 	protected int y;
 	protected int width;
@@ -32,6 +33,9 @@ public class Tile {
 	}
 
 	SlopeState slopeState = SlopeState.NONE;
+	
+	// To make the level files a bit more legible
+	protected String type = "";
 
 	public Tile(int x, int y, int width, int height) {
 		this(x, y, width, height, 0);
@@ -52,6 +56,16 @@ public class Tile {
 				slopeState = SlopeState.LEFT;
 				slope = -((double) height) / ((double) width);
 			}
+		}
+		switch (id) {
+		case 101:
+			type = "Right-leaning slope";
+			break;
+		case 102:
+			type = "Left-leaning slope";
+			break;
+		default:
+			type = "Basic black block";
 		}
 	}
 
@@ -76,6 +90,7 @@ public class Tile {
 
 	public void drawSide(Graphics2D g2, int scrollx, int scrolly, int which) {
 		g2.setColor(Color.blue);
+		g2.setStroke(new BasicStroke(8));
 		switch (which) {
 		case 0:
 			g2.drawLine(scrollx + x, scrolly + y, scrollx + x + width, scrolly + y);
@@ -94,6 +109,7 @@ public class Tile {
 		g2.drawString(Integer.toString(width), scrollx + x, scrolly + y + height + 50);
 		// System.out.println(width); 
 		g2.setColor(Color.black);
+		g2.setStroke(new BasicStroke(4));
 	}
 
 	public void goTo(double x, double y) {
@@ -110,18 +126,8 @@ public class Tile {
 					+ (point.getY() >= y && point.getY() <= y + height));
 		}
 		if (id < 100) {
-			if (point.getY() >= y && point.getY() <= y + height && point.getX() >= x && point.getX() <= x + width) {// point.getX()
-																													// -
-																													// x
-																													// <=
-																													// width
-																													// &&
-																													// point.getY()
-																													// -
-																													// y
-																													// <=
-																													// height)
-																													// {
+			if (point.getY() >= y && point.getY() <= y + height && point.getX() >= x && point.getX() <= x + width) {
+				// point.getX() - x <= width && point.getY() - y <= height) {
 				return true;
 			} else {
 				return false;
@@ -208,6 +214,7 @@ public class Tile {
 		}
 	}
 
+	// Difference between the parameter point and the x/y location of the object?
 	public double[] getDifference(Point2D.Double point) {
 		double diff[] = new double[2];
 		diff[0] = point.getX() - x;
@@ -250,7 +257,7 @@ public class Tile {
 	}
 
 	public String toString() {
-		return "Tile," + x + "," + y + "," + width + "," + height + "," + id + ",\n";
+		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + id + ",\t"+type+"\n";
 	}
 
 	public void setText(String name) {
@@ -306,6 +313,22 @@ public class Tile {
 
 	public void setId(int id) {
 		this.id = id;
+		
+		if (id > 100) {
+			if (id == 101) {
+				slopeState = SlopeState.RIGHT;
+				slope = ((double) height) / ((double) width);
+			} else if (id == 102) {
+				slopeState = SlopeState.LEFT;
+				slope = -((double) height) / ((double) width);
+			}
+		} else {
+			slopeState = SlopeState.NONE;
+			slope = 0;
+		}
+		if (id>=50 && id <100) {
+			System.out.println("Incorrect method of changing object to Interactable.");
+		}
 	}
 
 	public boolean shouldRemove() {
@@ -330,5 +353,9 @@ public class Tile {
 	// something
 	public int interact() {
 		return 0;
+	}
+	
+	public boolean isInteractable() {
+		return false;
 	}
 }

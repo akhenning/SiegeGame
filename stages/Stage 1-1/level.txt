@@ -1,4 +1,10 @@
-Tile,-200,600,3000,400,0,
-Interactable,0,400,200,200,50,-1,
-Interactable,1420,400,200,200,70,6,
-Interactable,2500,400,200,400,0,-1,
+Tile,		-720,	600,	3440,	400,	0,	Basic black block
+Interactable,	-720,	400,	200,	200,	50,	-1,	Bounce pad
+Interactable,	1420,	400,	200,	200,	70,	6,	Text continuer
+Tile,		1940,	420,	300,	180,	0,	Basic black block
+Tile,		3100,	600,	1720,	400,	0,	Basic black block
+Interactable,	3320,	400,	200,	200,	70,	9,	Text continuer
+Interactable,	5140,	740,	1880,	200,	99,	-1,	Finish element
+Interactable,	4260,	600,	500,	200,	50,	-1,	Bounce pad
+Tile,		4820,	220,	200,	780,	0,	Basic black block
+Tile,		-920,	-660,	200,	1660,	0,	Basic black block

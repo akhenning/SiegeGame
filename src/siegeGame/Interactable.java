@@ -5,11 +5,13 @@ import java.awt.Image;
 import java.awt.Toolkit;
 
 public class Interactable extends Tile {
+	// See Tile for complete list of IDs
 	public static Image target = Toolkit.getDefaultToolkit().getImage("assets/target.jpg"); // ID 50
 	public static Image gravel = Toolkit.getDefaultToolkit().getImage("assets/gravel.png"); // ID 60
 	public static Image q_mark = Toolkit.getDefaultToolkit().getImage("assets/question mark.png"); // ID 70
 	public static Image q_mark_activated = Toolkit.getDefaultToolkit().getImage("assets/question mark activated.png"); // ID 71
-	public static Image finish = Toolkit.getDefaultToolkit().getImage("assets/finish.png"); // ID 0
+	public static Image finish = Toolkit.getDefaultToolkit().getImage("assets/finish.png"); // ID 99
+	
 	
 	// Data that Interactable may hold, other than basic action; for example, which text box Q_Mark should send you to.
 	private int data = -1;
@@ -30,10 +32,28 @@ public class Interactable extends Tile {
 	
 	public Interactable(int x, int y, int width, int height, int id, int information) {
 		super(x, y, width, height, id);
-		if (id == 70 || id==0) {
+		if (id == 70 || id==99) {
 			isTangible = false;
 		}
 		data = information;
+		
+		switch (id) {
+		case 99:
+			type = "Finish element";
+			break;
+		case 50:
+			type = "Bounce pad";
+			break;
+		case 60:
+			type = "Destructable block";
+			break;
+		case 70:
+			type = "Text continuer";
+			break;
+		case 71:
+			type = "Activated text continuer";
+			break;
+		}
 	}
 
 	public void draw(Graphics2D g2) {
@@ -42,9 +62,11 @@ public class Interactable extends Tile {
 
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
 		switch (id) {
-		case 0:
-			g2.drawImage(finish, scrollx + x, scrolly + y,width,height, null);
-			g2.drawRect(scrollx + x, scrolly + y, width, height);
+		case 99:
+			if (Main.debug) {
+				g2.drawImage(finish, scrollx + x, scrolly + y,width,height, null);
+				g2.drawRect(scrollx + x, scrolly + y, width, height);
+			}
 			break;
 		case 50:
 			g2.drawImage(target, scrollx + x, scrolly + y,width,height, null);
@@ -64,10 +86,7 @@ public class Interactable extends Tile {
 	}
 	
 	public String toString() {
-		if (id == 71) {
-			id = 70;
-		}
-		return "Interactable,"+x+","+y+","+width+","+height+","+id+","+data+",\n";
+		return "Interactable,\t"+x+",\t"+y+",\t"+width+",\t"+height+",\t"+id+",\t"+data+",\t"+type+"\n";
 	}
 	
 	public boolean isTangible() {
@@ -98,5 +117,14 @@ public class Interactable extends Tile {
 	}
 	public int getData() {
 		return data;
+	}
+	public boolean isInteractable() {
+		return true;
+	}
+	public void setId(int newId) {
+		id = newId;
+		if (id<50 && id >=100) {
+			System.out.println("Incorrect method of changing object from Interactable.");
+		}
 	}
 }

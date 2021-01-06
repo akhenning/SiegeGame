@@ -9,7 +9,6 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 
 public class Player {
-	public boolean debug = true;
 	public final double GRAVITY = 1.5;
 
 	public static Image walk = Toolkit.getDefaultToolkit().getImage("assets/walk.png");
@@ -36,7 +35,6 @@ public class Player {
 	private boolean isHitbox = false;
 	boolean onSlope = false;
 	double slope = 0;
-	private int attack_cooldown = 0;
 
 	public enum State {
 		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, BASIC_ATTACK
@@ -65,7 +63,7 @@ public class Player {
 
 		hitboxes.add(new Hitbox(0, -220, 180, 60));
 		hitboxes.add(new Hitbox(130, -190, 70, 120));
-		hitboxes.add(new Hitbox(130, -100, 80, 160));
+		hitboxes.add(new Hitbox(90, -100, 120, 160));
 	}
 
 	public void draw(Graphics2D g2) {
@@ -318,7 +316,7 @@ public class Player {
 			}
 		}
 		// These are the collision points, which are simply being visualized
-		if (debug) {
+		if (Main.debug) {
 			int yoffset = 0;
 			if (state == State.HOVERING) {
 				yoffset = -70;
@@ -490,13 +488,7 @@ public class Player {
 				leftHead = new Point2D.Double(litx - Screen.scrollx, lity - 180 - Screen.scrolly);
 				rightHead = new Point2D.Double(litx - Screen.scrollx + 62, lity - 180 - Screen.scrolly);
 			}
-			// Check if head in ceiling
-			int ceilingLevel = screen.checkCeilingCollision(leftHead, rightHead);
-			if (ceilingLevel != -1000001) {
-				// If so, stop upwards movement and move player to below the collision point.
-				yspeed = 0;
-				lity = ceilingLevel + 180 + Screen.scrolly - yoffset; //+ 5;
-			}
+
 
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx, lity - Screen.scrolly + yoffset);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 62, lity - Screen.scrolly + yoffset);
@@ -509,6 +501,14 @@ public class Player {
 				// don't move until finished animation
 				if (true) {// 300 * animationFrame + 600 > jump.getWidth(null)) {
 					state = State.LANDING;
+				}
+			} else {
+				// Check if head in ceiling
+				int ceilingLevel = screen.checkCeilingCollision(leftHead, rightHead);
+				if (ceilingLevel != -1000001) {
+					// If so, stop upwards movement and move player to below the collision point.
+					yspeed = 0;
+					lity = ceilingLevel + 180 + Screen.scrolly - yoffset; //+ 5;
 				}
 			}
 		}
