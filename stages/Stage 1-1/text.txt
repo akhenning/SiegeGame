@@ -12,7 +12,8 @@
 [SiegeEnigmatic] Let's try attacking the [green] bounce pad with "E", and see if we can bounce over the obstacle.
 [break] break
 [SiegeEnigmatic] Excellent!
-[SiegeNormal] This attacking move is the main way you will interact with your environment. For example, you can attack these text prompters to have them play again.
+[SiegeNormal] This attacking move is the main way you will interact with your environment. 
+[SiegeNormal] For example, you can attack these text prompters to have them play their text again.
 [SiegeNormal] Next, let's use the same attacking move ("E") to break these destructable blocks to the right.
 [break] break
 [SiegeNormal] Great. Now, there is only one more thing left to teach.

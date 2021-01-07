@@ -17,6 +17,7 @@ public class Main {
 	
 	public static Dimension screenSize;
 	public static Dimension gameSize;
+	// This variable marks the locations at which the game starts to scroll
 	public static int scrollPos[] = {0,0,0,0};
 	public static boolean debug = true;
 	/**
@@ -37,7 +38,7 @@ public class Main {
 		Main.gameSize.height=Main.screenSize.height;
 		Main.scrollPos[0] = gameSize.width/5;
 		Main.scrollPos[1] = gameSize.width*2/3;
-		Main.scrollPos[2] = gameSize.width/5;
+		Main.scrollPos[2] = gameSize.width/3;
 		Main.scrollPos[3] = gameSize.width*2/5;
 
 

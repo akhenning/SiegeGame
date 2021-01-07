@@ -203,7 +203,6 @@ public class Screen extends JPanel {
 		for (Particle tile : particles) {
 			tile.draw(g2);
 		}
-
 		// Secion handling text boxes
 		if (activeText) {
 			if (textBoxNum == -1) {
@@ -316,6 +315,11 @@ public class Screen extends JPanel {
 			g2.fillRect(0, 0, 2000, 1500);
 			g2.setColor(fade_in_text);
 			g2.drawString(fade_text, Main.screenSize.width / 3, Main.screenSize.height / 2);
+		} else {
+			fade -=1;
+			if (fade == -5 && text.size()>0) {
+				activeText = true;
+			}
 		}
 
 	}
@@ -789,17 +793,15 @@ public class Screen extends JPanel {
 								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
 								Integer.parseInt(elements[5].trim())));
 					} catch (Exception e) {
-						System.out.println("Error reading stage element: " + line);
+						System.out.println("Error reading stage tile: " + line);
 					}
 				} else if (elements[0].trim().equals("Graphic")) {
 					try {
 						graphics.add(new Graphic(Integer.parseInt(elements[1].trim()),
 								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
 								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim())));
-
-						System.out.println("Graphic has been added properly");
 					} catch (Exception e) {
-						System.out.println(e + "Error reading stage element: " + line);
+						System.out.println(e + "Error reading stage graphic: " + line);
 					}
 				} else {
 					try {
@@ -808,7 +810,7 @@ public class Screen extends JPanel {
 								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
 								Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
-						System.out.println(e + "Error reading stage element: " + line);
+						System.out.println(e + "Error reading stage interactable: " + line);
 					}
 				}
 			}
@@ -839,7 +841,6 @@ public class Screen extends JPanel {
 				}
 			}
 			if (raw_text != null) {
-				activeText = true;
 				// System.out.println(raw_text);
 				String[] text_lines = raw_text.split("\n");
 				// System.out.println(text_lines);
@@ -988,6 +989,10 @@ public class Screen extends JPanel {
 					zoom += .5;
 					if (zoom > 1) {
 						zoom = 1;
+					} else {
+						// So, when it zooms in, we want to center on Siege... that's hard.
+						// Wait, it might actually work automatically
+						//scrollx -= (int) ((double) Main.screenSize.width / zoom)/8;
 					}
 					Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
 					Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
@@ -1002,6 +1007,11 @@ public class Screen extends JPanel {
 					zoom -= .5;
 					if (zoom < .5) {
 						zoom = .5;
+					} else {
+						// So, when it zooms out, we want to reduce scrollx by... half the original 
+						scrollx += Main.gameSize.width/4;
+						scrolly += Main.gameSize.height/4;
+						player.adjust(Main.gameSize.width/4,Main.gameSize.height/4);
 					}
 					Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
 					Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);

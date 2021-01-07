@@ -36,7 +36,7 @@ public class Player {
 	private boolean isHitbox = false;
 	boolean onSlope = false;
 	double slope = 0;
-	private final double WALK_SPEED = 8;
+	private final double WALK_SPEED = 10;
 
 	public enum State {
 		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, BASIC_ATTACK
@@ -58,8 +58,8 @@ public class Player {
 
 	public Player(Screen screen) {
 		this.screen = screen;
-		litx = 300;
-		x = 300;
+		litx = 500;
+		x = 500;
 		lity = 600;
 		y = 600;
 
@@ -144,6 +144,7 @@ public class Player {
 					animationFrame = 0;
 					previousAnimation = Animation.JUMPING;
 					width = MakeSureImageHasLoaded(jumping);
+					System.out.println("Jump occured naturally");
 				}
 				if (direction == 1) {
 					g2.drawImage(jumping, x - 36 - 67, y - 85 - 223, offset + x - 36 - 67, y + 340 - 85 - 223,
@@ -154,8 +155,11 @@ public class Player {
 				}
 				animationFrame += 1;
 
-				// check if end of animation without hardcoding number of frames
-				if (offset * animationFrame + 300 > width) {
+				// Have to check this one manually because Jumping state
+				// can be transitioned into in multiple ways at different
+				// points
+				if (animationFrame>=15) {
+				//if (offset * animationFrame + 300 > width) {
 					state = State.HOVERING;
 				}
 			} else if (state == State.HOVERING) {
@@ -284,7 +288,7 @@ public class Player {
 				width = MakeSureImageHasLoaded(walk);
 			}
 			// Special skidding animation for high speeds
-			if (Math.abs(xspeed) > 10) {
+			if (Math.abs(xspeed) > 15) {
 				// This is kind of slow, but only runs when skidding so it's probably fine
 				AffineTransform trans = new AffineTransform();
 				// trans rights
@@ -462,7 +466,9 @@ public class Player {
 		}
 
 		// All good games have jump-cancelling
-		if (isJump && state == State.BASIC_ATTACK) {
+		// ...though maybe I shouldn't, lol
+		// Oh. How about only after the hitboxes come out!
+		if (isJump && state == State.BASIC_ATTACK && animationFrame > 12) {
 			state = State.JUMPSQUAT;
 			xspeed *= .8;
 			litx += xspeed;
@@ -572,7 +578,7 @@ public class Player {
 			Screen.bgscrolly -= (int) (lity - Main.scrollPos[3]) / 2;
 			lity = Main.scrollPos[3];
 		} else if (lity < Main.scrollPos[2]) {
-			Screen.scrolly = Screen.scrolly + (int) (Main.scrollPos[2] - lity);
+			Screen.scrolly += (int) (Main.scrollPos[2] - lity);
 			Screen.bgscrolly += (int) (Main.scrollPos[2] - lity) / 2;
 			lity = Main.scrollPos[2];
 		}
@@ -603,6 +609,12 @@ public class Player {
 			}
 		}
 		return width;
+	}
+	
+	// To adjut the player when zooming and unzooming.
+	public void adjust(int x_diff, int y_diff) {
+		litx += x_diff;
+		lity += y_diff;
 	}
 
 	// Loads images to remove flickering

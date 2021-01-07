@@ -105,9 +105,9 @@ public class Interactable extends Tile {
 			return 0;
 		case 70:
 			id = 71;
+			hasInteraction = false;
 			return 2;
 		case 71:
-			hasInteraction = false;
 			return 2;
 		default:
 			System.out.println("Invalid Interactable type");

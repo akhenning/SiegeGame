@@ -17,7 +17,7 @@ Interactable,	5920,	20,	200,	200,	60,	-1,	Destructable block
 Tile,		6920,	-1460,	200,	1900,	0,	Basic black block
 Tile,		6320,	-80,	400,	300,	101,	Right-leaning slope
 Tile,		4280,	-380,	2220,	100,	0,	Basic black block
-Interactable,	6720,	-280,	200,	200,	70,	17,	Text continuer
+Interactable,	6720,	-280,	200,	200,	70,	18,	Text continuer
 Tile,		6720,	-80,	200,	300,	0,	Basic black block
-Interactable,	5880,	-580,	200,	200,	70,	21,	Text continuer
+Interactable,	5880,	-580,	200,	200,	70,	22,	Text continuer
 Tile,		4280,	-1060,	200,	680,	0,	Basic black block
