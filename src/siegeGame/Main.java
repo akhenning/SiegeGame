@@ -67,6 +67,8 @@ public class Main {
 			timeTook = (System.nanoTime() - timeElapsed) / 1000000;
 			if (timeTook  > 2) {
 				System.out.println("Time Took: " + timeTook);
+				System.out.println("(This is not a problem so long as the number stays below 33)");
+				// Currently rarely has any issues, and I don't see it above 5
 			}
 			//System.out.println("Time Took: " + timeTook);
 

@@ -15,8 +15,8 @@ import java.awt.geom.Point2D;
 // 101 = right slope
 // 102 = left slope
 
-public class Tile {	
-	
+public class Tile {
+
 	protected int x;
 	protected int y;
 	protected int width;
@@ -28,26 +28,34 @@ public class Tile {
 	double slope = 0;
 	protected boolean toRemove = false;
 
+	protected int clipType = 0;
+	// 0 is all angles, 1 is vertical only, 2 is left only, and 3 is right only
+	private boolean can_clip_vertical = true;
+	private boolean can_clip_left = true;
+	private boolean can_clip_right = true;
+	
+
 	public enum SlopeState {
 		NONE, LEFT, RIGHT
 	}
 
 	SlopeState slopeState = SlopeState.NONE;
-	
+
 	// To make the level files a bit more legible
 	protected String type = "Unrecognized";
 
 	public Tile(int x, int y, int width, int height) {
-		this(x, y, width, height, 0);
+		this(x, y, width, height, 0, 0);
 	}
 
 	// id 101=one right-leaning slope
-	public Tile(int x, int y, int width, int height, int id) {
+	public Tile(int x, int y, int width, int height, int colissionType, int id) {
 		this.x = x;
 		this.y = y;
 		this.height = height;
 		this.width = width;
 		this.id = id;
+		this.clipType = colissionType;
 		if (id > 100) {
 			if (id == 101) {
 				slopeState = SlopeState.RIGHT;
@@ -56,6 +64,31 @@ public class Tile {
 				slopeState = SlopeState.LEFT;
 				slope = -((double) height) / ((double) width);
 			}
+		}
+		
+
+		// Let's try to make it so that this doesn't need to calculate every frame
+		switch (clipType) {
+		case 0:
+			can_clip_vertical = true;
+			can_clip_left = true;
+			can_clip_right = true;
+			break;
+		case 1:
+			can_clip_vertical = true;
+			can_clip_left = false;
+			can_clip_right = false;
+			break;
+		case 2:
+			can_clip_vertical = false;
+			can_clip_left = true;
+			can_clip_right = false;
+			break;
+		case 3:
+			can_clip_vertical = false;
+			can_clip_left = false;
+			can_clip_right = true;
+			break;
 		}
 	}
 
@@ -75,6 +108,11 @@ public class Tile {
 			break;
 		default:
 			g2.fillRect(scrollx + x, scrolly + y, width, height);
+		}
+		if (Main.debug) {
+			g2.setColor(Color.yellow);
+			drawCollision(g2, scrollx, scrolly);
+			g2.setColor(Color.black);
 		}
 	}
 
@@ -97,9 +135,36 @@ public class Tile {
 		}
 		g2.drawString(Integer.toString(height), scrollx + x + width, scrolly + y + (height / 2) + 25);
 		g2.drawString(Integer.toString(width), scrollx + x, scrolly + y + height + 50);
-		// System.out.println(width); 
+		// System.out.println(width);
 		g2.setColor(Color.black);
 		g2.setStroke(new BasicStroke(4));
+	}
+
+	public void drawCollision(Graphics2D g2, int scrollx, int scrolly) {
+		if (clipType == 0) {
+			g2.drawRect(scrollx + (width / 2) + x - 20, scrolly + y - 20 + (height / 2), 40, 40);
+		} else if (clipType == 1) {
+			int[] xpts = { scrollx + x + (width / 2), scrollx + x + (width / 3), scrollx + x + (width * 2 / 3)};
+			int[] ypts = { y + scrolly, y + height + scrolly, y + (height / 4) + scrolly,
+					scrolly + y + (height * 3 / 4) };
+			g2.drawLine(xpts[0], ypts[0], xpts[0], ypts[1]);
+			g2.drawLine(xpts[0], ypts[0], xpts[1], ypts[2]);
+			g2.drawLine(xpts[0], ypts[0], xpts[2], ypts[2]);
+			g2.drawLine(xpts[0], ypts[1], xpts[1], ypts[3]);
+			g2.drawLine(xpts[0], ypts[1], xpts[2], ypts[3]);
+		} else if (clipType == 2) {
+			int[] xpts = { scrollx + x + (width / 2), scrollx + x, scrollx + x + (width / 4)};
+			int[] ypts = { y + (height / 2) + scrolly, y + (height / 3) + scrolly, scrolly + y + (height * 2 / 3) };
+			g2.drawLine(xpts[0], ypts[0], xpts[1], ypts[0]);
+			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[1]);
+			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[2]);
+		} else if (clipType == 3) {
+			int[] xpts = { scrollx + x + (width / 2), scrollx + x+width, scrollx + x + (width *3 / 4)};
+			int[] ypts = { y + (height / 2) + scrolly, y + (height / 3) + scrolly, scrolly + y + (height * 2 / 3) };
+			g2.drawLine(xpts[0], ypts[0], xpts[1], ypts[0]);
+			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[1]);
+			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[2]);
+		}
 	}
 
 	public void goTo(double x, double y) {
@@ -183,20 +248,21 @@ public class Tile {
 	}
 
 	public int getHeight(double px) {
+		int check_below = 12;
 		if (id < 100) {
 			return y;
 		} else if (slopeState == SlopeState.RIGHT) {
 			int dy = (int) ((width - (px - (double) x)) * slope);
-			if (height - dy > 8) {
-				return dy + y + 8;
+			if (height - dy > check_below) {
+				return dy + y + check_below;
 			} else {
 				return y + height;
 			}
 			// return ((int)((px-(double)x)*slope))+y;
 		} else {// if (slopeState == SlopeState.LEFT){
 			int dy = (int) ((px - (double) x) * slope);
-			if (height + dy > 8) {
-				return -dy + y + 8;
+			if (height + dy > check_below) {
+				return -dy + y + check_below;
 			} else {
 				return y + height;
 			}
@@ -219,6 +285,37 @@ public class Tile {
 		height += dheight;
 	}
 
+	public void cycleCollision() {
+		clipType += 1;
+		if (clipType > 3) {
+			clipType = 0;
+		}
+		// Technically, this will never be used
+		switch (clipType) {
+		case 0:
+			can_clip_vertical = true;
+			can_clip_left = true;
+			can_clip_right = true;
+			break;
+		case 1:
+			can_clip_vertical = true;
+			can_clip_left = false;
+			can_clip_right = false;
+			break;
+		case 2:
+			can_clip_vertical = false;
+			can_clip_left = true;
+			can_clip_right = false;
+			break;
+		case 3:
+			can_clip_vertical = false;
+			can_clip_left = false;
+			can_clip_right = true;
+			break;
+		}
+	}
+
+	// Snap the tile to nearest values that are a multiple of 20, to make it look more seamless.
 	public void snap() {
 		x = (int) (Math.round(((double) x) / 20) * 20);
 		y = (int) (Math.round(((double) y) / 20) * 20);
@@ -258,7 +355,8 @@ public class Tile {
 			type = "Basic black block";
 			break;
 		}
-		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + id + ",\t"+type+"\n";
+		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t\t" + id + ",\t"
+				+ type + "\n";
 	}
 
 	public void setText(String name) {
@@ -275,7 +373,7 @@ public class Tile {
 	public int getScreenY(int scrolly) {
 		return scrolly + y;
 	}
-	
+
 	public int getX() {
 		return x;
 	}
@@ -314,7 +412,7 @@ public class Tile {
 
 	public void setId(int id) {
 		this.id = id;
-		
+
 		if (id > 100) {
 			if (id == 101) {
 				slopeState = SlopeState.RIGHT;
@@ -327,7 +425,7 @@ public class Tile {
 			slopeState = SlopeState.NONE;
 			slope = 0;
 		}
-		if (id>=50 && id <100) {
+		if (id >= 50 && id < 100) {
 			System.out.println("Incorrect method of changing object to Interactable.");
 		}
 
@@ -356,7 +454,19 @@ public class Tile {
 	public int interact() {
 		return 0;
 	}
-	
+
+	public boolean canDetectLeft() {
+		return can_clip_left;
+	}
+
+	public boolean canDetectRight() {
+		return can_clip_right;
+	}
+
+	public boolean canDetectVertical() {
+		return can_clip_vertical;
+	}
+
 	public boolean isInteractable() {
 		return false;
 	}

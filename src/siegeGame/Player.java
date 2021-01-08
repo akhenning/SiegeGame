@@ -37,6 +37,7 @@ public class Player {
 	boolean onSlope = false;
 	double slope = 0;
 	private final double WALK_SPEED = 10;
+	private final int[] FOOT_WIDTH = { 5, 57 };
 
 	public enum State {
 		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, BASIC_ATTACK
@@ -105,7 +106,6 @@ public class Player {
 				if (offset * animationFrame + 300 > width) {
 					state = State.GROUNDED;
 					animationFrame = 0;
-					System.out.println("Exited normally");
 				}
 			}
 			if (state == State.JUMPSQUAT) {
@@ -144,7 +144,6 @@ public class Player {
 					animationFrame = 0;
 					previousAnimation = Animation.JUMPING;
 					width = MakeSureImageHasLoaded(jumping);
-					System.out.println("Jump occured naturally");
 				}
 				if (direction == 1) {
 					g2.drawImage(jumping, x - 36 - 67, y - 85 - 223, offset + x - 36 - 67, y + 340 - 85 - 223,
@@ -158,8 +157,8 @@ public class Player {
 				// Have to check this one manually because Jumping state
 				// can be transitioned into in multiple ways at different
 				// points
-				if (animationFrame>=15) {
-				//if (offset * animationFrame + 300 > width) {
+				if (animationFrame >= 15) {
+					// if (offset * animationFrame + 300 > width) {
 					state = State.HOVERING;
 				}
 			} else if (state == State.HOVERING) {
@@ -335,12 +334,14 @@ public class Player {
 					yoffset = -16 * (4 - (animationFrame - 5));
 				}
 			}
-			System.out.println("State and AnimationFrame:" + state + " " + animationFrame);
+			// NOTE: Very useful for debugging
+			//System.out.println("State and AnimationFrame:" + state + " " + animationFrame);
+			
 			g2.setColor(Color.yellow);
 			// Feet I think
-			g2.drawRect(x - 2 + 15, y - 2 + yoffset, 4, 4);
+			g2.drawRect(x - 2 + FOOT_WIDTH[0], y - 2 + yoffset, 4, 4);
 			g2.setColor(Color.red);
-			g2.drawRect(x - 2 + 47, y - 2 + yoffset, 4, 4);
+			g2.drawRect(x - 2 + FOOT_WIDTH[1], y - 2 + yoffset, 4, 4);
 
 			g2.drawRect(x - 17, y - 47 + yoffset, 4, 4); // left
 			g2.drawRect(x + 75, y - 47 + yoffset, 4, 4);
@@ -348,8 +349,8 @@ public class Player {
 			g2.drawRect(x + 75, y - 152 + yoffset, 4, 4);
 
 			// Head I think
-			g2.drawRect(x - 2 + 15, y - 182 + yoffset, 4, 4);
-			g2.drawRect(x - 2 + 47, y - 182 + yoffset, 4, 4);
+			g2.drawRect(x - 2 + FOOT_WIDTH[0], y - 182 + yoffset, 4, 4);
+			g2.drawRect(x - 2 + FOOT_WIDTH[1], y - 182 + yoffset, 4, 4);
 
 			for (Hitbox box : hitboxes) {
 				if (box.isActive()) {
@@ -371,17 +372,14 @@ public class Player {
 		if (xspeed < .01 && xspeed > -.01) {
 			xspeed = 0;
 		}
-		if (xspeed < -35) {
-			xspeed = -35;
-		} else if (xspeed > 35) {
-			xspeed = 35;
+		if (xspeed < -45) {
+			xspeed = -45;
+		} else if (xspeed > 45) {
+			xspeed = 45;
 		}
 
 		// Check for start of attack
-		// attack_cooldown -= 1;
 		if (isAttack && state == State.GROUNDED) {
-			System.out.println("Attacking");
-			// attack_cooldown = 19;
 			state = State.BASIC_ATTACK;
 		}
 		// Handle movement while attacking
@@ -404,7 +402,8 @@ public class Player {
 			state = State.JUMPING;
 			yspeed = -30;
 			direction *= -1;
-			xspeed = 20 * direction;
+			// This is the speed of knockback
+			xspeed = 25 * direction;
 			for (Hitbox box : hitboxes) {
 				box.setActive(false, direction);
 			}
@@ -440,8 +439,8 @@ public class Player {
 					xspeed *= .7;
 					litx += xspeed;
 
-					Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx +15, lity - Screen.scrolly);
-					Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 47, lity - Screen.scrolly);
+					Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly);
+					Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly);
 					int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 					if (groundLevel != 1000001) {
 						lity = groundLevel + Screen.scrolly;
@@ -487,6 +486,18 @@ public class Player {
 			}
 		}
 
+		// Check if player is inside of a WALL. If so, shunt them back to in front of
+		// it.
+		Point2D.Double left = new Point2D.Double(litx - Screen.scrollx - 15, lity - 45 - Screen.scrolly + yoffset);
+		Point2D.Double left2 = new Point2D.Double(litx - Screen.scrollx - 15, lity - 150 - Screen.scrolly + yoffset);
+		Point2D.Double right = new Point2D.Double(litx - Screen.scrollx + 77, lity - 45 - Screen.scrolly + yoffset);
+		Point2D.Double right2 = new Point2D.Double(litx - Screen.scrollx + 77, lity - 150 - Screen.scrolly + yoffset);
+		int wallLevel = screen.checkHorizontalCollision(left, left2, right, right2);
+		if (wallLevel != -1000001) {
+			litx = wallLevel + Screen.scrollx;
+			xspeed = 0;
+		}
+
 		// Check if (airborne) player has their HEAD in a CEILING or are about to LAND
 		if (state != State.GROUNDED && state != State.JUMPSQUAT && state != State.LANDING
 				&& state != State.BASIC_ATTACK) {
@@ -494,19 +505,20 @@ public class Player {
 			Point2D.Double leftHead;
 			Point2D.Double rightHead;
 			if (state == State.HOVERING) {
-				leftHead = new Point2D.Double(litx - Screen.scrollx +15, lity - 250 - Screen.scrolly);
-				rightHead = new Point2D.Double(litx - Screen.scrollx + 47, lity - 250 - Screen.scrolly);
+				leftHead = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - 250 - Screen.scrolly);
+				rightHead = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - 250 - Screen.scrolly);
 			} else if (state == State.JUMPING) {
-				leftHead = new Point2D.Double(litx - Screen.scrollx + 15, lity - 180 - Screen.scrolly - animationFrame * 5);
-				rightHead = new Point2D.Double(litx - Screen.scrollx + 47,
+				leftHead = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0],
+						lity - 180 - Screen.scrolly - animationFrame * 5);
+				rightHead = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1],
 						lity - 180 - Screen.scrolly - animationFrame * 5);
 			} else {
-				leftHead = new Point2D.Double(litx - Screen.scrollx +15, lity - 180 - Screen.scrolly);
-				rightHead = new Point2D.Double(litx - Screen.scrollx + 47, lity - 180 - Screen.scrolly);
+				leftHead = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - 180 - Screen.scrolly);
+				rightHead = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - 180 - Screen.scrolly);
 			}
 
-			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + 15, lity - Screen.scrolly + yoffset);
-			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 47, lity - Screen.scrolly + yoffset);
+			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly + yoffset);
+			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly + yoffset);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 			if (groundLevel != 1000001) {
 				// System.out.println("FORCED LANDING");
@@ -528,28 +540,17 @@ public class Player {
 			}
 		}
 
-		// Check if player is inside of a WALL. If so, shunt them back to in front of
-		// it.
-		Point2D.Double left = new Point2D.Double(litx - Screen.scrollx - 15, lity - 45 - Screen.scrolly + yoffset);
-		Point2D.Double left2 = new Point2D.Double(litx - Screen.scrollx - 15, lity - 150 - Screen.scrolly + yoffset);
-		Point2D.Double right = new Point2D.Double(litx - Screen.scrollx + 77, lity - 45 - Screen.scrolly + yoffset);
-		Point2D.Double right2 = new Point2D.Double(litx - Screen.scrollx + 77, lity - 150 - Screen.scrolly + yoffset);
-		int wallLevel = screen.checkHorizontalCollision(left, left2, right, right2);
-		if (wallLevel != -1000001) {
-			litx = wallLevel + Screen.scrollx;
-			xspeed = 0;
-		}
-
 		// Check case where grounded player walks off of the ground (i.e. ledge)
 		if ((state == State.GROUNDED || state == State.BASIC_ATTACK) || doLandingCheck) {
-			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + 15, lity - Screen.scrolly);
-			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + 47, lity - Screen.scrolly);
+			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly);
+			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 			// This means that nothing is below the player
 			if (groundLevel == 1000001) {
-				if (screen.checkDescendingStairs(new Point2D.Double(leftFoot.getX(), leftFoot.getY() + 10),
-						new Point2D.Double(rightFoot.getX(), rightFoot.getY() + 10))) {
-					lity += 6;
+				int check_below = 12; // 10
+				if (screen.checkDescendingStairs(new Point2D.Double(leftFoot.getX(), leftFoot.getY() + check_below),
+						new Point2D.Double(rightFoot.getX(), rightFoot.getY() + check_below))) {
+					lity += 6;// 6;
 				} else {
 					state = State.JUMPING;
 					animationFrame = 1;
@@ -610,7 +611,7 @@ public class Player {
 		}
 		return width;
 	}
-	
+
 	// To adjut the player when zooming and unzooming.
 	public void adjust(int x_diff, int y_diff) {
 		litx += x_diff;

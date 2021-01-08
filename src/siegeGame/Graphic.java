@@ -12,7 +12,7 @@ public class Graphic extends Tile {
 	private String text = "";
 
 	public Graphic(int x, int y, int id) {
-		super(x, y, -1, -1, id);
+		super(x, y, -1, -1,0, id);
 		switch (id) {
 		case 10:
 			// Nian sleeping

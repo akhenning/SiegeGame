@@ -413,7 +413,7 @@ public class Screen extends JPanel {
 		int highest = 1000001;
 		// For every tile
 		for (Tile tile : area) {
-			if (tile.isVisible()) {
+			if (tile.isVisible()&& tile.canDetectVertical()) {
 				// See if either foot is inside something
 				if (tile.slopeState == SlopeState.NONE) {
 					if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
@@ -441,7 +441,7 @@ public class Screen extends JPanel {
 			}
 		}
 		for (Interactable tile : interactables) {
-			if (tile.isVisible() && tile.hasInteraction()) {
+			if (tile.isVisible() && tile.hasInteraction()&& tile.canDetectVertical()) {
 				// See if either foot is inside something
 				if (tile.slopeState == SlopeState.NONE) {
 					if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
@@ -479,7 +479,7 @@ public class Screen extends JPanel {
 		int highest = -1000001;
 		// For every tile
 		for (Tile tile : area) {
-			if (tile.isVisible()) {
+			if (tile.isVisible() && tile.canDetectVertical()) {
 				if (tile.isInside(left) || tile.isInside(right)) {
 					// player.setStandingOn(tile);
 					// If it is inside, save the lowest Y value
@@ -490,7 +490,7 @@ public class Screen extends JPanel {
 			}
 		}
 		for (Interactable tile : interactables) {
-			if (tile.isVisible() && tile.hasInteraction()) {
+			if (tile.isVisible() && tile.hasInteraction() && tile.canDetectVertical()) {
 				if (tile.isInside(left) || tile.isInside(right)) {
 					// player.setStandingOn(tile);
 					// If it is, save the lowest Y value
@@ -513,16 +513,21 @@ public class Screen extends JPanel {
 		for (Tile tile : area) {
 			if (tile.isVisible() && tile.id < 100) {
 				// See if either foot is inside something
-				if (tile.isInside(leftTop)) {
-					// If so, return the location that the player should
-					// be snapped to
-					return tile.x + tile.width + 15 + 2;
-				} else if (tile.isInside(leftBot)) {
-					return tile.x + tile.width + 15 + 2;
-				} else if (tile.isInside(rightTop)) {
-					return tile.x - 75 - 2;
-				} else if (tile.isInside(rightBot)) {
-					return tile.x - 75 - 2;
+				if (tile.canDetectRight()) {
+					if (tile.isInside(leftTop)) {
+						// If so, return the location that the player should
+						// be snapped to
+						return tile.x + tile.width + 15 + 2;
+					} else if (tile.isInside(leftBot)) {
+						return tile.x + tile.width + 15 + 2;
+					} 
+				}
+				if (tile.canDetectLeft()) {
+					if (tile.isInside(rightTop)) {
+						return tile.x - 75 - 2;
+					} else if (tile.isInside(rightBot)) {
+						return tile.x - 75 - 2;
+					}
 				}
 			}
 		}
@@ -534,65 +539,70 @@ public class Screen extends JPanel {
 					System.out.println("Error: Interactable with no contact Interaction is registered as having one.");
 				}
 				// See if either foot is inside something
-				if (tile.isInside(leftTop)) {
-					// Do this if the object can be stood on/ran into
-					if (tile.isTangible()) {
-						return tile.x + tile.width + 15 + 2;
-					}
-					// If the object is an un-activated question mark
-					if (tile.getId() == 70) {
-						if (!activeText) {
-							tile.interact();
-							activeText = true;
-							textBoxNum = tile.getData();
-							textScrollNum[0] = 0;
-							textScrollNum[1] = 1;
+				if (tile.canDetectRight()) {
+					if (tile.isInside(leftTop)) {
+						// Do this if the object can be stood on/ran into
+						if (tile.isTangible()) {
+							return tile.x + tile.width + 15 + 2;
 						}
-						// If the object is a finish line
-					} else if (tile.getId() == 99) {
-						levelAdvance(tile.getData());
-						return -1000001;
-					}
-				} else if (tile.isInside(leftBot)) {
-					if (tile.isTangible()) {
-						return tile.x + tile.width + 15 + 2;
-					}
-					if (tile.getId() == 70) {
-						if (!activeText) {
-							tile.interact();
-							activeText = true;
-							textBoxNum = tile.getData();
-							textScrollNum[0] = 0;
-							textScrollNum[1] = 1;
+						// If the object is an un-activated question mark
+						if (tile.getId() == 70) {
+							if (!activeText) {
+								tile.interact();
+								activeText = true;
+								textBoxNum = tile.getData();
+								textScrollNum[0] = 0;
+								textScrollNum[1] = 1;
+							}
+							// If the object is a finish line
+						} else if (tile.getId() == 99) {
+							levelAdvance(tile.getData());
+							return -1000001;
+						}
+					} else if (tile.isInside(leftBot)) {
+						if (tile.isTangible()) {
+							return tile.x + tile.width + 15 + 2;
+						}
+						if (tile.getId() == 70) {
+							if (!activeText) {
+								tile.interact();
+								activeText = true;
+								textBoxNum = tile.getData();
+								textScrollNum[0] = 0;
+								textScrollNum[1] = 1;
+							}
 						}
 					}
-				} else if (tile.isInside(rightTop)) {
-					if (tile.isTangible()) {
-						return tile.x - 75 - 2;
-					}
-					if (tile.getId() == 70) {
-						if (!activeText) {
-							tile.interact();
-							activeText = true;
-							textBoxNum = tile.getData();
-							textScrollNum[0] = 0;
-							textScrollNum[1] = 1;
+				} 
+				if (tile.canDetectLeft()) {
+					if (tile.isInside(rightTop)) {
+						if (tile.isTangible()) {
+							return tile.x - 75 - 2;
 						}
-					} else if (tile.getId() == 99) {
-						levelAdvance(tile.getData());
-						return -1000001;
-					}
-				} else if (tile.isInside(rightBot)) {
-					if (tile.isTangible()) {
-						return tile.x - 75 - 2;
-					}
-					if (tile.getId() == 70) {
-						if (!activeText) {
-							tile.interact();
-							activeText = true;
-							textBoxNum = tile.getData();
-							textScrollNum[0] = 0;
-							textScrollNum[1] = 1;
+						if (tile.getId() == 70) {
+							if (!activeText) {
+								tile.interact();
+								activeText = true;
+								textBoxNum = tile.getData();
+								textScrollNum[0] = 0;
+								textScrollNum[1] = 1;
+							}
+						} else if (tile.getId() == 99) {
+							levelAdvance(tile.getData());
+							return -1000001;
+						}
+					} else if (tile.isInside(rightBot)) {
+						if (tile.isTangible()) {
+							return tile.x - 75 - 2;
+						}
+						if (tile.getId() == 70) {
+							if (!activeText) {
+								tile.interact();
+								activeText = true;
+								textBoxNum = tile.getData();
+								textScrollNum[0] = 0;
+								textScrollNum[1] = 1;
+							}
 						}
 					}
 				}
@@ -738,6 +748,7 @@ public class Screen extends JPanel {
 		textScrollNum[1] = -1;
 		numSelected = 0;
 		player = new Player(this);
+		graphics = new ArrayList<Graphic>();
 
 		// And load level select
 		fade = 310;
@@ -753,6 +764,7 @@ public class Screen extends JPanel {
 		area = new ArrayList<Tile>();
 		interactables = new ArrayList<Interactable>();
 		particles = new ArrayList<Particle>();
+		graphics = new ArrayList<Graphic>();
 
 		// If loading a level
 		if (state == GameState.LEVEL) {
@@ -790,8 +802,8 @@ public class Screen extends JPanel {
 				if (elements[0].trim().equals("Tile")) {
 					try {
 						area.add(new Tile(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
-								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
-								Integer.parseInt(elements[5].trim())));
+								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println("Error reading stage tile: " + line);
 					}
@@ -807,8 +819,8 @@ public class Screen extends JPanel {
 					try {
 						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()),
 								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
-								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
-								Integer.parseInt(elements[6].trim())));
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim()),
+								Integer.parseInt(elements[7].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage interactable: " + line);
 					}

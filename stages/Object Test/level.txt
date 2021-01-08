@@ -1,19 +1,19 @@
-Tile,		-1400,	600,	3200,	400,	0,	Basic black block
-Tile,		448,	-76,	238,	370,	0,	Basic black block
-Tile,		900,	0,	200,	100,	0,	Basic black block
-Tile,		0,	150,	200,	100,	0,	Basic black block
-Tile,		1934,	846,	200,	100,	0,	Basic black block
-Interactable,	1200,	-2000,	200,	2200,	50,	-1,	Bounce pad
-Interactable,	2000,	-2000,	200,	2200,	50,	-1,	Bounce pad
-Tile,		2200,	-1000,	200,	1200,	0,	Basic black block
-Tile,		1000,	400,	200,	200,	101,	Right-leaning slope
-Tile,		1200,	400,	200,	200,	0,	Basic black block
-Tile,		1400,	200,	400,	200,	101,	Right-leaning slope
-Tile,		-1400,	400,	200,	200,	102,	Left-leaning slope
-Interactable,	-1740,	320,	330,	290,	50,	-1,	Bounce pad
-Tile,		2000,	200,	200,	200,	10,	Unrecognized
-Tile,		3000,	200,	200,	200,	10,	Unrecognized
-Tile,		4000,	200,	200,	200,	10,	Unrecognized
-Interactable,	-1200,	60,	360,	290,	70,	-1,	Text continuer
-Interactable,	-880,	240,	360,	360,	70,	-1,	Text continuer
-Interactable,	-80,	400,	200,	200,	99,	-1,	Finish element
+Tile,		-1400,	600,	3200,	400,	0,		0,	Basic black block
+Tile,		448,	-76,	238,	370,	0,		0,	Basic black block
+Tile,		900,	0,	200,	100,	0,		0,	Basic black block
+Tile,		0,	150,	200,	100,	0,		0,	Basic black block
+Tile,		1934,	846,	200,	100,	0,		0,	Basic black block
+Interactable,	1200,	-2000,	200,	2200,	0,	50,	-1,	Bounce pad
+Interactable,	2000,	-2000,	200,	2200,	0,	50,	-1,	Bounce pad
+Tile,		2200,	-1000,	200,	1200,	0,		0,	Basic black block
+Tile,		1000,	400,	200,	200,	0,		101,	Right-leaning slope
+Tile,		1200,	400,	200,	200,	0,		0,	Basic black block
+Tile,		1400,	200,	400,	200,	0,		101,	Right-leaning slope
+Tile,		-1400,	400,	200,	200,	0,		102,	Left-leaning slope
+Interactable,	-1740,	320,	330,	290,	0,	50,	-1,	Bounce pad
+Tile,		2000,	200,	200,	200,	0,		10,	Unrecognized
+Tile,		3000,	200,	200,	200,	0,		10,	Unrecognized
+Tile,		4000,	200,	200,	200,	0,		10,	Unrecognized
+Interactable,	-1200,	60,	360,	290,	0,	70,	-1,	Text continuer
+Interactable,	-880,	240,	360,	360,	0,	70,	-1,	Text continuer
+Interactable,	-80,	400,	200,	200,	0,	99,	-1,	Finish element

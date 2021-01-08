@@ -58,7 +58,7 @@ public class BuilderScreen extends JPanel {
 	// RectObj finish=new RectObj(new Point2D.Double(3000,100),50,1000,Color.BLACK);
 	private boolean isShift = false;
 	private Tile lastActiveTile = null;
-	private int mode = 0;// 0 is drag, 1 is resize, 2 is change, 3 is add
+	private int mode = 0;// 0 is drag, 1 is resize, 2 is change, 3 is add, 4 is change collision type
 	boolean canDrag = false;// true if currently dragging
 	boolean nowResize;// true is resize mode
 	private Point2D.Double lastPoint = null;
@@ -126,10 +126,13 @@ public class BuilderScreen extends JPanel {
 			// for (Interactable tile : interactables) {
 			// tile.draw(g2, scrollx, scrolly);
 			// }
+			g2.drawImage(Player.IDLE, 450 + scrollx, 375 + scrolly, 200 + 450 + scrollx, 375 + 250 + scrolly, 0, 0, 200,
+					250, null);
 
-			if (lastActiveTile!=null) {
+			if (lastActiveTile != null) {
 				g2.setColor(Color.blue);
-				g2.drawRect(lastActiveTile.getX()+ scrollx, scrolly+lastActiveTile.getY(), lastActiveTile.getWidth(), lastActiveTile.getHeight());
+				g2.drawRect(lastActiveTile.getX() + scrollx, scrolly + lastActiveTile.getY(), lastActiveTile.getWidth(),
+						lastActiveTile.getHeight());
 			}
 			g2.setColor(Color.black);
 			if (mode == 1 && lastActiveTile != null) {
@@ -147,8 +150,9 @@ public class BuilderScreen extends JPanel {
 			int fontX = (int) (BuilderMain.gameSize.width * .65);
 			int fontY = (int) (BuilderMain.gameSize.height * .85);
 			g2.drawString(currentLevel, (int) (BuilderMain.gameSize.width * .8), 100);
-			if (mode==3) {
-				g2.drawString("Adding: "+TileTypes.get(current_type).description, (int) (BuilderMain.gameSize.width * .07), fontY);
+			if (mode == 3) {
+				g2.drawString("Adding: " + TileTypes.get(current_type).description,
+						(int) (BuilderMain.gameSize.width * .07), fontY);
 			}
 
 			g2.setFont(font);
@@ -166,9 +170,12 @@ public class BuilderScreen extends JPanel {
 				g2.drawString("Mode: Change", fontX, fontY);
 				g2.drawString("Change Type", (int) (BuilderMain.gameSize.width * .07), fontY);
 				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
-
 			} else if (mode == 3) {
 				g2.drawString("Mode: Add", fontX, fontY);
+				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+			} else if (mode == 4) {
+				g2.drawString("Mode: Collision", fontX, fontY);
+				g2.drawString("Change Type", (int) (BuilderMain.gameSize.width * .07), fontY);
 				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			}
 		} else if (state == GameState.SELECT) {
@@ -187,8 +194,6 @@ public class BuilderScreen extends JPanel {
 				// }
 			}
 		}
-		g2.drawImage(Player.IDLE, 300+scrollx, 300+scrolly, 200 + 300+scrollx, 300 + 250+scrolly, 0, 0,
-						 200, 250, null);
 	}
 
 	public void nextFrame() {
@@ -236,7 +241,7 @@ public class BuilderScreen extends JPanel {
 					try {
 						area.add(new Tile(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
 								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
-								Integer.parseInt(elements[5].trim())));
+								Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println("Error reading stage element: " + line);
 					}
@@ -250,9 +255,10 @@ public class BuilderScreen extends JPanel {
 					}
 				} else {
 					try {
-						area.add(new Interactable(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
-								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
-								Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
+						area.add(new Interactable(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim()), Integer.parseInt(elements[7].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
@@ -380,7 +386,7 @@ public class BuilderScreen extends JPanel {
 				break;
 			case KeyEvent.VK_E:
 				mode += 1;
-				if (mode > 3) {
+				if (mode > 4) {
 					mode = 0;
 				}
 				break;
@@ -407,8 +413,8 @@ public class BuilderScreen extends JPanel {
 						lastActiveTile = temp;
 					} else {
 						// if is currently Interactable, but becoming Tile.
-						Tile temp = new Tile(lastActiveTile.getX(), lastActiveTile.getY(),
-								lastActiveTile.getWidth(), lastActiveTile.getHeight(), TileTypes.get(current_type).id);
+						Tile temp = new Tile(lastActiveTile.getX(), lastActiveTile.getY(), lastActiveTile.getWidth(),
+								lastActiveTile.getHeight(), 0, TileTypes.get(current_type).id);
 						area.set(area.indexOf(lastActiveTile), temp);
 						lastActiveTile = temp;
 					}
@@ -418,6 +424,11 @@ public class BuilderScreen extends JPanel {
 					current_type += 1;
 					if (current_type >= TileTypes.size()) {
 						current_type = 0;
+					}
+					break;
+				case 4:
+					if (lastActiveTile != null) {
+						lastActiveTile.cycleCollision();
 					}
 					break;
 				}
@@ -497,8 +508,8 @@ public class BuilderScreen extends JPanel {
 
 		public void mousePressed(MouseEvent e) {
 
-			Point2D.Double point = new Point2D.Double(e.getPoint().getX()/zoom - scrollx,
-					e.getPoint().getY()/zoom - scrolly);
+			Point2D.Double point = new Point2D.Double(e.getPoint().getX() / zoom - scrollx,
+					e.getPoint().getY() / zoom - scrolly);
 			if (lastActiveTile != null && lastActiveTile.isInside(point)) {
 				canDrag = true;
 				selectOffset = lastActiveTile.getDifference(point);
@@ -521,9 +532,9 @@ public class BuilderScreen extends JPanel {
 					if (TileTypes.get(current_type).isInteractable) {
 						lastActiveTile = new Interactable(0, 0, 200, 200, TileTypes.get(current_type).id);
 					} else {
-						lastActiveTile = new Tile(0, 0, 200, 200, TileTypes.get(current_type).id);
+						lastActiveTile = new Tile(0, 0, 200, 200, 0, TileTypes.get(current_type).id);
 					}
-					lastActiveTile.goTo(point.getX()-100,point.getY()-100);
+					lastActiveTile.goTo(point.getX() - 100, point.getY() - 100);
 					canDrag = true;
 					area.add(lastActiveTile);
 					selectOffset = lastActiveTile.getDifference(point);
@@ -556,8 +567,8 @@ public class BuilderScreen extends JPanel {
 	public class MovementListener implements MouseMotionListener {
 		public void mouseDragged(MouseEvent e) {
 			// System.out.println("Trying: "+canDrag+" " +dragMode);
-			Point2D.Double point = new Point2D.Double(e.getPoint().getX()/zoom - scrollx,
-					e.getPoint().getY()/zoom - scrolly);
+			Point2D.Double point = new Point2D.Double(e.getPoint().getX() / zoom - scrollx,
+					e.getPoint().getY() / zoom - scrolly);
 			if (mode != 1) {
 				if (canDrag) {
 					lastActiveTile.goTo(point.getX() - selectOffset[0], point.getY() - selectOffset[1]);
@@ -596,8 +607,7 @@ public class BuilderScreen extends JPanel {
 		}
 
 		public void mouseMoved(MouseEvent e) {
-			lastPoint = new Point2D.Double(e.getPoint().getX() * 2 - scrollx,
-					e.getPoint().getY() * 2 - scrolly);
+			lastPoint = new Point2D.Double(e.getPoint().getX() * 2 - scrollx, e.getPoint().getY() * 2 - scrolly);
 			requestFocusInWindow();
 		}
 	}

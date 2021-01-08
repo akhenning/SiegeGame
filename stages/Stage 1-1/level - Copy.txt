@@ -1,0 +1,23 @@
+Tile,		-720,	600,	3440,	400,	0,	Basic black block
+Interactable,	-720,	400,	200,	200,	50,	-1,	Bounce pad
+Interactable,	1420,	400,	200,	200,	70,	6,	Text continuer
+Tile,		1940,	420,	300,	180,	0,	Basic black block
+Tile,		3100,	600,	1720,	400,	0,	Basic black block
+Interactable,	3320,	400,	200,	200,	70,	9,	Text continuer
+Interactable,	4820,	-800,	300,	420,	99,	-1,	Finish element
+Interactable,	4260,	600,	500,	200,	50,	-1,	Bounce pad
+Tile,		4820,	220,	200,	780,	0,	Basic black block
+Tile,		-920,	-660,	200,	1660,	0,	Basic black block
+Tile,		5020,	220,	1900,	200,	0,	Basic black block
+Interactable,	5200,	20,	200,	200,	70,	13,	Text continuer
+Interactable,	5720,	20,	200,	200,	60,	-1,	Destructable block
+Interactable,	5720,	-180,	200,	200,	60,	-1,	Destructable block
+Interactable,	5920,	-180,	200,	200,	60,	-1,	Destructable block
+Interactable,	5920,	20,	200,	200,	60,	-1,	Destructable block
+Tile,		6920,	-1460,	200,	1900,	0,	Basic black block
+Tile,		6320,	-80,	400,	300,	101,	Right-leaning slope
+Tile,		4280,	-380,	2220,	100,	0,	Basic black block
+Interactable,	6720,	-280,	200,	200,	70,	18,	Text continuer
+Tile,		6720,	-80,	200,	300,	0,	Basic black block
+Interactable,	5880,	-580,	200,	200,	70,	22,	Text continuer
+Tile,		4280,	-1060,	200,	680,	0,	Basic black block
