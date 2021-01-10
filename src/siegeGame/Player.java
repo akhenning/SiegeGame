@@ -92,6 +92,7 @@ public class Player {
 				} else if (animationFrame == 13) {
 					hitboxes.get(2).setActive(false, direction);
 					isHitbox = false;
+					this.screen.makeEffect(-Screen.scrollx+x+25+(direction*130),-Screen.scrolly+y,1,direction);
 				}
 
 				if (direction == 1) {
@@ -434,6 +435,8 @@ public class Player {
 					litx += xspeed;
 					lity += yspeed;
 					state = State.JUMPING;
+
+					this.screen.makeEffect(-Screen.scrollx+x,-Screen.scrolly+y,2,direction);
 				} else {
 					// System.out.println("JUMPSQUAT"+xspeed);
 					xspeed *= .7;

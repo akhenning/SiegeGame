@@ -697,6 +697,25 @@ public class Screen extends JPanel {
 		}
 		return false;
 	}
+	
+	public void makeEffect(int x, int y, int type, int direction) {
+		switch (type) {
+		case 1:
+			// impact
+			for (int i=0;i<4;i++) {
+				particles.add(new Particle(x,y, 2 + (int)(Math.random()*5), 2+(int)(Math.random()*5), 2));
+			}
+			break;
+		case 3:
+			// landing
+			break;
+		case 2:
+			// jumping
+			particles.add(new Particle(x-20,y-5, 10, 5, 3));
+			particles.add(new Particle(x+60,y-5, 10, 5, 4));
+			break;
+		}
+	}
 
 	// Method to advance the level, usually after finishing.
 	// Currently simply moves to the next level.
@@ -724,6 +743,9 @@ public class Screen extends JPanel {
 			break;
 		case 2:
 			next_lvl = "Stage 1-2";
+			break;
+		case 3:
+			next_lvl = "Stage 1-3";
 			break;
 		default:
 			System.err.println("Error: Finish element has no assigned destination");

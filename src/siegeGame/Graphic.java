@@ -7,18 +7,32 @@ import java.awt.Toolkit;
 
 public class Graphic extends Tile {
 	private Image nian_sleep = Toolkit.getDefaultToolkit().getImage("assets/niansleep.png");
+	private Image w_dance = Toolkit.getDefaultToolkit().getImage("assets/w_dance.png");
 	private int animationFrame = 0;
 	private int pictureWidth = 0;
 	private String text = "";
+	private int image_width;
+	private int image_height;
 
 	public Graphic(int x, int y, int id) {
 		super(x, y, -1, -1,0, id);
 		switch (id) {
+		case 9:
+			// W dancing
+			image_width = 552;
+			image_height = 786;
+			width =(int) (552/4);
+			height =(int) (786/4);
+			
+			pictureWidth = MakeSureImageHasLoaded(w_dance);
+			break;
 		case 10:
 			// Nian sleeping
 			width = 349;
 			height = 188;
-			pictureWidth = 27570;
+			image_width = width;
+			image_height = height;
+			pictureWidth = MakeSureImageHasLoaded(nian_sleep);
 			break;
 		case 11:
 			// Level selector
@@ -34,8 +48,10 @@ public class Graphic extends Tile {
 
 	public Graphic(int x, int y, int width, int height, int id) {
 		this(x, y, id);
-		this.width = width;
-		this.height = height;
+		if (id == 11) {
+			this.width = width;
+			this.height = height;
+		}
 		// slight redundancy in this() call
 	}
 
@@ -45,6 +61,14 @@ public class Graphic extends Tile {
 
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
 		switch (id) {
+		case 9:
+			g2.drawImage(w_dance, x + scrollx, y + scrolly, x + scrollx + width, y + scrolly + height,
+					image_width * animationFrame, 0, image_width * (animationFrame + 1), image_height, null);
+			animationFrame += 1;
+			if (image_width * animationFrame + 300 > pictureWidth) {
+				animationFrame = 0;
+			}
+			break;
 		case 10:
 			g2.drawImage(nian_sleep, x + scrollx, y + scrolly, x + scrollx + width, y + scrolly + height,
 					width * animationFrame, 0, width * (animationFrame + 1), height, null);
@@ -64,6 +88,9 @@ public class Graphic extends Tile {
 	
 	public String toString() {
 		switch (id) {
+		case 9:
+			type = "W Dancing";
+			break;
 		case 10:
 			type = "Nian lying down";
 			break;
@@ -79,5 +106,25 @@ public class Graphic extends Tile {
 	} 
 	public String getText() {
 		return text;
+	}
+	
+
+	public int MakeSureImageHasLoaded(Image image) {
+		int width = image.getWidth(null);
+		int failcase = 0;
+		while (width == -1) {
+			failcase += 1;
+			try {
+				Thread.sleep(5);
+				width = image.getWidth(null);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			if (failcase > 30) {
+				System.out.println("ERROR: IMAGE FAILED TO LOAD IN GRAPHICS");
+				return -1;
+			}
+		}
+		return width;
 	}
 }

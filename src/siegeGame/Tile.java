@@ -33,7 +33,6 @@ public class Tile {
 	private boolean can_clip_vertical = true;
 	private boolean can_clip_left = true;
 	private boolean can_clip_right = true;
-	
 
 	public enum SlopeState {
 		NONE, LEFT, RIGHT
@@ -65,7 +64,6 @@ public class Tile {
 				slope = -((double) height) / ((double) width);
 			}
 		}
-		
 
 		// Let's try to make it so that this doesn't need to calculate every frame
 		switch (clipType) {
@@ -144,7 +142,7 @@ public class Tile {
 		if (clipType == 0) {
 			g2.drawRect(scrollx + (width / 2) + x - 20, scrolly + y - 20 + (height / 2), 40, 40);
 		} else if (clipType == 1) {
-			int[] xpts = { scrollx + x + (width / 2), scrollx + x + (width / 3), scrollx + x + (width * 2 / 3)};
+			int[] xpts = { scrollx + x + (width / 2), scrollx + x + (width / 3), scrollx + x + (width * 2 / 3) };
 			int[] ypts = { y + scrolly, y + height + scrolly, y + (height / 4) + scrolly,
 					scrolly + y + (height * 3 / 4) };
 			g2.drawLine(xpts[0], ypts[0], xpts[0], ypts[1]);
@@ -153,13 +151,13 @@ public class Tile {
 			g2.drawLine(xpts[0], ypts[1], xpts[1], ypts[3]);
 			g2.drawLine(xpts[0], ypts[1], xpts[2], ypts[3]);
 		} else if (clipType == 2) {
-			int[] xpts = { scrollx + x + (width / 2), scrollx + x, scrollx + x + (width / 4)};
+			int[] xpts = { scrollx + x + (width / 2), scrollx + x, scrollx + x + (width / 4) };
 			int[] ypts = { y + (height / 2) + scrolly, y + (height / 3) + scrolly, scrolly + y + (height * 2 / 3) };
 			g2.drawLine(xpts[0], ypts[0], xpts[1], ypts[0]);
 			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[1]);
 			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[2]);
 		} else if (clipType == 3) {
-			int[] xpts = { scrollx + x + (width / 2), scrollx + x+width, scrollx + x + (width *3 / 4)};
+			int[] xpts = { scrollx + x + (width / 2), scrollx + x + width, scrollx + x + (width * 3 / 4) };
 			int[] ypts = { y + (height / 2) + scrolly, y + (height / 3) + scrolly, scrolly + y + (height * 2 / 3) };
 			g2.drawLine(xpts[0], ypts[0], xpts[1], ypts[0]);
 			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[1]);
@@ -315,10 +313,20 @@ public class Tile {
 		}
 	}
 
-	// Snap the tile to nearest values that are a multiple of 20, to make it look more seamless.
+	// Snap the tile to nearest values that are a multiple of 20, to make it look
+	// more seamless.
 	public void snap() {
 		x = (int) (Math.round(((double) x) / 20) * 20);
 		y = (int) (Math.round(((double) y) / 20) * 20);
+		// This prevents an obscure bug where, if the width was an exact multiple of 10,
+		// the x location and width would round in different directions, causing them to
+		// snap unevenly
+		if (width % 10 == 0) {
+			width -= 1;
+		}
+		if (height % 10 == 0) {
+			height -= 1;
+		}
 		width = (int) (Math.round(((double) width) / 20) * 20);
 		height = (int) (Math.round(((double) height) / 20) * 20);
 	}
