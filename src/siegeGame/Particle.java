@@ -14,6 +14,8 @@ public class Particle {
 	protected double height;
 	protected int id;
 	protected int timeRemaining;
+	protected int alpha = 255;
+	protected int time_till_opacity_drops = 5;
 
 	public Particle(int x, int y, int width, int height, int id) {
 		this.x = x;
@@ -36,15 +38,21 @@ public class Particle {
 			break;
 		case 3:
 			// jump puff left
-			timeRemaining = 10;
-			dx = -8;
+			timeRemaining = 6;
+			dx = -12;
 			dy = -1;
 			break;
 		case 4:
 			// jump puff right
-			timeRemaining = 10;
-			dx = 8;
+			timeRemaining = 6;
+			dx = 12;
 			dy = -1;
+			break;
+		case 5:
+			// Large puff of smoke
+			timeRemaining = 45;
+			dx = Math.random() * 10 - 5;
+			dy = Math.random() * 5 - 2.5;
 			break;
 		}
 	}
@@ -54,25 +62,35 @@ public class Particle {
 	}
 
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
+		if (alpha < 0) {
+			return;
+		}
 		switch (id) {
 		case 1:
-			g2.drawImage(Interactable.gravel, scrollx + (int) x, scrolly + (int) y, (int)width, (int)height, null);
+			g2.drawImage(Interactable.gravel, scrollx + (int) x, scrolly + (int) y, (int) width, (int) height, null);
 			break;
 		case 2:
 			g2.setColor(Color.BLACK);
-			g2.draw(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int)width, (int)height));
+			g2.draw(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int) width, (int) height));
 			g2.setColor(Color.gray);
 			break;
 		case 3:
-			g2.setColor(Color.WHITE);
-			g2.draw(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int)width, (int)height));
-			g2.draw(new Ellipse2D.Double(scrollx+4 + (int)x, scrolly-2 + (int) y, (int)width/2, (int)height/2));
+			g2.setColor(new Color(255, 255, 255, alpha));
+			g2.fill(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int) width, (int) height));
+			g2.fill(new Ellipse2D.Double(scrollx + 4 + (int) x, scrolly - 2 + (int) y, (int) width / 2,
+					(int) height / 2));
 			g2.setColor(Color.gray);
 			break;
 		case 4:
-			g2.setColor(Color.WHITE);
-			g2.draw(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int)width, (int)height));
-			g2.draw(new Ellipse2D.Double(scrollx-4 + (int)x, scrolly-2 + (int) y, (int)width/2, (int)height/2));
+			g2.setColor(new Color(255, 255, 255, alpha));
+			g2.fill(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int) width, (int) height));
+			g2.fill(new Ellipse2D.Double(scrollx - 4 + (int) x, scrolly - 2 + (int) y, (int) width / 2,
+					(int) height / 2));
+			g2.setColor(Color.gray);
+			break;
+		case 5:
+			g2.setColor(new Color(255, 255, 255, alpha));
+			g2.fill(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int) width, (int) height));
 			g2.setColor(Color.gray);
 			break;
 		default:
@@ -85,15 +103,15 @@ public class Particle {
 			x += dx;
 			y += dy;
 			dy += 1;
-			width-=1;
-			height -=1;
+			width -= 1;
+			height -= 1;
 			break;
 		case 2:
 			x += dx;
 			y += dy;
 			dy += 1;
-			width-=.5;
-			height -=.5;
+			width -= .5;
+			height -= .5;
 			break;
 		case 3:
 			dx += 1;
@@ -101,15 +119,29 @@ public class Particle {
 			x += dx;
 			y += dy;
 			dx -= .5;
-			width-=.5;
-			height -=.5;
+			// width-=.5;
+			// height -=.5;
+			alpha -= 35;
+			break;
+		case 5:
+			x += dx;
+			y += dy;
+			dx *= .9;
+			dy *= .9;
+			width -= .5;
+			height -= .5;
+			if (time_till_opacity_drops > 0) {
+				time_till_opacity_drops -= 1;
+			} else {
+				alpha -= 6;
+			}
 			break;
 		default:
 		}
-		timeRemaining-=1;
+		timeRemaining -= 1;
 	}
 
 	public boolean shouldRemove() {
-		return (timeRemaining<0);
+		return (timeRemaining < 0 || alpha <= 0);
 	}
 }

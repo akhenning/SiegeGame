@@ -2,6 +2,7 @@ package siegeGame;
 
 import javax.swing.JPanel;
 
+import siegeGame.Player.State;
 import siegeGame.Tile.SlopeState;
 
 import java.awt.event.KeyListener;
@@ -148,6 +149,10 @@ public class Screen extends JPanel {
 				for (Image sprite : sprites) {
 					g2.drawImage(sprite, 0, 0, null);
 				}
+				for (Graphic graphic : graphics) {
+					graphic.draw(g2);
+				}
+				Graphic.loadTwoParters(g2);
 				sprites = null;
 			}
 			drawBG(g2);
@@ -316,8 +321,8 @@ public class Screen extends JPanel {
 			g2.setColor(fade_in_text);
 			g2.drawString(fade_text, Main.screenSize.width / 3, Main.screenSize.height / 2);
 		} else {
-			fade -=1;
-			if (fade == -5 && text.size()>0) {
+			fade -= 1;
+			if (fade == -5 && text.size() > 0) {
 				activeText = true;
 			}
 		}
@@ -374,8 +379,17 @@ public class Screen extends JPanel {
 			for (Tile tile : area) {
 				tile.checkIsVisible();
 			}
-			for (Interactable tile : interactables) {
-				tile.checkIsVisible();
+			for (int i = 0; i < interactables.size();i++) {
+				interactables.get(i).checkIsVisible();
+				interactables.get(i).nextFrame();
+				if (interactables.get(i).shouldRemove()) {
+					if (interactables.get(i).getId() == 61) {
+						// todo make puff of smoke
+						makeEffect(interactables.get(i).getX(), interactables.get(i).getY(), 4, 0);
+					}
+					interactables.remove(interactables.get(i));
+					i-=1;
+				}
 			}
 			for (Graphic tile : graphics) {
 				tile.checkIsVisible();
@@ -388,7 +402,7 @@ public class Screen extends JPanel {
 				player.calcMove(0, false, false, false);
 			}
 		}
-		
+
 		// Avoid particle flooding
 		if (particles.size() > 15) {
 			particles.remove(0);
@@ -413,7 +427,7 @@ public class Screen extends JPanel {
 		int highest = 1000001;
 		// For every tile
 		for (Tile tile : area) {
-			if (tile.isVisible()&& tile.canDetectVertical()) {
+			if (tile.isVisible() && tile.canDetectVertical()) {
 				// See if either foot is inside something
 				if (tile.slopeState == SlopeState.NONE) {
 					if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
@@ -441,7 +455,7 @@ public class Screen extends JPanel {
 			}
 		}
 		for (Interactable tile : interactables) {
-			if (tile.isVisible() && tile.hasInteraction()&& tile.canDetectVertical()) {
+			if (tile.isVisible() && tile.hasInteraction() && tile.canDetectVertical()) {
 				// See if either foot is inside something
 				if (tile.slopeState == SlopeState.NONE) {
 					if (tile.isInside(leftFoot) || tile.isInside(rightFoot)) {
@@ -520,7 +534,7 @@ public class Screen extends JPanel {
 						return tile.x + tile.width + 15 + 2;
 					} else if (tile.isInside(leftBot)) {
 						return tile.x + tile.width + 15 + 2;
-					} 
+					}
 				}
 				if (tile.canDetectLeft()) {
 					if (tile.isInside(rightTop)) {
@@ -573,7 +587,7 @@ public class Screen extends JPanel {
 							}
 						}
 					}
-				} 
+				}
 				if (tile.canDetectLeft()) {
 					if (tile.isInside(rightTop)) {
 						if (tile.isTangible()) {
@@ -619,6 +633,7 @@ public class Screen extends JPanel {
 		int dx = player.x - Screen.scrollx;
 		int dy = player.y - Screen.scrolly;
 		int point[];
+		boolean rtrn = false;
 		for (Hitbox box : hitboxes) {
 			if (box.isActive()) {
 				for (Interactable tile : interactables) {
@@ -635,7 +650,7 @@ public class Screen extends JPanel {
 								int effect = tile.interact();
 								// If it has a bouncing effect
 								if (effect == 1) {
-									return true;
+									rtrn = true;
 									// if it breaks upon contact
 								} else if (effect == 0) {
 									// Create new particles with semirandom properties in area of tile
@@ -650,8 +665,7 @@ public class Screen extends JPanel {
 									particles.add(new Particle(tile.getX() + (widthover4 * 3),
 											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
 									// Remove the tile from the list
-									interactables.remove(tile);
-									return false;
+									tile.setToRemove();
 									// If is a text box prompt (? mark)
 								} else if (effect == 2) {
 									// Tell the game to activate text boxes, and move to the proper box
@@ -666,7 +680,7 @@ public class Screen extends JPanel {
 				}
 			}
 		}
-		return false;
+		return rtrn;
 	}
 
 	// Method that handles desending staircases.
@@ -697,13 +711,13 @@ public class Screen extends JPanel {
 		}
 		return false;
 	}
-	
+
 	public void makeEffect(int x, int y, int type, int direction) {
 		switch (type) {
 		case 1:
 			// impact
-			for (int i=0;i<4;i++) {
-				particles.add(new Particle(x,y, 2 + (int)(Math.random()*5), 2+(int)(Math.random()*5), 2));
+			for (int i = 0; i < 4; i++) {
+				particles.add(new Particle(x, y, 2 + (int) (Math.random() * 5), 2 + (int) (Math.random() * 5), 2));
 			}
 			break;
 		case 3:
@@ -711,8 +725,22 @@ public class Screen extends JPanel {
 			break;
 		case 2:
 			// jumping
-			particles.add(new Particle(x-20,y-5, 10, 5, 3));
-			particles.add(new Particle(x+60,y-5, 10, 5, 4));
+			particles.add(new Particle(x - 20, y - 5, 10, 5, 3));
+			particles.add(new Particle(x + 60, y - 5, 10, 5, 4));
+			break;
+		case 4:
+			// smoke
+			int size = 100;
+			particles.add(new Particle(x - 25, y, size, size, 5));
+			particles.add(new Particle(x + 100, y, size, size, 5));
+			particles.add(new Particle(x - 25, y + 50, size, size, 5));
+			particles.add(new Particle(x + 100, y + 50, size, size, 5));
+			particles.add(new Particle(x - 25, y + 100, size, size, 5));
+			particles.add(new Particle(x + 100, y + 100, size, size, 5));
+			particles.add(new Particle(x + 40, y + 25, size, size, 5));
+			particles.add(new Particle(x + 40, y + 75, size, size, 5));
+			particles.add(new Particle(x + 40, y - 25, size, size, 5));
+			particles.add(new Particle(x + 40, y + 125, size, size, 5));
 			break;
 		}
 	}
@@ -824,16 +852,16 @@ public class Screen extends JPanel {
 				if (elements[0].trim().equals("Tile")) {
 					try {
 						area.add(new Tile(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
-								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
-								Integer.parseInt(elements[6].trim())));
+								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
+								Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println("Error reading stage tile: " + line);
 					}
 				} else if (elements[0].trim().equals("Graphic")) {
 					try {
-						graphics.add(new Graphic(Integer.parseInt(elements[1].trim()),
-								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
-								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim())));
+						graphics.add(new Graphic(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
+										Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
+										Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage graphic: " + line);
 					}
@@ -841,8 +869,8 @@ public class Screen extends JPanel {
 					try {
 						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()),
 								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
-								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim()),
-								Integer.parseInt(elements[7].trim())));
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim()), Integer.parseInt(elements[7].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage interactable: " + line);
 					}
@@ -942,7 +970,7 @@ public class Screen extends JPanel {
 			area = new ArrayList<Tile>();
 			int i = 0;
 			for (String name : files) {
-				area.add(new Graphic(800, 150 * i + 50, 500, 100, 11));
+				area.add(new Graphic(800, 150 * i + 50, 500, 100, 1, 11));
 				area.get(area.size() - 1).setText(name);// .substring(0, name.length() - 4));
 				i++;
 			}
@@ -1020,13 +1048,12 @@ public class Screen extends JPanel {
 				break;
 			case KeyEvent.VK_UP:
 				if (state == GameState.LEVEL) {
+					boolean change = false;
 					zoom += .5;
 					if (zoom > 1) {
 						zoom = 1;
 					} else {
-						// So, when it zooms in, we want to center on Siege... that's hard.
-						// Wait, it might actually work automatically
-						//scrollx -= (int) ((double) Main.screenSize.width / zoom)/8;
+						change = true;
 					}
 					Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
 					Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
@@ -1034,6 +1061,10 @@ public class Screen extends JPanel {
 					Main.scrollPos[1] = Main.gameSize.width * 2 / 3;
 					Main.scrollPos[2] = Main.gameSize.width / 5;
 					Main.scrollPos[3] = Main.gameSize.width * 2 / 5;
+					if (change && Main.scrollPos[3] < player.y && (player.state == State.GROUNDED || player.state == State.BASIC_ATTACK || player.state == State.LANDING || player.state == State.JUMPSQUAT)) {
+						//System.out.println("Adjusting player location");
+						player.adjust(0, 60);
+					} 
 				}
 				break;
 			case KeyEvent.VK_DOWN:
@@ -1042,10 +1073,10 @@ public class Screen extends JPanel {
 					if (zoom < .5) {
 						zoom = .5;
 					} else {
-						// So, when it zooms out, we want to reduce scrollx by... half the original 
-						scrollx += Main.gameSize.width/4;
-						scrolly += Main.gameSize.height/4;
-						player.adjust(Main.gameSize.width/4,Main.gameSize.height/4);
+						// So, when it zooms out, we want to reduce scrollx by... half the original
+						scrollx += Main.gameSize.width / 4;
+						scrolly += Main.gameSize.height / 4;
+						player.adjust(Main.gameSize.width / 4, Main.gameSize.height / 4);
 					}
 					Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
 					Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);

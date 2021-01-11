@@ -1,4 +1,5 @@
 Tile,		120,	760,	2000,	200,	0,		0,	Basic black block
 Interactable,	1560,	560,	200,	200,	0,	70,	4,	Text continuer
 Tile,		120,	660,	500,	100,	0,		0,	Basic black block
-Graphic,	732,	599,	349,	188,	10,	Nian lying down
+Graphic,	732,	599,	349,	188,	1,	10,		Nian lying down
+Interactable,	1259,	567,	200,	200,	0,	61,	-1,	W (leaves when hit)

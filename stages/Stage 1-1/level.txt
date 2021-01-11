@@ -4,7 +4,7 @@ Interactable,	1420,	400,	200,	200,	0,	70,	6,	Text continuer
 Tile,		1940,	420,	300,	180,	0,		0,	Basic black block
 Tile,		3100,	600,	1720,	400,	1,		0,	Basic black block
 Interactable,	3320,	400,	200,	200,	0,	70,	9,	Text continuer
-Interactable,	4820,	-800,	300,	420,	0,	99,	-1,	Finish element
+Interactable,	4820,	-800,	300,	420,	0,	99,	2,	Finish element
 Interactable,	4260,	600,	500,	200,	1,	50,	-1,	Bounce pad
 Tile,		4820,	220,	200,	780,	2,		0,	Basic black block
 Tile,		-920,	-660,	200,	1660,	3,		0,	Basic black block

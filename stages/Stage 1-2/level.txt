@@ -33,4 +33,6 @@ Tile,		-1920,	-1780,	200,	200,	1,		0,	Basic black block
 Interactable,	-1920,	-1780,	200,	720,	2,	50,	-1,	Bounce pad
 Tile,		1080,	-2100,	200,	200,	0,		101,	Right-leaning slope
 Tile,		0,	-1080,	1080,	200,	1,		0,	Basic black block
-Interactable,	880,	-1280,	200,	200,	0,	99,	3,	Finish element
+Interactable,	1780,	-2640,	200,	200,	0,	99,	3,	Finish element
+Interactable,	631,	-1274,	200,	200,	0,	61,	-1,	W (leaves when hit)
+Tile,		0,	-1080,	200,	200,	2,		0,	Basic black block

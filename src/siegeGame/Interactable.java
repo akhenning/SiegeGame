@@ -23,13 +23,15 @@ public class Interactable extends Tile {
 	// Whether moving against the object has an effect;
 	// Note that all Interactables have interaction when hit.
 	private boolean hasInteraction = true;
+	private int action = -1;
+	private boolean flag = false;
 
 	public Interactable(int x, int y, int width, int height) {
-		this(x, y, width, height,0, 50,-1);
+		this(x, y, width, height, 0, 50, -1);
 	}
 
 	public Interactable(int x, int y, int width, int height, int id) {
-		this(x, y, width, height, 0,id, -1);
+		this(x, y, width, height, 0, id, -1);
 	}
 
 	public Interactable(int x, int y, int width, int height, int clipType, int id, int information) {
@@ -38,6 +40,10 @@ public class Interactable extends Tile {
 			isTangible = false;
 		}
 		data = information;
+		if (id == 61) {
+			isTangible = false;
+			animated_graphic = new Graphic(x, y, 7, data);
+		}
 	}
 
 	public void draw(Graphics2D g2) {
@@ -67,8 +73,31 @@ public class Interactable extends Tile {
 			g2.drawImage(q_mark_activated, scrollx + x, scrolly + y, width, height, null);
 			break;
 		}
-		if(Main.debug && id < 70) {
-			drawCollision(g2,scrollx,scrolly);
+		if (animated_graphic != null) {
+			animated_graphic.draw(g2, scrollx, scrolly);
+		}
+		if (Main.debug && id <= 60) {
+			drawCollision(g2, scrollx, scrolly);
+		}
+	}
+
+	public void nextFrame() {
+		if (id == 61) {
+			if (flag == true) {
+				int frame = animated_graphic.getFrame();
+				if (frame == 0 || frame == 40 || frame == 17 || frame == 55) {
+					// Last two are less seamless...
+					flag = false;
+					action = 27;
+					animated_graphic = new Graphic(x, y, 8, data);
+					System.out.println("Flag tripped");
+				}
+			} else if (action > 0) {
+				System.out.println(action);
+				action -= 1;
+			} else if (action == 0) {
+				toRemove = true;
+			}
 		}
 	}
 
@@ -82,6 +111,9 @@ public class Interactable extends Tile {
 			break;
 		case 60:
 			type = "Destructable block";
+			break;
+		case 61:
+			type = "W (leaves when hit)";
 			break;
 		case 70:
 			type = "Text continuer";
@@ -110,6 +142,9 @@ public class Interactable extends Tile {
 		case 60:
 			toRemove = true;
 			return 0;
+		case 61:
+			flag = true;// action = 27;
+			return -1;
 		case 70:
 			id = 71;
 			hasInteraction = false;

@@ -431,7 +431,7 @@ public class Player {
 				if (animationFrame == 8) {
 					// System.out.println("JUMPING"+xspeed);
 					yspeed = -20;
-					xspeed = xMove * 10;
+					xspeed = xMove * 16;
 					litx += xspeed;
 					lity += yspeed;
 					state = State.JUMPING;
@@ -528,7 +528,7 @@ public class Player {
 				lity = groundLevel + Screen.scrolly;
 				yspeed = 0;
 				xspeed = 0;
-				// don't move until finished animation
+				// don't move until finished animation (no longer used)
 				if (true) {// 300 * animationFrame + 600 > jump.getWidth(null)) {
 					state = State.LANDING;
 				}
@@ -619,6 +619,16 @@ public class Player {
 	public void adjust(int x_diff, int y_diff) {
 		litx += x_diff;
 		lity += y_diff;
+		
+		/**if (y_diff != 0 && (state == State.GROUNDED || state == State.BASIC_ATTACK || state == State.LANDING || state == State.JUMPSQUAT)) {
+			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly);
+			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly );
+			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
+			if (groundLevel != 1000001) {
+				lity = groundLevel + Screen.scrolly;
+				state = State.GROUNDED;
+			}
+		}*/
 	}
 
 	// Loads images to remove flickering

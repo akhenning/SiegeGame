@@ -33,6 +33,7 @@ public class Tile {
 	private boolean can_clip_vertical = true;
 	private boolean can_clip_left = true;
 	private boolean can_clip_right = true;
+	protected Graphic animated_graphic = null;
 
 	public enum SlopeState {
 		NONE, LEFT, RIGHT
@@ -104,8 +105,12 @@ public class Tile {
 			g2.drawImage(cobb_slope_left, scrollx + x, scrolly + y, width, height, null);
 			// g2.drawRect(Screen.scrollx + x, Screen.scrolly + y, width, height);
 			break;
-		default:
+		case 0:
 			g2.fillRect(scrollx + x, scrolly + y, width, height);
+		default:
+			if (Main.debug) {
+				g2.drawRect(scrollx + x, scrolly + y, width, height);
+			}
 		}
 		if (Main.debug) {
 			g2.setColor(Color.yellow);
@@ -168,6 +173,9 @@ public class Tile {
 	public void goTo(double x, double y) {
 		this.x = (int) x;
 		this.y = (int) y;
+		if(animated_graphic != null) {
+			animated_graphic.goTo(x,y);
+		}
 	}
 
 	// I could easily compress these two into one, but it would be slower
@@ -316,6 +324,9 @@ public class Tile {
 	// Snap the tile to nearest values that are a multiple of 20, to make it look
 	// more seamless.
 	public void snap() {
+		if(animated_graphic != null) {
+			return;
+		}
 		x = (int) (Math.round(((double) x) / 20) * 20);
 		y = (int) (Math.round(((double) y) / 20) * 20);
 		// This prevents an obscure bug where, if the width was an exact multiple of 10,
@@ -361,6 +372,9 @@ public class Tile {
 			break;
 		case 0:
 			type = "Basic black block";
+			break;
+		case -1:
+			type = "Invisible block";
 			break;
 		}
 		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t\t" + id + ",\t"
@@ -477,5 +491,9 @@ public class Tile {
 
 	public boolean isInteractable() {
 		return false;
+	}
+	
+	public void setToRemove() {
+		toRemove = true;
 	}
 }

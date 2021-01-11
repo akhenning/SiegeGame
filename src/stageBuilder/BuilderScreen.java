@@ -87,11 +87,13 @@ public class BuilderScreen extends JPanel {
 	// private int currentLevel = 1;
 
 	public BuilderScreen() {
-		TileTypes.add(new TileType(0, false, "Basic black square."));
+		TileTypes.add(new TileType(0, false, "Basic black block"));
+		TileTypes.add(new TileType(-1, false, "Invisible block"));
 		TileTypes.add(new TileType(101, false, "Right-facing slope"));
 		TileTypes.add(new TileType(102, false, "Left-facing slope"));
 		TileTypes.add(new TileType(50, true, "Basic bounce pad"));
 		TileTypes.add(new TileType(60, true, "Basic destructable block"));
+		TileTypes.add(new TileType(61, true, "Destructable W element"));
 		TileTypes.add(new TileType(70, true, "Basic text prompter"));
 		TileTypes.add(new TileType(71, true, "Basic activated text prompter"));
 		TileTypes.add(new TileType(99, true, "Basic finish element"));
@@ -249,7 +251,7 @@ public class BuilderScreen extends JPanel {
 					try {
 						area.add(new Graphic(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
 								Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
-								Integer.parseInt(elements[5].trim())));
+								Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
@@ -271,7 +273,7 @@ public class BuilderScreen extends JPanel {
 			area = new ArrayList<Tile>();
 			int i = 0;
 			for (String name : files) {
-				area.add(new Graphic(800, 150 * i + 50, 500, 100, 11));
+				area.add(new Graphic(800, 150 * i + 50, 500, 100, 1, 11));
 				area.get(area.size() - 1).setText(name);// .substring(0, name.length() - 4));
 				i++;
 			}
@@ -403,6 +405,7 @@ public class BuilderScreen extends JPanel {
 					if (current_type >= TileTypes.size()) {
 						current_type = 0;
 					}
+					System.out.println(TileTypes.get(current_type).id);
 					if (TileTypes.get(current_type).isInteractable == lastActiveTile.isInteractable()) {
 						lastActiveTile.setId(TileTypes.get(current_type).id);
 					} else if (TileTypes.get(current_type).isInteractable) {
