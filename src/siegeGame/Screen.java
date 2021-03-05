@@ -45,7 +45,11 @@ public class Screen extends JPanel {
 	private static Image[] face_images = { Toolkit.getDefaultToolkit().getImage("assets/SiegeNormal.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/SiegeLion.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/SiegeEnigmatic.png"),
-			Toolkit.getDefaultToolkit().getImage("assets/nian.png") };
+			Toolkit.getDefaultToolkit().getImage("assets/nian.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/w.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/w_smile.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/w_mad.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/w_crazy.png") };
 
 	// Handles scroll for player and background
 	public static int scrollx = 0;
@@ -77,6 +81,7 @@ public class Screen extends JPanel {
 	private boolean isShift = false;
 	private boolean isJump = false;
 	private boolean isAttack = false;
+	private boolean isHeavyAttack = false;
 	private int fade = 0;
 	private String fade_text = "TEST";
 	// private int direction = 1;
@@ -175,7 +180,6 @@ public class Screen extends JPanel {
 				}
 			}
 			player.draw(g2);
-
 		} else if (state == GameState.TITLE) {
 			g2.setColor(Color.BLACK);
 			g2.fillRect(0, 0, 2000, 1500);
@@ -186,10 +190,8 @@ public class Screen extends JPanel {
 			for (Tile tile : area) {
 				tile.draw(g2);
 			}
-
 		} else if (state == GameState.SELECT) {
 			// todo check visibility on level icons
-
 			g2.setFont(font);
 			g2.fillRect(0, 1000, 2000, 9999);
 			g2.drawImage(selectbg, scrollx, scrolly, null);
@@ -202,11 +204,10 @@ public class Screen extends JPanel {
 					tile.drawBoxAround(g2);
 				}
 				i++;
-				// }
 			}
 		}
-		for (Particle tile : particles) {
-			tile.draw(g2);
+		for (int i = 0; i < particles.size(); i++) {
+			particles.get(i).draw(g2);
 		}
 		// Secion handling text boxes
 		if (activeText) {
@@ -317,7 +318,7 @@ public class Screen extends JPanel {
 				}
 				fade_in_text = new Color(255, 255, 255, fade);
 			}
-			g2.fillRect(0, 0, 2000, 1500);
+			g2.fillRect(0, 0, 3500, 1500);
 			g2.setColor(fade_in_text);
 			g2.drawString(fade_text, Main.screenSize.width / 3, Main.screenSize.height / 2);
 		} else {
@@ -379,7 +380,7 @@ public class Screen extends JPanel {
 			for (Tile tile : area) {
 				tile.checkIsVisible();
 			}
-			for (int i = 0; i < interactables.size();i++) {
+			for (int i = 0; i < interactables.size(); i++) {
 				interactables.get(i).checkIsVisible();
 				interactables.get(i).nextFrame();
 				if (interactables.get(i).shouldRemove()) {
@@ -388,7 +389,7 @@ public class Screen extends JPanel {
 						makeEffect(interactables.get(i).getX(), interactables.get(i).getY(), 4, 0);
 					}
 					interactables.remove(interactables.get(i));
-					i-=1;
+					i -= 1;
 				}
 			}
 			for (Graphic tile : graphics) {
@@ -397,9 +398,9 @@ public class Screen extends JPanel {
 
 			// Player moves; calculating collision is also handled in this method
 			if (fade < 50) {
-				player.calcMove(left + right, isShift, isJump, isAttack);
+				player.calcMove(left + right, isShift, isJump, isAttack, isHeavyAttack);
 			} else {
-				player.calcMove(0, false, false, false);
+				player.calcMove(0, false, false, false, false);
 			}
 		}
 
@@ -524,23 +525,23 @@ public class Screen extends JPanel {
 	public int checkHorizontalCollision(Point2D.Double leftTop, Point2D.Double leftBot, Point2D.Double rightTop,
 			Point2D.Double rightBot) {
 		// For every tile
-		for (Tile tile : area) {
-			if (tile.isVisible() && tile.id < 100) {
+		for (int t = 0; t < area.size(); t++) {
+			if (area.get(t).isVisible() && area.get(t).id < 100) {
 				// See if either foot is inside something
-				if (tile.canDetectRight()) {
-					if (tile.isInside(leftTop)) {
+				if (area.get(t).canDetectRight()) {
+					if (area.get(t).isInside(leftTop)) {
 						// If so, return the location that the player should
 						// be snapped to
-						return tile.x + tile.width + 15 + 2;
-					} else if (tile.isInside(leftBot)) {
-						return tile.x + tile.width + 15 + 2;
+						return area.get(t).x + area.get(t).width + 15 + 2;
+					} else if (area.get(t).isInside(leftBot)) {
+						return area.get(t).x + area.get(t).width + 15 + 2;
 					}
 				}
-				if (tile.canDetectLeft()) {
-					if (tile.isInside(rightTop)) {
-						return tile.x - 75 - 2;
-					} else if (tile.isInside(rightBot)) {
-						return tile.x - 75 - 2;
+				if (area.get(t).canDetectLeft()) {
+					if (area.get(t).isInside(rightTop)) {
+						return area.get(t).x - 75 - 2;
+					} else if (area.get(t).isInside(rightBot)) {
+						return area.get(t).x - 75 - 2;
 					}
 				}
 			}
@@ -568,7 +569,14 @@ public class Screen extends JPanel {
 								textScrollNum[0] = 0;
 								textScrollNum[1] = 1;
 							}
-							// If the object is a finish line
+						// if the object is a respawn element
+						} else if (tile.getId() == -1) {
+							// TODO
+							int[] xy = tile.getTiedXY();
+							// problem- this is not centered on player anyway
+							scrollx -= xy[0]-tile.getX();
+							scrolly -= xy[1]-tile.getY();
+						// If the object is a finish line
 						} else if (tile.getId() == 99) {
 							levelAdvance(tile.getData());
 							return -1000001;
@@ -601,6 +609,10 @@ public class Screen extends JPanel {
 								textScrollNum[0] = 0;
 								textScrollNum[1] = 1;
 							}
+						} else if (tile.getId() == -1) {
+							//int[] xy = tile.getTiedXY();
+							//player.goTo(xy[0],xy[1]);
+						// If the object is a finish line
 						} else if (tile.getId() == 99) {
 							levelAdvance(tile.getData());
 							return -1000001;
@@ -717,7 +729,8 @@ public class Screen extends JPanel {
 		case 1:
 			// impact
 			for (int i = 0; i < 4; i++) {
-				particles.add(new Particle(x, y, 2 + (int) (Math.random() * 5), 2 + (int) (Math.random() * 5), 2));
+				particles.add(
+						new Particle(x+3, y+3, 2 + (int) (Math.random() * 5 + 5), 2 + (int) (Math.random() * 5 + 5), 2));
 			}
 			break;
 		case 3:
@@ -725,8 +738,8 @@ public class Screen extends JPanel {
 			break;
 		case 2:
 			// jumping
-			particles.add(new Particle(x - 20, y - 5, 10, 5, 3));
-			particles.add(new Particle(x + 60, y - 5, 10, 5, 4));
+			particles.add(new Particle(x - 15 + 5, y - 5 + 2, 10, 5, 3));
+			particles.add(new Particle(x + 60 + 2, y - 5 + 2, 10, 5, 4));
 			break;
 		case 4:
 			// smoke
@@ -741,6 +754,13 @@ public class Screen extends JPanel {
 			particles.add(new Particle(x + 40, y + 75, size, size, 5));
 			particles.add(new Particle(x + 40, y - 25, size, size, 5));
 			particles.add(new Particle(x + 40, y + 125, size, size, 5));
+			break;
+		case 5:
+			// strong impact
+			for (int i = 0; i < 7; i++) {
+				particles.add(
+						new Particle(x, y, 2 + (int) (Math.random() * 8 + 7), 2 + (int) (Math.random() * 8 + 7), 6));
+			}
 			break;
 		}
 	}
@@ -764,7 +784,7 @@ public class Screen extends JPanel {
 		// And prepare to load the next level
 		state = GameState.LEVEL;
 		fade = 320;
-		String next_lvl = "Stage 1-1";
+		String next_lvl = "";
 		switch (next) {
 		case 1:
 			next_lvl = "Stage 1-1";
@@ -774,6 +794,9 @@ public class Screen extends JPanel {
 			break;
 		case 3:
 			next_lvl = "Stage 1-3";
+			break; 
+		case 4:
+			next_lvl = "Stage 1-4";
 			break;
 		default:
 			System.err.println("Error: Finish element has no assigned destination");
@@ -845,9 +868,14 @@ public class Screen extends JPanel {
 				}
 			}
 
+			int first = 2;
 			// Process level file
 			String[] lines = raw_stage.split("\n");
 			for (String line : lines) {
+				if (first > 0) {
+					first -= 1;
+					continue;
+				}
 				String[] elements = line.split(",");
 				if (elements[0].trim().equals("Tile")) {
 					try {
@@ -859,12 +887,21 @@ public class Screen extends JPanel {
 					}
 				} else if (elements[0].trim().equals("Graphic")) {
 					try {
-						graphics.add(new Graphic(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
+						graphics.add(
+								new Graphic(Integer.parseInt(elements[1].trim()), Integer.parseInt(elements[2].trim()),
 										Integer.parseInt(elements[3].trim()), Integer.parseInt(elements[4].trim()),
 										Integer.parseInt(elements[5].trim()), Integer.parseInt(elements[6].trim())));
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage graphic: " + line);
 					}
+				} else if (elements[0].trim().equals("ConnectedTile")) {
+					Tile tied = new Tile(Integer.parseInt(elements[8].trim()), Integer.parseInt(elements[9].trim()),
+							Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
+							Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()));
+					interactables.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim()),tied));
 				} else {
 					try {
 						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()),
@@ -925,6 +962,22 @@ public class Screen extends JPanel {
 					case "[Nian]":
 						faces.add(face_images[3]);
 						faceNames.add("Nian");
+						break;
+					case "[W]":
+						faces.add(face_images[4]);
+						faceNames.add("W");
+						break;
+					case "[WSmile]":
+						faces.add(face_images[5]);
+						faceNames.add("W");
+						break;
+					case "[WMad]":
+						faces.add(face_images[6]);
+						faceNames.add("W");
+						break;
+					case "[WCrazy]":
+						faces.add(face_images[7]);
+						faceNames.add("W");
 						break;
 					case "[break]":
 						faces.add(BREAK_POINT_SIGNIFIER);
@@ -997,6 +1050,11 @@ public class Screen extends JPanel {
 					isAttack = true;
 				}
 				break;
+			case KeyEvent.VK_F:
+				if (state == GameState.LEVEL) {
+					isHeavyAttack = true;
+				}
+				break;
 			case KeyEvent.VK_ENTER:
 				if (state == GameState.TITLE) {
 					state = GameState.SELECT;
@@ -1030,8 +1088,7 @@ public class Screen extends JPanel {
 			case KeyEvent.VK_R:
 				scrollx = 0;
 				scrolly = 100;
-				player.litx = 0;
-				player.lity = 0;
+				player.goTo(0, 0);
 				break;
 			case KeyEvent.VK_A:
 				left = -1;
@@ -1061,10 +1118,12 @@ public class Screen extends JPanel {
 					Main.scrollPos[1] = Main.gameSize.width * 2 / 3;
 					Main.scrollPos[2] = Main.gameSize.width / 5;
 					Main.scrollPos[3] = Main.gameSize.width * 2 / 5;
-					if (change && Main.scrollPos[3] < player.y && (player.state == State.GROUNDED || player.state == State.BASIC_ATTACK || player.state == State.LANDING || player.state == State.JUMPSQUAT)) {
-						//System.out.println("Adjusting player location");
+					if (change && Main.scrollPos[3] < player.y
+							&& (player.state == State.GROUNDED || player.state == State.BASIC_ATTACK
+									|| player.state == State.LANDING || player.state == State.JUMPSQUAT)) {
+						// System.out.println("Adjusting player location");
 						player.adjust(0, 60);
-					} 
+					}
 				}
 				break;
 			case KeyEvent.VK_DOWN:
@@ -1129,6 +1188,9 @@ public class Screen extends JPanel {
 				break;
 			case KeyEvent.VK_E:
 				isAttack = false;
+				break;
+			case KeyEvent.VK_F:
+				isHeavyAttack = false;
 				break;
 			case 16:
 				isShift = false;

@@ -18,12 +18,14 @@ public class Interactable extends Tile {
 	private int data = -1;
 
 	// Whether an object can be stood on
-	private boolean isTangible = true;
+	protected boolean isTangible = true;
 
 	// Whether moving against the object has an effect;
 	// Note that all Interactables have interaction when hit.
-	private boolean hasInteraction = true;
+	protected boolean hasInteraction = true;
+	// Counter for how much time until an action will happen
 	private int action = -1;
+	// Flag that can be set do do things...
 	private boolean flag = false;
 
 	public Interactable(int x, int y, int width, int height) {
@@ -33,10 +35,13 @@ public class Interactable extends Tile {
 	public Interactable(int x, int y, int width, int height, int id) {
 		this(x, y, width, height, 0, id, -1);
 	}
+	public Interactable(int x, int y, int width, int height, int clipType, int id) {
+		this(x, y, width, height, clipType, id, 0);
+	}
 
 	public Interactable(int x, int y, int width, int height, int clipType, int id, int information) {
 		super(x, y, width, height, clipType, id);
-		if (id == 70 || id == 99) {
+		if (id == 70 || id == 71 || id == 99) {
 			isTangible = false;
 		}
 		data = information;
@@ -152,6 +157,8 @@ public class Interactable extends Tile {
 		case 71:
 			return 2;
 		case 99:
+			return -1;
+		case -1:
 			return -1;
 		default:
 			System.out.println("Invalid Interactable type");

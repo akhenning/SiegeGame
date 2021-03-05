@@ -3,6 +3,7 @@ package stageBuilder;
 import javax.swing.JPanel;
 
 import siegeGame.Tile;
+import siegeGame.ConnectedTile;
 import siegeGame.Graphic;
 import siegeGame.Interactable;
 import siegeGame.Player;
@@ -48,6 +49,8 @@ public class BuilderScreen extends JPanel {
 
 	public ArrayList<TileType> TileTypes = new ArrayList<TileType>();
 	public int current_type = 0;
+	public ArrayList<TileType> ComplexTypes = new ArrayList<TileType>();
+	public int current_complex_type = 0;
 
 	public static int scrollx = 0;
 	public static int scrolly = 0;
@@ -58,7 +61,7 @@ public class BuilderScreen extends JPanel {
 	// RectObj finish=new RectObj(new Point2D.Double(3000,100),50,1000,Color.BLACK);
 	private boolean isShift = false;
 	private Tile lastActiveTile = null;
-	private int mode = 0;// 0 is drag, 1 is resize, 2 is change, 3 is add, 4 is change collision type
+	private int mode = 0;// 0 is drag, 1 is resize, 2 is change, 3 is add, 4 is change collision type, 5 is add complex object
 	boolean canDrag = false;// true if currently dragging
 	boolean nowResize;// true is resize mode
 	private Point2D.Double lastPoint = null;
@@ -88,7 +91,7 @@ public class BuilderScreen extends JPanel {
 
 	public BuilderScreen() {
 		TileTypes.add(new TileType(0, false, "Basic black block"));
-		TileTypes.add(new TileType(-1, false, "Invisible block"));
+		TileTypes.add(new TileType(2, false, "Invisible block"));
 		TileTypes.add(new TileType(101, false, "Right-facing slope"));
 		TileTypes.add(new TileType(102, false, "Left-facing slope"));
 		TileTypes.add(new TileType(50, true, "Basic bounce pad"));
@@ -97,6 +100,8 @@ public class BuilderScreen extends JPanel {
 		TileTypes.add(new TileType(70, true, "Basic text prompter"));
 		TileTypes.add(new TileType(71, true, "Basic activated text prompter"));
 		TileTypes.add(new TileType(99, true, "Basic finish element"));
+		ComplexTypes.add(new TileType(-1, false, "Respawn Paired Element"));
+		ComplexTypes.add(new TileType(0, false, "Blank Graphic"));
 
 		setBackground(Color.WHITE);
 		addMouseListener(new ClickListener());
@@ -155,6 +160,10 @@ public class BuilderScreen extends JPanel {
 			if (mode == 3) {
 				g2.drawString("Adding: " + TileTypes.get(current_type).description,
 						(int) (BuilderMain.gameSize.width * .07), fontY);
+			} else if (mode == 5) {
+				g2.drawString("Adding: " + ComplexTypes.get(current_complex_type).description,
+						(int) (BuilderMain.gameSize.width * .07), fontY);
+				
 			}
 
 			g2.setFont(font);
@@ -179,7 +188,10 @@ public class BuilderScreen extends JPanel {
 				g2.drawString("Mode: Collision", fontX, fontY);
 				g2.drawString("Change Type", (int) (BuilderMain.gameSize.width * .07), fontY);
 				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
-			}
+			} else if (mode == 5) {
+				g2.drawString("Mode: Add Complex", fontX, fontY);
+				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+			} 
 		} else if (state == GameState.SELECT) {
 			g2.setFont(font2);
 			g2.fillRect(0, 1000, 2000, 9999);
@@ -235,9 +247,14 @@ public class BuilderScreen extends JPanel {
 				}
 			}
 
+			int first = 2;
 			area = new ArrayList<Tile>();
 			String[] lines = raw_stage.split("\n");
 			for (String line : lines) {
+				if (first > 0) {
+					first -= 1;
+					continue;
+				}
 				String[] elements = line.split(",");
 				if (elements[0].trim().equals("Tile")) {
 					try {
@@ -255,6 +272,14 @@ public class BuilderScreen extends JPanel {
 					} catch (Exception e) {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
+				} else if (elements[0].trim().equals("ConnectedTile")) {
+					Tile tied = new Tile(Integer.parseInt(elements[8].trim()), Integer.parseInt(elements[9].trim()),
+							Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
+							Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()));
+					area.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim()),tied));
 				} else {
 					try {
 						area.add(new Interactable(Integer.parseInt(elements[1].trim()),
@@ -295,8 +320,12 @@ public class BuilderScreen extends JPanel {
 
 			out = new FileOutputStream(file);
 			// out = new FileOutputStream("stages/1.txt");
+			out.write("Element Type\tX\tY\tWidth\tHeight\tClip\tID\tOther\tDescription\n".getBytes());
+			out.write("-------------------------------------------------------------------------------------------\n".getBytes());
 			for (Tile tile : area) {
-				out.write(tile.toString().getBytes());
+				if (tile.should_be_saved) {
+					out.write(tile.toString().getBytes());
+				}
 			}
 			// for (Interactable inter : interactables) {
 			// out.write(inter.toString().getBytes());
@@ -388,7 +417,7 @@ public class BuilderScreen extends JPanel {
 				break;
 			case KeyEvent.VK_E:
 				mode += 1;
-				if (mode > 4) {
+				if (mode > 5) {
 					mode = 0;
 				}
 				break;
@@ -434,6 +463,12 @@ public class BuilderScreen extends JPanel {
 						lastActiveTile.cycleCollision();
 					}
 					break;
+				case 5:
+					current_complex_type += 1;
+					if (current_complex_type >= ComplexTypes.size()) {
+						current_complex_type = 0;
+					}
+					break;
 				}
 				break;
 			case KeyEvent.VK_UP:
@@ -468,6 +503,7 @@ public class BuilderScreen extends JPanel {
 				}
 				break;
 			case KeyEvent.VK_DELETE:
+				lastActiveTile.cleanup();
 				area.remove(lastActiveTile);
 				lastActiveTile = null;
 			default:
@@ -543,6 +579,25 @@ public class BuilderScreen extends JPanel {
 					selectOffset = lastActiveTile.getDifference(point);
 					lastPoint = point;
 					hasChanges = true;
+				}
+				if (lastActiveTile == null && mode == 5) {
+					if (ComplexTypes.get(current_complex_type).id == -1) {
+						lastActiveTile = new ConnectedTile(0, 0, 200, 200, 0, TileTypes.get(current_type).id);
+						lastActiveTile.goToTied(point.getX(), point.getY() - 100);
+						area.add(lastActiveTile.getTied());
+					} else {
+						lastActiveTile = new Graphic(0,0,ComplexTypes.get(current_complex_type).id);
+					}
+					if (lastActiveTile != null) {
+						lastActiveTile.goTo(point.getX() - 100, point.getY() - 100);
+						canDrag = true;
+						area.add(lastActiveTile);
+						selectOffset = lastActiveTile.getDifference(point);
+						lastPoint = point;
+						hasChanges = true;
+					} else {
+						System.out.println("Error: adding unrecognized type with id: " + ComplexTypes.get(current_complex_type).id);
+					}
 				}
 			}
 			// System.out.println(point.getX());

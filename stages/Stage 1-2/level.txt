@@ -1,38 +1,13 @@
-Tile,		-20,	620,	1320,	120,	1,		0,	Basic black block
-Interactable,	-20,	420,	200,	200,	0,	50,	-1,	Bounce pad
-Tile,		-220,	0,	200,	740,	3,		0,	Basic black block
-Tile,		-1460,	-100,	1780,	100,	1,		0,	Basic black block
-Tile,		240,	-100,	80,	100,	3,		0,	Basic black block
-Tile,		1280,	-460,	200,	1200,	2,		0,	Basic black block
-Tile,		1280,	-460,	700,	200,	1,		0,	Basic black block
-Interactable,	-1460,	-240,	140,	140,	0,	50,	-1,	Bounce pad
-Tile,		-1660,	-700,	200,	700,	3,		0,	Basic black block
-Interactable,	-1460,	-240,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1260,	-240,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1060,	-240,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1260,	-380,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1460,	-380,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1460,	-520,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1260,	-520,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1060,	-380,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-1060,	-520,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-860,	-240,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-860,	-380,	200,	140,	0,	60,	-1,	Destructable block
-Interactable,	-860,	-520,	200,	140,	0,	60,	-1,	Destructable block
-Tile,		1080,	-1900,	200,	1020,	2,		0,	Basic black block
-Tile,		1980,	-2760,	200,	2500,	2,		0,	Basic black block
-Tile,		1500,	-660,	280,	200,	0,		101,	Right-leaning slope
-Interactable,	1780,	-1920,	200,	1460,	2,	50,	-1,	Bounce pad
-Interactable,	1280,	-1900,	200,	1020,	3,	50,	-1,	Bounce pad
-Tile,		1280,	-2100,	200,	200,	0,		102,	Left-leaning slope
-Tile,		1780,	-2120,	200,	200,	0,		101,	Right-leaning slope
-Tile,		-2500,	-700,	1040,	200,	1,		0,	Basic black block
-Interactable,	-2500,	-2680,	200,	1980,	3,	50,	-1,	Bounce pad
-Tile,		-1920,	-1260,	200,	200,	1,		0,	Basic black block
-Tile,		-1920,	-1780,	200,	200,	1,		0,	Basic black block
-Interactable,	-1920,	-1780,	200,	720,	2,	50,	-1,	Bounce pad
-Tile,		1080,	-2100,	200,	200,	0,		101,	Right-leaning slope
-Tile,		0,	-1080,	1080,	200,	1,		0,	Basic black block
-Interactable,	1780,	-2640,	200,	200,	0,	99,	3,	Finish element
-Interactable,	631,	-1274,	200,	200,	0,	61,	-1,	W (leaves when hit)
-Tile,		0,	-1080,	200,	200,	2,		0,	Basic black block
+Element Type	X	Y	Width	Height	Clip	ID	Other	Description
+-------------------------------------------------------------------------------------------
+Tile,		-220,	600,	1600,	200,	1,	0,		Basic black block
+Interactable,	900,	400,	200,	200,	0,	70,	2,	Text continuer
+Tile,		-420,	-500,	200,	1300,	3,	0,		Basic black block
+Interactable,	-220,	400,	200,	200,	0,	50,	-1,	Bounce pad
+Tile,		2300,	-20,	1140,	200,	1,	0,		Basic black block
+Interactable,	3240,	-220,	200,	200,	0,	99,	3,	Finish element
+Tile,		2300,	0,	200,	1620,	2,	0,		Basic black block
+Tile,		1180,	620,	200,	960,	3,	0,		Basic black block
+Tile,		3440,	-1220,	200,	1400,	2,	0,		Basic black block
+Graphic,	-418,	794,	1604,	780,	1,	0,		Blank black graphic
+Graphic,	2496,	180,	1142,	1438,	1,	0,		Blank black graphic

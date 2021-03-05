@@ -21,6 +21,7 @@ public class Player {
 	public static Image strike = Toolkit.getDefaultToolkit().getImage("assets/air_strike.png");
 	public static Image landing = Toolkit.getDefaultToolkit().getImage("assets/landing.png");
 	public static Image attack = Toolkit.getDefaultToolkit().getImage("assets/attack_fast.png");
+	public static Image heavy_attack = Toolkit.getDefaultToolkit().getImage("assets/heavy_attack.png");
 	public static Image[] skid = { Toolkit.getDefaultToolkit().getImage("assets/skid.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/skid2.png") };
 
@@ -40,11 +41,11 @@ public class Player {
 	private final int[] FOOT_WIDTH = { 5, 57 };
 
 	public enum State {
-		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, BASIC_ATTACK
+		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, BASIC_ATTACK, HEAVY_ATTACK
 	}
 
 	public enum Animation {
-		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, IDLE, WALKING, BASIC_ATTACK, NONE
+		GROUNDED, JUMPSQUAT, JUMPING, HOVERING, DESCENDING, LANDING, IDLE, WALKING, BASIC_ATTACK, HEAVY_ATTACK, NONE
 	}
 
 	State state = State.GROUNDED;
@@ -54,6 +55,7 @@ public class Player {
 	private int animationFrame = 0;
 	private Animation previousAnimation = Animation.NONE;
 	private int rotations = 0;
+	private boolean aerial_attack_state = false;
 
 	private ArrayList<Hitbox> hitboxes = new ArrayList<Hitbox>();
 
@@ -108,8 +110,42 @@ public class Player {
 					state = State.GROUNDED;
 					animationFrame = 0;
 				}
-			}
-			if (state == State.JUMPSQUAT) {
+			} else if (state == State.HEAVY_ATTACK) {
+				int offset = 325;
+				// Check if this is the first frame of the new animation
+				if (previousAnimation != Animation.HEAVY_ATTACK) {
+					animationFrame = 0;
+					previousAnimation = Animation.HEAVY_ATTACK;
+					width = MakeSureImageHasLoaded(heavy_attack);
+				}
+				if (animationFrame == 32) {
+					isHitbox = true;
+					hitboxes.get(0).setActive(true, direction);
+					hitboxes.get(1).setActive(true, direction);
+				} else if (animationFrame == 34) {
+					hitboxes.get(0).setActive(false, direction);
+					hitboxes.get(1).setActive(false, direction);
+					hitboxes.get(2).setActive(true, direction);
+					this.screen.makeEffect(-Screen.scrollx+x+30+(direction*110),-Screen.scrolly+y,5,direction);
+				} else if (animationFrame == 35) {
+					hitboxes.get(2).setActive(false, direction);
+					isHitbox = false;
+				}
+
+				if (direction == 1) {
+					g2.drawImage(heavy_attack, x - 115, y - 85 - 152, offset + x - 115, y + 340 - 85 - 152,
+							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
+				} else {
+					g2.drawImage(heavy_attack, offset + x - 115 - 32, y - 85 - 152, x - 115 - 32, y + 340 - 85 - 152,
+							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
+				}
+				animationFrame += 1;
+				// check if end of animation without hardcoding number of frames
+				if (offset * animationFrame + 300 > width) {
+					state = State.GROUNDED;
+					animationFrame = 0;
+				}
+			} else if (state == State.JUMPSQUAT) {
 				int offset = 300;
 				// Check if this is the first frame of the new animation
 				if (previousAnimation != Animation.JUMPSQUAT) {
@@ -215,7 +251,9 @@ public class Player {
 					previousAnimation = Animation.DESCENDING;
 					width = MakeSureImageHasLoaded(strike);
 				}
-				if (animationFrame == 8) {
+				if (animationFrame == 6) {
+					aerial_attack_state = true;
+				} else if (animationFrame == 8) {
 					isHitbox = true;
 					hitboxes.get(0).setActive(true, direction);
 					hitboxes.get(1).setActive(true, direction);
@@ -224,8 +262,8 @@ public class Player {
 					hitboxes.get(1).setActive(false, direction);
 					hitboxes.get(2).setActive(true, direction);
 				} else if (animationFrame == 10) {
-					hitboxes.get(2).setActive(false, direction);
-					isHitbox = false;
+					//hitboxes.get(2).setActive(false, direction);
+					//isHitbox = false;
 				}
 				if (direction == 1) {
 					g2.drawImage(strike, x - 36 - 67, y - 85 - 223, offset + x - 36 - 67, y + 340 - 85 - 223,
@@ -238,16 +276,22 @@ public class Player {
 				if (offset * animationFrame + 300 > width) {
 					animationFrame -= 1;
 				}
-			} else if (state == State.LANDING) {
+			} else if (state == State.LANDING && aerial_attack_state) {
 				int offset = 300;
 				if (previousAnimation != Animation.LANDING) {
-					isHitbox = false;
 					for (Hitbox box : hitboxes) {
 						box.setActive(false, direction);
 					}
 					animationFrame = 0;
 					previousAnimation = Animation.LANDING;
 					width = MakeSureImageHasLoaded(landing);
+				}
+				if (animationFrame == 0) {
+					isHitbox = true;
+					hitboxes.get(2).setActive(true, direction);
+				} else if (animationFrame == 4) {
+					hitboxes.get(2).setActive(false, direction);
+					isHitbox = false;
 				}
 				if (direction == 1) {
 					g2.drawImage(landing, x - 36 - 67, y - 85 - 223, offset + x - 36 - 67, y + 340 - 85 - 223,
@@ -259,6 +303,30 @@ public class Player {
 				animationFrame += 2;
 				if (offset * animationFrame + 300 > width) {
 					state = State.GROUNDED;
+					aerial_attack_state = false;
+				}
+			} else if (state == State.LANDING && !aerial_attack_state) {
+				int offset = 300;
+				if (previousAnimation != Animation.LANDING) {
+					isHitbox = false;
+					for (Hitbox box : hitboxes) {
+						box.setActive(false, direction);
+					}
+					animationFrame = 6;
+					previousAnimation = Animation.LANDING;
+					width = MakeSureImageHasLoaded(jumpsquat);
+				}
+				if (direction == 1) {
+					g2.drawImage(jumpsquat, x - 36 - 67, y - 85 - 223, offset + x - 36 - 67, y + 340 - 85 - 223,
+							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
+				} else {
+					g2.drawImage(jumpsquat, offset + x - 36 - 67 - 32, y - 85 - 223, x - 36 - 67 - 32, y + 340 - 85 - 223,
+							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
+				}
+				animationFrame -= 1;
+				if (animationFrame < 0) {
+					state = State.GROUNDED;
+					aerial_attack_state = false;
 				}
 			}
 		} else if (xspeed == 0) {
@@ -363,7 +431,7 @@ public class Player {
 
 	}
 
-	public void calcMove(double xMove, boolean isShift, boolean isJump, boolean isAttack) {
+	public void calcMove(double xMove, boolean isShift, boolean isJump, boolean isAttack, boolean isHeavyAttack) {
 		boolean doLandingCheck = false;
 		isSpace = isJump;
 
@@ -382,9 +450,11 @@ public class Player {
 		// Check for start of attack
 		if (isAttack && state == State.GROUNDED) {
 			state = State.BASIC_ATTACK;
+		} else if (isHeavyAttack && state == State.GROUNDED) {
+			state = State.HEAVY_ATTACK;
 		}
 		// Handle movement while attacking
-		if (state == State.BASIC_ATTACK) {
+		if (state == State.BASIC_ATTACK || state == State.HEAVY_ATTACK) {
 			xspeed *= .8;
 			litx += xspeed;
 		}
@@ -400,11 +470,19 @@ public class Player {
 		// Check if smacking a bounce pad
 		if (isHitbox && screen.checkHitboxCollision(hitboxes)) {
 			// If so, transition to airborne state and go flying in opposite direction
-			state = State.JUMPING;
-			yspeed = -30;
-			direction *= -1;
-			// This is the speed of knockback
-			xspeed = 25 * direction;
+			if (state == State.HEAVY_ATTACK) {
+				state = State.JUMPING;
+				yspeed = -40;
+				direction *= -1;
+				// This is the speed of knockback
+				xspeed = 35 * direction;
+			} else {
+				state = State.JUMPING;
+				yspeed = -30;
+				direction *= -1;
+				// This is the speed of knockback
+				xspeed = 25 * direction;
+			}
 			for (Hitbox box : hitboxes) {
 				box.setActive(false, direction);
 			}
@@ -468,8 +546,6 @@ public class Player {
 		}
 
 		// All good games have jump-cancelling
-		// ...though maybe I shouldn't, lol
-		// Oh. How about only after the hitboxes come out!
 		if (isJump && state == State.BASIC_ATTACK && animationFrame > 12) {
 			state = State.JUMPSQUAT;
 			xspeed *= .8;
@@ -503,7 +579,7 @@ public class Player {
 
 		// Check if (airborne) player has their HEAD in a CEILING or are about to LAND
 		if (state != State.GROUNDED && state != State.JUMPSQUAT && state != State.LANDING
-				&& state != State.BASIC_ATTACK) {
+				&& state != State.BASIC_ATTACK && state != State.HEAVY_ATTACK) {
 			// Find location of head (animation dependent)
 			Point2D.Double leftHead;
 			Point2D.Double rightHead;
@@ -544,7 +620,7 @@ public class Player {
 		}
 
 		// Check case where grounded player walks off of the ground (i.e. ledge)
-		if ((state == State.GROUNDED || state == State.BASIC_ATTACK) || doLandingCheck) {
+		if ((state == State.GROUNDED || state == State.BASIC_ATTACK || state == State.HEAVY_ATTACK) || doLandingCheck) {
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
@@ -555,6 +631,8 @@ public class Player {
 						new Point2D.Double(rightFoot.getX(), rightFoot.getY() + check_below))) {
 					lity += 6;// 6;
 				} else {
+					aerial_attack_state = false;
+					isHitbox = false;
 					state = State.JUMPING;
 					animationFrame = 1;
 					previousAnimation = Animation.JUMPING;
@@ -615,7 +693,7 @@ public class Player {
 		return width;
 	}
 
-	// To adjut the player when zooming and unzooming.
+	// To adjust the player when zooming and unzooming.
 	public void adjust(int x_diff, int y_diff) {
 		litx += x_diff;
 		lity += y_diff;
@@ -631,9 +709,14 @@ public class Player {
 		}*/
 	}
 
+	public void goTo(int x, int y) {
+		litx = x;
+		lity = y;
+	}
+	
 	// Loads images to remove flickering
 	public void load(Graphics2D g2) {
-		Image sprites[] = { walk, IDLE, jumpsquat, jumping, hovering, strike, landing };
+		Image sprites[] = { walk, IDLE, jumpsquat, jumping, hovering, strike, landing, attack, heavy_attack };
 		for (Image sprite : sprites) {
 			g2.drawImage(sprite, 0, 0, null);
 			// g2.drawImage(sprite, x, y, x - 36 - 67, y + 340 - 85 - 223, animationFrame,

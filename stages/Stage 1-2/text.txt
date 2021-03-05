@@ -1,0 +1,5 @@
+[SiegeNormal] Alright, I think I'm almost back to Rhodes Island.
+[break] break
+[SiegeEnigmatic] Hmm. This giant gaping hole in the ground was not here when I left.
+[SiegeEnigmatic] *I don't think I can jump over this normally*, so we'll need to find another way.
+[break] break

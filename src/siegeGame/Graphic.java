@@ -20,6 +20,11 @@ public class Graphic extends Tile {
 	public Graphic(int x, int y, int id) {
 		super(x, y, -1, -1, 0, id);
 		switch (id) {
+		case 0:
+			// blank black space filler
+			width = 200;
+			height = 200;
+			break;
 		case 7:
 			// W vibing (with gun)
 			width = 171;
@@ -62,7 +67,7 @@ public class Graphic extends Tile {
 
 	public Graphic(int x, int y, int width, int height, int direction, int id) {
 		this(x, y, id);
-		if (id == 11) {
+		if (id == 11 || id == 0) {
 			this.width = width;
 			this.height = height;
 		}
@@ -82,6 +87,9 @@ public class Graphic extends Tile {
 
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
 		switch (id) {
+		case 0:
+			g2.fillRect(scrollx + x, scrolly + y, width, height);
+			break;
 		case 7:
 			if (direction == 1) {
 				g2.drawImage(w_idle, x + scrollx - 6, y + scrolly, x + scrollx + width - 6, y + scrolly + height,
@@ -146,6 +154,9 @@ public class Graphic extends Tile {
 
 	public String toString() {
 		switch (id) {
+		case 0:
+			type = "Blank black graphic";
+			break;
 		case 9:
 			type = "W Dancing";
 			break;

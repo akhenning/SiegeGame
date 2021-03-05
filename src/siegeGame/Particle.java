@@ -16,10 +16,11 @@ public class Particle {
 	protected int timeRemaining;
 	protected int alpha = 255;
 	protected int time_till_opacity_drops = 5;
+	protected Color color = Color.black;
 
 	public Particle(int x, int y, int width, int height, int id) {
-		this.x = x;
-		this.y = y;
+		this.x = x-(width/2);
+		this.y = y-(height/2);
 		this.height = height;
 		this.width = width;
 		this.id = id;
@@ -49,10 +50,30 @@ public class Particle {
 			dy = -1;
 			break;
 		case 5:
+			// oversight
+			this.x = x;
+			this.y = y;
 			// Large puff of smoke
 			timeRemaining = 45;
 			dx = Math.random() * 10 - 5;
 			dy = Math.random() * 5 - 2.5;
+			break;
+		case 6:
+			// large impact debris
+			timeRemaining = 20;
+			dx = Math.random() * 40 - 20;
+			dy = Math.random() * -30;
+			switch((int)(Math.random()*5)) {
+				case 2:
+					color = Color.YELLOW;
+					break;
+				case 3:
+					color = Color.ORANGE;
+					break;
+				case 4:
+					color = Color.GRAY;
+					break;
+			}
 			break;
 		}
 	}
@@ -70,7 +91,7 @@ public class Particle {
 			g2.drawImage(Interactable.gravel, scrollx + (int) x, scrolly + (int) y, (int) width, (int) height, null);
 			break;
 		case 2:
-			g2.setColor(Color.BLACK);
+			g2.setColor(color);
 			g2.draw(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int) width, (int) height));
 			g2.setColor(Color.gray);
 			break;
@@ -93,6 +114,11 @@ public class Particle {
 			g2.fill(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int) width, (int) height));
 			g2.setColor(Color.gray);
 			break;
+		case 6:
+			g2.setColor(color);
+			g2.fill(new Ellipse2D.Double(scrollx + (int) x, scrolly + (int) y, (int) width, (int) height));
+			g2.setColor(Color.gray);
+			break;
 		default:
 		}
 	}
@@ -107,6 +133,13 @@ public class Particle {
 			height -= 1;
 			break;
 		case 2:
+			x += dx;
+			y += dy;
+			dy += 1;
+			width -= .5;
+			height -= .5;
+			break;
+		case 6:
 			x += dx;
 			y += dy;
 			dy += 1;

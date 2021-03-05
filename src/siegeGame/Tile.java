@@ -9,11 +9,18 @@ import java.awt.geom.Point2D;
 
 // Id:
 // 0 = black square
+// 1 = respawn destination (appears as Siege)
+// 2 = invisible block
 // >50 <100 = interactable
 // 50 = bouncy default
+// 60 = destructable block
+// 70 = text prompt
+// 71 = activated text prompt
+// 99 = finish line
 // >100 = slope
 // 101 = right slope
 // 102 = left slope
+// -1 = respawn block 
 
 public class Tile {
 
@@ -34,6 +41,7 @@ public class Tile {
 	private boolean can_clip_left = true;
 	private boolean can_clip_right = true;
 	protected Graphic animated_graphic = null;
+	public boolean should_be_saved = true;
 
 	public enum SlopeState {
 		NONE, LEFT, RIGHT
@@ -64,6 +72,9 @@ public class Tile {
 				slopeState = SlopeState.LEFT;
 				slope = -((double) height) / ((double) width);
 			}
+		}
+		if (id == 1) {
+			should_be_saved = false;
 		}
 
 		// Let's try to make it so that this doesn't need to calculate every frame
@@ -107,6 +118,12 @@ public class Tile {
 			break;
 		case 0:
 			g2.fillRect(scrollx + x, scrolly + y, width, height);
+			break;
+		case 1:
+			if (Main.debug) {
+				g2.drawImage(Player.IDLE, scrollx + x - 67, scrolly + y - 223, scrollx + 200 + x - 67, scrolly + y + 250 - 223, 0, 0,
+						200, 250, null);
+			}
 		default:
 			if (Main.debug) {
 				g2.drawRect(scrollx + x, scrolly + y, width, height);
@@ -373,11 +390,14 @@ public class Tile {
 		case 0:
 			type = "Basic black block";
 			break;
-		case -1:
+		case 1:
+			type = "Respawn Destination";
+			break;
+		case 2:
 			type = "Invisible block";
 			break;
 		}
-		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t\t" + id + ",\t"
+		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id + ",\t\t"
 				+ type + "\n";
 	}
 
@@ -455,6 +475,19 @@ public class Tile {
 
 	public boolean shouldRemove() {
 		return toRemove;
+	}
+
+	public void goToTied(double x, double y) {
+	}
+	public Tile getTied() {
+		System.out.println("This message should not appear (getTied)");
+		return null;
+	}
+	public int[] getTiedXY() {
+		System.out.println("This message should not appear (getTiedXY)");
+		return null;
+	}
+	public void cleanup() {
 	}
 
 	public void drawBoxAround(Graphics2D g2, int scrollx, int scrolly) {
