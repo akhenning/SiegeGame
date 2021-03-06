@@ -714,6 +714,39 @@ public class Player {
 		lity = y;
 	}
 	
+	/* NOTE: FOR LEFT FOOT
+	 */
+	public int getAbsoluteX() {
+		return (int)(litx - Screen.scrollx + FOOT_WIDTH[0]);
+	}
+	public int getAbsoluteY() {
+		return (int)(lity - Screen.scrolly);
+	}
+	
+	public void goToAbsolute(int x, int y) {
+		// if absX = litx - scollx, then
+		// litx = absX + scrollx
+		litx = x + Screen.scrollx;
+		lity = y + Screen.scrolly;
+	}
+	
+	public void forceLanding() {
+		Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly);
+		Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly);
+		int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
+		if (groundLevel != 1000001) {
+			System.out.println("FORCED LANDING");
+			lity = groundLevel + Screen.scrolly;
+			yspeed = 0;
+			xspeed = 0;
+			state = State.GROUNDED;
+			isHitbox = false;
+			for (Hitbox box : hitboxes) {
+				box.setActive(false, direction);
+			}
+		}
+	}
+	
 	// Loads images to remove flickering
 	public void load(Graphics2D g2) {
 		Image sprites[] = { walk, IDLE, jumpsquat, jumping, hovering, strike, landing, attack, heavy_attack };

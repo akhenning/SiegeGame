@@ -121,8 +121,8 @@ public class Tile {
 			break;
 		case 1:
 			if (Main.debug) {
-				g2.drawImage(Player.IDLE, scrollx + x - 67, scrolly + y - 223, scrollx + 200 + x - 67, scrolly + y + 250 - 223, 0, 0,
-						200, 250, null);
+				g2.drawImage(Player.IDLE, scrollx + x - 67, scrolly + y - 223 + 250, scrollx + 200 + x - 67,
+						scrolly + y + 250 - 223 + 250, 0, 0, 200, 250, null);
 			}
 		default:
 			if (Main.debug) {
@@ -190,8 +190,8 @@ public class Tile {
 	public void goTo(double x, double y) {
 		this.x = (int) x;
 		this.y = (int) y;
-		if(animated_graphic != null) {
-			animated_graphic.goTo(x,y);
+		if (animated_graphic != null) {
+			animated_graphic.goTo(x, y);
 		}
 	}
 
@@ -341,7 +341,7 @@ public class Tile {
 	// Snap the tile to nearest values that are a multiple of 20, to make it look
 	// more seamless.
 	public void snap() {
-		if(animated_graphic != null) {
+		if (animated_graphic != null) {
 			return;
 		}
 		x = (int) (Math.round(((double) x) / 20) * 20);
@@ -479,14 +479,17 @@ public class Tile {
 
 	public void goToTied(double x, double y) {
 	}
+
 	public Tile getTied() {
 		System.out.println("This message should not appear (getTied)");
 		return null;
 	}
+
 	public int[] getTiedXY() {
 		System.out.println("This message should not appear (getTiedXY)");
 		return null;
 	}
+
 	public void cleanup() {
 	}
 
@@ -525,7 +528,7 @@ public class Tile {
 	public boolean isInteractable() {
 		return false;
 	}
-	
+
 	public void setToRemove() {
 		toRemove = true;
 	}

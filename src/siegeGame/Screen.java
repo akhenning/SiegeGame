@@ -301,7 +301,7 @@ public class Screen extends JPanel {
 			g2.setFont(fade_font);
 			// if above 300, reduce by one (black) until is normal alpha
 			Color fade_in_text = null;
-			if (fade > 300) {
+			if (fade >= 300) {
 				g2.setColor(Color.BLACK);
 				fade -= 1;
 				if (fade <= 300) {
@@ -466,6 +466,16 @@ public class Screen extends JPanel {
 							if (tile.y < highest) {
 								highest = tile.getHeight(rightFoot.getX());
 							}
+						// if the object is a respawn element
+						} else if (tile.getId() == -1) {
+							int[] dest_xy = tile.getTiedXY();
+							// int[] src_xy = {tile.getX()+(tile.getWidth()/2), tile.getY() +
+							// (tile.getHeight()/2)};
+							// int[] player_xy = {player.getAbsoluteX(), player.getAbsoluteY()};
+							player.goToAbsolute(dest_xy[0], dest_xy[1] + 250);
+							player.forceLanding();
+							fade = 300;
+							fade_text = "";
 						}
 					}
 					// I commented the below, because it shouldn't ever matter
@@ -569,14 +579,17 @@ public class Screen extends JPanel {
 								textScrollNum[0] = 0;
 								textScrollNum[1] = 1;
 							}
-						// if the object is a respawn element
+							// if the object is a respawn element
 						} else if (tile.getId() == -1) {
-							// TODO
-							int[] xy = tile.getTiedXY();
-							// problem- this is not centered on player anyway
-							scrollx -= xy[0]-tile.getX();
-							scrolly -= xy[1]-tile.getY();
-						// If the object is a finish line
+							int[] dest_xy = tile.getTiedXY();
+							// int[] src_xy = {tile.getX()+(tile.getWidth()/2), tile.getY() +
+							// (tile.getHeight()/2)};
+							// int[] player_xy = {player.getAbsoluteX(), player.getAbsoluteY()};
+							player.goToAbsolute(dest_xy[0], dest_xy[1] + 250);
+							player.forceLanding();
+							fade = 300;
+							fade_text = "";
+							// If the object is a finish line
 						} else if (tile.getId() == 99) {
 							levelAdvance(tile.getData());
 							return -1000001;
@@ -610,9 +623,12 @@ public class Screen extends JPanel {
 								textScrollNum[1] = 1;
 							}
 						} else if (tile.getId() == -1) {
-							//int[] xy = tile.getTiedXY();
-							//player.goTo(xy[0],xy[1]);
-						// If the object is a finish line
+							int[] dest_xy = tile.getTiedXY();
+							player.goToAbsolute(dest_xy[0], dest_xy[1] + 250);
+							player.forceLanding();
+							fade = 300;
+							fade_text = "";
+							// If the object is a finish line
 						} else if (tile.getId() == 99) {
 							levelAdvance(tile.getData());
 							return -1000001;
@@ -729,8 +745,8 @@ public class Screen extends JPanel {
 		case 1:
 			// impact
 			for (int i = 0; i < 4; i++) {
-				particles.add(
-						new Particle(x+3, y+3, 2 + (int) (Math.random() * 5 + 5), 2 + (int) (Math.random() * 5 + 5), 2));
+				particles.add(new Particle(x + 3, y + 3, 2 + (int) (Math.random() * 5 + 5),
+						2 + (int) (Math.random() * 5 + 5), 2));
 			}
 			break;
 		case 3:
@@ -794,7 +810,7 @@ public class Screen extends JPanel {
 			break;
 		case 3:
 			next_lvl = "Stage 1-3";
-			break; 
+			break;
 		case 4:
 			next_lvl = "Stage 1-4";
 			break;
@@ -899,9 +915,9 @@ public class Screen extends JPanel {
 							Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
 							Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()));
 					interactables.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
-								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
-								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
-								Integer.parseInt(elements[6].trim()),tied));
+							Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+							Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+							Integer.parseInt(elements[6].trim()), tied));
 				} else {
 					try {
 						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()),
@@ -1112,6 +1128,7 @@ public class Screen extends JPanel {
 					} else {
 						change = true;
 					}
+					// Why didn't I put this in the loop above?
 					Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
 					Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
 					Main.scrollPos[0] = Main.gameSize.width / 5;
@@ -1121,8 +1138,9 @@ public class Screen extends JPanel {
 					if (change && Main.scrollPos[3] < player.y
 							&& (player.state == State.GROUNDED || player.state == State.BASIC_ATTACK
 									|| player.state == State.LANDING || player.state == State.JUMPSQUAT)) {
-						// System.out.println("Adjusting player location");
-						player.adjust(0, 60);
+						System.out.println("Adjusting player location");
+						player.forceLanding();
+						player.adjust(0, 100);
 					}
 				}
 				break;

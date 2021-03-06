@@ -582,7 +582,7 @@ public class BuilderScreen extends JPanel {
 				}
 				if (lastActiveTile == null && mode == 5) {
 					if (ComplexTypes.get(current_complex_type).id == -1) {
-						lastActiveTile = new ConnectedTile(0, 0, 200, 200, 0, TileTypes.get(current_type).id);
+						lastActiveTile = new ConnectedTile(0, 0, 200, 200, 0, ComplexTypes.get(current_complex_type).id);
 						lastActiveTile.goToTied(point.getX(), point.getY() - 100);
 						area.add(lastActiveTile.getTied());
 					} else {

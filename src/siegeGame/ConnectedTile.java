@@ -40,7 +40,7 @@ public class ConnectedTile extends Interactable {
 		}
 		System.out.println(id);
 		return "ConnectedTile,\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id
-			 + ",\t" + type + " " + tied.toString();
+			 + ",\t\t" + type + " \t" + tied.toString();
 	}
 	
 	public void cleanup() {
