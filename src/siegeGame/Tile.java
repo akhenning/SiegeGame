@@ -11,6 +11,7 @@ import java.awt.geom.Point2D;
 // 0 = black square
 // 1 = respawn destination (appears as Siege)
 // 2 = invisible block
+// 3 = open/closed door
 // >50 <100 = interactable
 // 50 = bouncy default
 // 60 = destructable block
@@ -21,6 +22,7 @@ import java.awt.geom.Point2D;
 // 101 = right slope
 // 102 = left slope
 // -1 = respawn block 
+// -2 = button for open/closed door
 
 public class Tile {
 
@@ -37,9 +39,9 @@ public class Tile {
 
 	protected int clipType = 0;
 	// 0 is all angles, 1 is vertical only, 2 is left only, and 3 is right only
-	private boolean can_clip_vertical = true;
-	private boolean can_clip_left = true;
-	private boolean can_clip_right = true;
+	protected boolean can_clip_vertical = true;
+	protected boolean can_clip_left = true;
+	protected boolean can_clip_right = true;
 	protected Graphic animated_graphic = null;
 	public boolean should_be_saved = true;
 
@@ -73,10 +75,6 @@ public class Tile {
 				slope = -((double) height) / ((double) width);
 			}
 		}
-		if (id == 1) {
-			should_be_saved = false;
-		}
-
 		// Let's try to make it so that this doesn't need to calculate every frame
 		switch (clipType) {
 		case 0:
@@ -99,6 +97,10 @@ public class Tile {
 			can_clip_left = false;
 			can_clip_right = true;
 			break;
+		}
+
+		if (id == 1) {
+			makeIntangible();
 		}
 	}
 
@@ -505,12 +507,18 @@ public class Tile {
 	public void drawBoxAround(Graphics2D g2) {
 		drawBoxAround(g2, Screen.scrollx, Screen.scrolly);
 	}
+	
+	public void dontSaveThis() {
+		should_be_saved = false;
+	}
 
 	// return 1 if effects Siege, 2 if changes text
 	// Will eventually need to make more complicated if we want to add buttons or
 	// something
 	public int interact() {
 		return 0;
+	}
+	public void setData(int d) {
 	}
 
 	public boolean canDetectLeft() {
@@ -531,5 +539,36 @@ public class Tile {
 
 	public void setToRemove() {
 		toRemove = true;
+	}
+	
+	protected void makeIntangible() {
+		can_clip_vertical = false;
+		can_clip_left = false;
+		can_clip_right = false;
+	}
+	
+	protected void refreshClipType() {
+		switch (clipType) {
+		case 0:
+			can_clip_vertical = true;
+			can_clip_left = true;
+			can_clip_right = true;
+			break;
+		case 1:
+			can_clip_vertical = true;
+			can_clip_left = false;
+			can_clip_right = false;
+			break;
+		case 2:
+			can_clip_vertical = false;
+			can_clip_left = true;
+			can_clip_right = false;
+			break;
+		case 3:
+			can_clip_vertical = false;
+			can_clip_left = false;
+			can_clip_right = true;
+			break;
+		}
 	}
 }

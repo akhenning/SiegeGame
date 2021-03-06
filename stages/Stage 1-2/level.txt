@@ -4,11 +4,12 @@ Tile,		-220,	600,	1600,	200,	1,	0,		Basic black block
 Interactable,	900,	400,	200,	200,	0,	70,	2,	Text continuer
 Tile,		-420,	-500,	200,	1300,	3,	0,		Basic black block
 Interactable,	-220,	400,	200,	200,	0,	50,	-1,	Bounce pad
-Tile,		2300,	-20,	1140,	200,	1,	0,		Basic black block
-Interactable,	3240,	-220,	200,	200,	0,	99,	3,	Finish element
+Tile,		2300,	-20,	1760,	200,	1,	0,		Basic black block
+Interactable,	3760,	-220,	200,	200,	0,	99,	3,	Finish element
 Tile,		2300,	0,	200,	1620,	2,	0,		Basic black block
 Tile,		1180,	620,	200,	960,	3,	0,		Basic black block
-Tile,		3440,	-1220,	200,	1400,	2,	0,		Basic black block
 Graphic,	-418,	794,	1604,	780,	1,	0,		Blank black graphic
-Graphic,	2496,	180,	1142,	1438,	1,	0,		Blank black graphic
-ConnectedTile,	1380,	1500,	920,	200,	0,	-1,		Respawn Element Tile,		1140,	360,	200,	240,	0,	1,		Respawn Destination
+Graphic,	2496,	180,	1562,	1438,	1,	0,		Blank black graphic
+ConnectedTile,	2420,	-100,	200,	80,	0,	-2,		Door Button 	,Interactable,	3240,	-620,	200,	600,	2,	3,	0,	Door Object
+Graphic,	2312,	-1240,	1128,	620,	1,	0,		Blank black graphic
+ConnectedTile,	1380,	1500,	920,	200,	0,	-1,		Respawn Element 	,Tile,		680,	360,	200,	240,	0,	1,		Respawn Destination

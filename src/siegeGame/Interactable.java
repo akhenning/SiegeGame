@@ -1,5 +1,6 @@
 package siegeGame;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -24,14 +25,13 @@ public class Interactable extends Tile {
 	// Note that all Interactables have interaction when hit.
 	protected boolean hasInteraction = true;
 	// Counter for how much time until an action will happen
-	private int action = -1;
+	protected int action = -1;
 	// Flag that can be set do do things...
-	private boolean flag = false;
+	protected boolean flag = false;
 
 	public Interactable(int x, int y, int width, int height) {
 		this(x, y, width, height, 0, 50, -1);
 	}
-
 	public Interactable(int x, int y, int width, int height, int id) {
 		this(x, y, width, height, 0, id, -1);
 	}
@@ -77,12 +77,21 @@ public class Interactable extends Tile {
 		case 71:
 			g2.drawImage(q_mark_activated, scrollx + x, scrolly + y, width, height, null);
 			break;
+		case 3:
+			if (data == 1) {
+				g2.drawRect(scrollx + x, scrolly + y, width, height);
+			} else {
+				g2.fillRect(scrollx + x, scrolly + y, width, height);
+			}
+			break;
 		}
 		if (animated_graphic != null) {
 			animated_graphic.draw(g2, scrollx, scrolly);
 		}
 		if (Main.debug && id <= 60) {
+			g2.setColor(Color.yellow);
 			drawCollision(g2, scrollx, scrolly);
+			g2.setColor(Color.black);
 		}
 	}
 
@@ -126,6 +135,9 @@ public class Interactable extends Tile {
 		case 71:
 			type = "Activated text continuer";
 			break;
+		case 3:
+			type = "Door Object";
+			break;
 		}
 		return "Interactable,\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id
 				+ ",\t" + data + ",\t" + type + "\n";
@@ -157,8 +169,7 @@ public class Interactable extends Tile {
 		case 71:
 			return 2;
 		case 99:
-			return -1;
-		case -1:
+		case 3:
 			return -1;
 		default:
 			System.out.println("Invalid Interactable type");
@@ -168,6 +179,16 @@ public class Interactable extends Tile {
 
 	public int getData() {
 		return data;
+	}
+	public void setData(int d) {
+		data = d;
+		if (id == 3) {
+			if (data == 1) {
+				makeIntangible();
+			} else {
+				refreshClipType();
+			}
+		}
 	}
 
 	public boolean isInteractable() {

@@ -911,9 +911,18 @@ public class Screen extends JPanel {
 						System.out.println(e + "Error reading stage graphic: " + line);
 					}
 				} else if (elements[0].trim().equals("ConnectedTile")) {
-					Tile tied = new Tile(Integer.parseInt(elements[8].trim()), Integer.parseInt(elements[9].trim()),
-							Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
-							Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()));
+					Tile tied;
+					if (elements[8].trim().equals("Tile")) {
+						tied = new Tile(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
+								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
+								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()));
+					} else {
+						tied = new Interactable(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
+								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
+								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()),
+								Integer.parseInt(elements[15].trim()));
+					}
+					area.add(tied);
 					interactables.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
 							Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
 							Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),

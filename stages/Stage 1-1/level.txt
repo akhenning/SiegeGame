@@ -26,5 +26,5 @@ Tile,		4280,	-1060,	200,	680,	3,	0,		Basic black block
 Tile,		3100,	620,	200,	380,	2,	0,		Basic black block
 Tile,		6400,	-380,	100,	100,	3,	0,		Basic black block
 Tile,		480,	260,	140,	120,	0,	0,		Basic black block
-ConnectedTile,	2660,	1000,	520,	200,	0,	-1,		Respawn Element Tile,		2360,	360,	200,	240,	0,	1,		Respawn Destination
+ConnectedTile,	2660,	1000,	520,	200,	0,	-1,		Respawn Element ,Tile,		2360,	.360,	200,	240,	0,	1,		Respawn Destination
 Graphic,	5006,	406,	2534,	794,	1,	0,		Blank black graphic

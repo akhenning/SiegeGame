@@ -100,8 +100,9 @@ public class BuilderScreen extends JPanel {
 		TileTypes.add(new TileType(70, true, "Basic text prompter"));
 		TileTypes.add(new TileType(71, true, "Basic activated text prompter"));
 		TileTypes.add(new TileType(99, true, "Basic finish element"));
-		ComplexTypes.add(new TileType(-1, false, "Respawn Paired Element"));
 		ComplexTypes.add(new TileType(0, false, "Blank Graphic"));
+		ComplexTypes.add(new TileType(-1, false, "Respawn Paired Element"));
+		ComplexTypes.add(new TileType(-2, false, "Button-Door Pair"));
 
 		setBackground(Color.WHITE);
 		addMouseListener(new ClickListener());
@@ -273,9 +274,18 @@ public class BuilderScreen extends JPanel {
 						System.out.println(e + "Error reading stage element: " + line);
 					}
 				} else if (elements[0].trim().equals("ConnectedTile")) {
-					Tile tied = new Tile(Integer.parseInt(elements[8].trim()), Integer.parseInt(elements[9].trim()),
-							Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
-							Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()));
+					Tile tied;
+					if (elements[8].trim().equals("Tile")) {
+						tied = new Tile(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
+								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
+								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()));
+					} else {
+						tied = new Interactable(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
+								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
+								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()),
+								Integer.parseInt(elements[15].trim()));
+					}
+					area.add(tied);
 					area.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
 								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
 								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
@@ -585,6 +595,11 @@ public class BuilderScreen extends JPanel {
 						lastActiveTile = new ConnectedTile(0, 0, 200, 200, 0, ComplexTypes.get(current_complex_type).id);
 						lastActiveTile.goToTied(point.getX(), point.getY() - 100);
 						area.add(lastActiveTile.getTied());
+					} else if (ComplexTypes.get(current_complex_type).id == -2) {
+						Interactable temp = new Interactable(0, 0,200,200,0,3,0);
+						lastActiveTile = new ConnectedTile(0, 0, 200, 200, 0, ComplexTypes.get(current_complex_type).id, temp);
+						lastActiveTile.goToTied(point.getX(), point.getY() - 100);
+						area.add(lastActiveTile.getTied()); 
 					} else {
 						lastActiveTile = new Graphic(0,0,ComplexTypes.get(current_complex_type).id);
 					}
