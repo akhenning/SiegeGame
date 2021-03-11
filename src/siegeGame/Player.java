@@ -208,6 +208,8 @@ public class Player {
 					// The two following if statements allow you to skip hovering if you wish
 					if (!isSpace) {
 						state = State.DESCENDING;
+					} else  {
+						screen.makeEffect(0,0,6,0);
 					}
 				}
 				if (state != State.DESCENDING) {
@@ -227,6 +229,8 @@ public class Player {
 						if (!isSpace || rotations > 2) {
 							state = State.DESCENDING;
 							animationFrame = 0;
+						} else {
+							screen.makeEffect(0,0,6,0);
 						}
 					}
 					if (offset * animationFrame + 300 > width) {
@@ -279,6 +283,7 @@ public class Player {
 			} else if (state == State.LANDING && aerial_attack_state) {
 				int offset = 300;
 				if (previousAnimation != Animation.LANDING) {
+					screen.makeEffect(0,0,3,0);
 					for (Hitbox box : hitboxes) {
 						box.setActive(false, direction);
 					}

@@ -1,5 +1,6 @@
 package siegeGame;
 
+import javax.sound.sampled.*;
 import javax.swing.JPanel;
 
 import siegeGame.Player.State;
@@ -11,6 +12,8 @@ import java.awt.event.KeyEvent;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -51,6 +54,11 @@ public class Screen extends JPanel {
 			Toolkit.getDefaultToolkit().getImage("assets/w_mad.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/w_crazy.png") };
 
+	private static Map<String, AudioInputStream> sounds = new HashMap<String, AudioInputStream>();
+	private static String[] snds = { "audio/speedoflight_intro.wav", "audio/speedoflight_loop.wav",
+			"audio/drift_intro.wav", "audio/drift_loop.wav", "audio/fight_intro.wav", "audio/fight_loop.wav",
+			"audio/heavy_hit.wav", "audio/land.wav", "audio/jump.wav", "audio/very_heavy_hit.wav", "audio/swish.wav" };
+
 	// Handles scroll for player and background
 	public static int scrollx = 0;
 	public static int scrolly = 0;
@@ -65,6 +73,11 @@ public class Screen extends JPanel {
 	private ArrayList<Particle> particles = new ArrayList<Particle>();
 	private int numSelected = 0;
 	private Player player = new Player(this);
+
+	public static Clip music;
+	public static String current_track = "";
+	// (0-4), where 0 is loudest and 4 is quietest
+	public static int volume = 1;
 
 	// Fonts and texts for speech bubbles
 	private final int CHARS_PER_LINE = 50;
@@ -98,6 +111,8 @@ public class Screen extends JPanel {
 	public GameState state = GameState.TITLE;
 
 	public Screen() {
+		Screen.makeSoundMap();
+		Screen.playSound("audio/speedoflight_intro.wav", 1);
 		setBackground(Color.WHITE);
 		// addMouseListener(new ClickListener());
 		// addMouseMotionListener(new MovementListener());
@@ -118,6 +133,10 @@ public class Screen extends JPanel {
 		int zoom_mult = 1;
 		if (zoom == .5) {
 			zoom_mult = 2;
+		}
+		if (state == GameState.LEVEL && faces.size() == 0) {
+			System.out.println("For some reason, level load failed");
+			System.exit(0);
 		}
 		g2.setStroke(new BasicStroke(4 * zoom_mult));
 
@@ -466,7 +485,7 @@ public class Screen extends JPanel {
 							if (tile.y < highest) {
 								highest = tile.getHeight(rightFoot.getX());
 							}
-						// if the object is a respawn element
+							// if the object is a respawn element
 						} else if (tile.getId() == -1) {
 							int[] dest_xy = tile.getTiedXY();
 							// int[] src_xy = {tile.getX()+(tile.getWidth()/2), tile.getY() +
@@ -748,14 +767,17 @@ public class Screen extends JPanel {
 				particles.add(new Particle(x + 3, y + 3, 2 + (int) (Math.random() * 5 + 5),
 						2 + (int) (Math.random() * 5 + 5), 2));
 			}
+			playSound("audio/heavy_hit.wav", 3);
 			break;
 		case 3:
 			// landing
+			playSound("audio/land.wav", 3);
 			break;
 		case 2:
 			// jumping
 			particles.add(new Particle(x - 15 + 5, y - 5 + 2, 10, 5, 3));
 			particles.add(new Particle(x + 60 + 2, y - 5 + 2, 10, 5, 4));
+			playSound("audio/jump.wav", 3);
 			break;
 		case 4:
 			// smoke
@@ -777,7 +799,109 @@ public class Screen extends JPanel {
 				particles.add(
 						new Particle(x, y, 2 + (int) (Math.random() * 8 + 7), 2 + (int) (Math.random() * 8 + 7), 6));
 			}
+			playSound("audio/very_heavy_hit.wav", 3);
 			break;
+		case 6:
+			// spinning in the air
+			playSound("audio/swish.wav", 3);
+			// playSound("audio/jump_mid.wav", 3);
+			break;
+		}
+	}
+
+	public static void makeSoundMap() {
+		for (String str : snds) {
+			File file = new File(str);
+			try {
+				sounds.put(str, AudioSystem.getAudioInputStream(file));
+			} catch (UnsupportedAudioFileException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Sound: Unsupported Audio File: " + e);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Sound: Input/Output Error: " + e);
+			}
+		}
+		System.out.println(sounds.toString());
+	}
+
+	// This whole method is an amalgamation of several StackOverflow threads
+	// and a few tutorials since I didn't learn Clip formally and don't know
+	// what I'm doing lol
+	// Behavior- 0= none, 1 = intro sequence, 2= loop, 3= cancel upon quit
+	public static void playSound(String fileName, int behavior) {
+		AudioInputStream sound = sounds.get(fileName);
+		if (sound == null) {
+			System.out.println("Error, " + fileName +" not found");
+		} else if (behavior == 3) {
+			try {
+				Clip clip;
+				clip = AudioSystem.getClip();
+				clip.addLineListener(new LineListener() {
+					public void update(LineEvent e) {
+						if (e.getType() == LineEvent.Type.STOP) {
+							((SourceDataLine) e.getSource()).close();
+						}
+					}
+				});
+				clip.setMicrosecondPosition(0);
+				clip.open(sound);
+				FloatControl volumeC = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+				clip.start();
+				if (volumeC != null) {
+					volumeC.setValue((float) -10 * volume);
+				}
+			} catch (LineUnavailableException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Sound: Line Unavailable Exception Error: " + e);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Sound: Input/Output Error: " + e);
+			}
+		} else {
+			System.out.println("Playing track " + fileName);
+			if (Screen.music != null && Screen.music.isRunning()) {
+				System.out.println("Closing track");
+				Screen.music.close();
+			}
+			try {
+				Screen.current_track = fileName;
+				// Should this not be a new clip? todo
+				Screen.music = AudioSystem.getClip();
+				if (behavior == 1) {
+					Screen.music.addLineListener(new LineListener() {
+						public void update(LineEvent e) {
+							if (e.getType() == LineEvent.Type.STOP) { // ((SourceDataLine) e.getSource()).close();
+								if (Screen.current_track.equals("audio/speedoflight_intro.wav")) {
+									Screen.playSound("audio/speedoflight_loop.wav", 2);
+								} else if (Screen.current_track.equals("audio/drift_intro.wav")) {
+									Screen.playSound("audio/drift_loop.wav", 2);
+								} else if (Screen.current_track.equals("audio/fight_intro.wav")) {
+									Screen.playSound("audio/fight_loop.wav", 2);
+								} else {
+									System.out.println("Could not follow up " + Screen.current_track);
+								}
+							}
+						}
+					});
+				}
+				Screen.music.open(sound);
+				FloatControl volumeC = (FloatControl) Screen.music.getControl(FloatControl.Type.MASTER_GAIN);
+				if (behavior == 2) {
+					Screen.music.loop(Clip.LOOP_CONTINUOUSLY);
+				} else {
+					Screen.music.start();
+				}
+				if (volumeC != null) {
+					volumeC.setValue((float) 10 + (-10 * volume));
+				}
+			} catch (LineUnavailableException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Sound: Line Unavailable Exception Error: " + e);
+			} catch (IOException e) {
+				e.printStackTrace();
+				throw new RuntimeException("Sound: Input/Output Error: " + e);
+			}
 		}
 	}
 
@@ -857,6 +981,15 @@ public class Screen extends JPanel {
 
 		// If loading a level
 		if (state == GameState.LEVEL) {
+			music.stop();
+			music.close();
+			switch (which) {
+			case "Default":
+				playSound("audio/drift_intro.wav", 1);
+				break;
+			default:
+				playSound("audio/fight_intro.wav", 1);
+			}
 
 			FileInputStream in = null;
 			File file = null;
@@ -917,10 +1050,10 @@ public class Screen extends JPanel {
 								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
 								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()));
 					} else {
-						tied = new Interactable(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
-								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
-								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()),
-								Integer.parseInt(elements[15].trim()));
+						tied = new Interactable(Integer.parseInt(elements[9].trim()),
+								Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
+								Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()),
+								Integer.parseInt(elements[14].trim()), Integer.parseInt(elements[15].trim()));
 					}
 					area.add(tied);
 					interactables.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
