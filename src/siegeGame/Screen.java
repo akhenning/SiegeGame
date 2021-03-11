@@ -20,9 +20,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class Screen extends JPanel {
 	// Dunno what this does
@@ -134,10 +136,10 @@ public class Screen extends JPanel {
 		if (zoom == .5) {
 			zoom_mult = 2;
 		}
-		if (state == GameState.LEVEL && faces.size() == 0) {
-			System.out.println("For some reason, level load failed");
-			System.exit(0);
-		}
+		//if (state == GameState.LEVEL && faces.size() == 0) {
+		//	System.out.println("For some reason, level load failed");
+		//	System.exit(0);
+		//}
 		g2.setStroke(new BasicStroke(4 * zoom_mult));
 
 		if (state == GameState.LEVEL) {
@@ -233,6 +235,10 @@ public class Screen extends JPanel {
 			if (textBoxNum == -1) {
 				System.err.println("ERROR: Text box with no assigned text box");
 				textBoxNum = 0;
+			}
+			if (textBoxNum >= faces.size()) {
+				System.out.println("This error again...");
+				System.exit(0);
 			}
 			if (BREAK_POINT_SIGNIFIER.equals(faces.get(textBoxNum))) {
 				activeText = false;
@@ -813,7 +819,12 @@ public class Screen extends JPanel {
 		for (String str : snds) {
 			File file = new File(str);
 			try {
-				sounds.put(str, AudioSystem.getAudioInputStream(file));
+				//add buffer for mark/reset support
+				InputStream stream = new FileInputStream(file);
+				InputStream bufferedIn = new BufferedInputStream(stream);
+				AudioInputStream temp = AudioSystem.getAudioInputStream(bufferedIn);
+				temp.mark(Integer.MAX_VALUE);
+				sounds.put(str, temp);
 			} catch (UnsupportedAudioFileException e) {
 				e.printStackTrace();
 				throw new RuntimeException("Sound: Unsupported Audio File: " + e);
@@ -831,6 +842,11 @@ public class Screen extends JPanel {
 	// Behavior- 0= none, 1 = intro sequence, 2= loop, 3= cancel upon quit
 	public static void playSound(String fileName, int behavior) {
 		AudioInputStream sound = sounds.get(fileName);
+		try {
+			sound.reset();
+		} catch (IOException e) {
+			System.out.println("COuld not reset file :( "+e.getMessage());
+		}
 		if (sound == null) {
 			System.out.println("Error, " + fileName +" not found");
 		} else if (behavior == 3) {
@@ -844,8 +860,8 @@ public class Screen extends JPanel {
 						}
 					}
 				});
-				clip.setMicrosecondPosition(0);
 				clip.open(sound);
+				clip.setFramePosition(0);
 				FloatControl volumeC = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 				clip.start();
 				if (volumeC != null) {
