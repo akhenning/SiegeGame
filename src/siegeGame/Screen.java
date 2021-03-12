@@ -79,7 +79,7 @@ public class Screen extends JPanel {
 	public static Clip music;
 	public static String current_track = "";
 	// (0-4), where 0 is loudest and 4 is quietest
-	public static int volume = 1;
+	public static int volume = 3;
 
 	// Fonts and texts for speech bubbles
 	private final int CHARS_PER_LINE = 50;
@@ -842,14 +842,15 @@ public class Screen extends JPanel {
 	// Behavior- 0= none, 1 = intro sequence, 2= loop, 3= cancel upon quit
 	public static void playSound(String fileName, int behavior) {
 		AudioInputStream sound = sounds.get(fileName);
+		if (sound == null) {
+			System.out.println("Error, " + fileName +" not found/loaded");
+		}
 		try {
 			sound.reset();
 		} catch (IOException e) {
 			System.out.println("COuld not reset file :( "+e.getMessage());
 		}
-		if (sound == null) {
-			System.out.println("Error, " + fileName +" not found");
-		} else if (behavior == 3) {
+		if (behavior == 3) {
 			try {
 				Clip clip;
 				clip = AudioSystem.getClip();
