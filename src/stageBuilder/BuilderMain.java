@@ -43,8 +43,7 @@ public class BuilderMain {
 		frame.add(canvas);
 
 		// make the frame visible which will result in the paintComponent method being
-		// invoked on the
-		// component.
+		// invoked on the component.
 		frame.setVisible(true);
 
 		//while (true) {

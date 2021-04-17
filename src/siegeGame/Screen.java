@@ -79,7 +79,7 @@ public class Screen extends JPanel {
 	public static Clip music;
 	public static String current_track = "";
 	// (0-4), where 0 is loudest and 4 is quietest
-	public static int volume = 3;
+	public static int volume = 1;
 
 	// Fonts and texts for speech bubbles
 	private final int CHARS_PER_LINE = 50;
