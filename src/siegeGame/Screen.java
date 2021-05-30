@@ -76,6 +76,7 @@ public class Screen extends JPanel {
 
 	public static Clip music;
 	public static Clip music_next;
+	public static Clip music_last;
 	public static boolean isIntroMusic = true;
 	public static String current_track = "";
 	// (0-4), where 0 is loudest and 4 is quietest
@@ -890,7 +891,7 @@ public class Screen extends JPanel {
 			}
 		} else {
 			// If it is a music track
-			//System.out.println("Playing track " + fileName);
+			System.out.println("Playing track " + fileName);
 			// Clear it if it is still running
 			if (Screen.music != null && Screen.music.isRunning()) {
 				System.out.println("Closing track");
@@ -962,6 +963,7 @@ public class Screen extends JPanel {
 				} else {
 					// If it's a loop, then swap the Clips and start this one.
 					Screen.music.close();
+					Screen.music_last = Screen.music;
 					Screen.music = Screen.music_next;
 					FloatControl volumeC = (FloatControl) Screen.music.getControl(FloatControl.Type.MASTER_GAIN);
 					Screen.music.loop(Clip.LOOP_CONTINUOUSLY);
@@ -1057,6 +1059,11 @@ public class Screen extends JPanel {
 		if (state == GameState.LEVEL) {
 			music.stop();
 			music.close();
+			if (music_last != null) {
+				music_last.stop();
+				music_last.close();
+			}
+			
 			switch (which) {
 			case "Default":
 				playSound("audio/drift_intro.wav", 1);

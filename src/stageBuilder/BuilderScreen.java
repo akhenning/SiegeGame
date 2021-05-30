@@ -6,6 +6,7 @@ import siegeGame.Tile;
 import siegeGame.ConnectedTile;
 import siegeGame.Graphic;
 import siegeGame.Interactable;
+import siegeGame.Main;
 import siegeGame.Player;
 
 import java.awt.event.KeyListener;
@@ -103,7 +104,6 @@ public class BuilderScreen extends JPanel {
 		ComplexTypes.add(new TileType(0, false, "Blank Graphic"));
 		ComplexTypes.add(new TileType(-1, false, "Respawn Paired Element"));
 		ComplexTypes.add(new TileType(-2, false, "Button-Door Pair"));
-
 		setBackground(Color.WHITE);
 		addMouseListener(new ClickListener());
 		addMouseMotionListener(new MovementListener());
@@ -111,6 +111,7 @@ public class BuilderScreen extends JPanel {
 		addKeyListener(new KeysListener());
 		loadLevel("2");
 		// saveLevel("2");
+		Main.debug = true;
 	}
 
 	public Dimension getPreferredSize() {
