@@ -57,9 +57,7 @@ public class Screen extends JPanel {
 			Toolkit.getDefaultToolkit().getImage("assets/w_crazy.png") };
 
 	private static Map<String, AudioInputStream> sounds = new HashMap<String, AudioInputStream>();
-	private static String[] snds = { "audio/speedoflight_intro.wav", "audio/speedoflight_loop.wav",
-			"audio/drift_intro.wav", "audio/drift_loop.wav", "audio/fight_intro.wav", "audio/fight_loop.wav",
-			"audio/heavy_hit.wav", "audio/land.wav", "audio/jump.wav", "audio/very_heavy_hit.wav", "audio/swish.wav" };
+	private static String[] snds = { "audio/heavy_hit.wav", "audio/land.wav", "audio/jump.wav", "audio/very_heavy_hit.wav", "audio/swish.wav" };
 
 	// Handles scroll for player and background
 	public static int scrollx = 0;
@@ -77,6 +75,8 @@ public class Screen extends JPanel {
 	private Player player = new Player(this);
 
 	public static Clip music;
+	public static Clip music_next;
+	public static boolean isIntroMusic = true;
 	public static String current_track = "";
 	// (0-4), where 0 is loudest and 4 is quietest
 	public static int volume = 1;
@@ -408,9 +408,12 @@ public class Screen extends JPanel {
 			for (int i = 0; i < interactables.size(); i++) {
 				interactables.get(i).checkIsVisible();
 				interactables.get(i).nextFrame();
+				// Check if Interactable should be removed
 				if (interactables.get(i).shouldRemove()) {
+					// Check if it is W; if so, needs to make a unique smoke effect
 					if (interactables.get(i).getId() == 61) {
 						// todo make puff of smoke
+						System.out.println("Removing W");
 						makeEffect(interactables.get(i).getX(), interactables.get(i).getY(), 4, 0);
 					}
 					interactables.remove(interactables.get(i));
@@ -815,6 +818,9 @@ public class Screen extends JPanel {
 		}
 	}
 
+	// Method to map AudioInputStreams to filenames so we don't need
+	// to recreate them
+	// ended up not really working...
 	public static void makeSoundMap() {
 		for (String str : snds) {
 			File file = new File(str);
@@ -833,27 +839,32 @@ public class Screen extends JPanel {
 				throw new RuntimeException("Sound: Input/Output Error: " + e);
 			}
 		}
-		System.out.println(sounds.toString());
+		//System.out.println(sounds.toString());
 	}
 
-	// This whole method is an amalgamation of several StackOverflow threads
-	// and a few tutorials since I didn't learn Clip formally and don't know
-	// what I'm doing lol
+	// I don't super understand Clip
+	// A few parts were taken from StackOverFlow, but they have since been
+	// modified as to be unrecognizable.
 	// Behavior- 0= none, 1 = intro sequence, 2= loop, 3= cancel upon quit
-	public static void playSound(String fileName, int behavior) {
-		AudioInputStream sound = sounds.get(fileName);
-		if (sound == null) {
-			System.out.println("Error, " + fileName +" not found/loaded");
-		}
-		try {
-			sound.reset();
-		} catch (IOException e) {
-			System.out.println("COuld not reset file :( "+e.getMessage());
-		}
+	public static synchronized void playSound(String fileName, int behavior) {
+		// If not music, is 3
 		if (behavior == 3) {
+			// Get sound and check that it works
+			AudioInputStream sound = sounds.get(fileName);
+			if (sound == null) {
+				System.out.println("Error, " + fileName +" not found/loaded");
+			}
+			// Reset it
+			try {
+				sound.reset();
+			} catch (IOException e) {
+				System.out.println("COuld not reset file :( "+e.getMessage());
+			}
+			// Put Clip together
 			try {
 				Clip clip;
 				clip = AudioSystem.getClip();
+				// Make it close when it finishes executing
 				clip.addLineListener(new LineListener() {
 					public void update(LineEvent e) {
 						if (e.getType() == LineEvent.Type.STOP) {
@@ -861,8 +872,10 @@ public class Screen extends JPanel {
 						}
 					}
 				});
+				// Start it
 				clip.open(sound);
 				clip.setFramePosition(0);
+				// Set volume
 				FloatControl volumeC = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 				clip.start();
 				if (volumeC != null) {
@@ -876,41 +889,85 @@ public class Screen extends JPanel {
 				throw new RuntimeException("Sound: Input/Output Error: " + e);
 			}
 		} else {
-			System.out.println("Playing track " + fileName);
+			// If it is a music track
+			//System.out.println("Playing track " + fileName);
+			// Clear it if it is still running
 			if (Screen.music != null && Screen.music.isRunning()) {
 				System.out.println("Closing track");
 				Screen.music.close();
 			}
+			if (Screen.music_next != null && Screen.music_next.isRunning()) {
+				System.out.println("Closing track");
+				Screen.music_next.close();
+			}
 			try {
-				Screen.current_track = fileName;
-				// Should this not be a new clip? todo
-				Screen.music = AudioSystem.getClip();
+				// if it's an introduction,
+				// initalize the intro and the loop to try to save time
+				// (which didn't really work)
 				if (behavior == 1) {
+					//Load Clips from filenames, like in previous method
+					AudioInputStream temp;
+					AudioInputStream temp2;
+					try {
+						File file = new File(fileName);
+						//add buffer for mark/reset support
+						InputStream stream = new FileInputStream(file);
+						InputStream bufferedIn = new BufferedInputStream(stream);
+						temp = AudioSystem.getAudioInputStream(bufferedIn);
+						temp.mark(Integer.MAX_VALUE);
+
+						// Find the loop that goes with this intro, and load it as well
+						String next = "";
+						if (fileName.equals("audio/speedoflight_intro.wav")) {
+							next = "audio/speedoflight_loop.wav";
+						} else if (fileName.equals("audio/drift_intro.wav")) {
+							//} else if (Screen.current_track.equals("audio/drift_intro.wav")) {
+							next = "audio/drift_loop.wav";
+						} else if (fileName.equals("audio/fight_intro.wav")) {
+							next = "audio/fight_loop.wav";
+							//Screen.playSound("audio/fight_loop.wav", 2);
+						} else {
+							System.out.println("Could not follow up " + Screen.current_track);
+						}
+						File file2 = new File(next);
+						InputStream stream2 = new FileInputStream(file2);
+						InputStream bufferedIn2 = new BufferedInputStream(stream2);
+						temp2 = AudioSystem.getAudioInputStream(bufferedIn2);
+						temp2.mark(Integer.MAX_VALUE);
+					} catch (UnsupportedAudioFileException e) {
+						e.printStackTrace();
+						throw new RuntimeException("Sound: Unsupported Audio File: " + e);
+					} catch (IOException e) {
+						e.printStackTrace();
+						throw new RuntimeException("Sound: Input/Output Error: " + e);
+					}
+					// Open both of them, don't run the loop yet
+					Screen.current_track = fileName;
+					Screen.music_next = AudioSystem.getClip();
+					Screen.music = AudioSystem.getClip();
 					Screen.music.addLineListener(new LineListener() {
 						public void update(LineEvent e) {
 							if (e.getType() == LineEvent.Type.STOP) { // ((SourceDataLine) e.getSource()).close();
-								if (Screen.current_track.equals("audio/speedoflight_intro.wav")) {
-									Screen.playSound("audio/speedoflight_loop.wav", 2);
-								} else if (Screen.current_track.equals("audio/drift_intro.wav")) {
-									Screen.playSound("audio/drift_loop.wav", 2);
-								} else if (Screen.current_track.equals("audio/fight_intro.wav")) {
-									Screen.playSound("audio/fight_loop.wav", 2);
-								} else {
-									System.out.println("Could not follow up " + Screen.current_track);
-								}
+								Screen.playSound("a loop", 2);
 							}
 						}
 					});
-				}
-				Screen.music.open(sound);
-				FloatControl volumeC = (FloatControl) Screen.music.getControl(FloatControl.Type.MASTER_GAIN);
-				if (behavior == 2) {
-					Screen.music.loop(Clip.LOOP_CONTINUOUSLY);
-				} else {
+					Screen.music.open(temp);
+					Screen.music_next.open(temp2);
+					FloatControl volumeC = (FloatControl) Screen.music.getControl(FloatControl.Type.MASTER_GAIN);
 					Screen.music.start();
-				}
-				if (volumeC != null) {
-					volumeC.setValue((float) 10 + (-10 * volume));
+					if (volumeC != null) {
+						volumeC.setValue((float) 10 + (-10 * volume));
+					}
+				} else {
+					// If it's a loop, then swap the Clips and start this one.
+					Screen.music.close();
+					Screen.music = Screen.music_next;
+					FloatControl volumeC = (FloatControl) Screen.music.getControl(FloatControl.Type.MASTER_GAIN);
+					Screen.music.loop(Clip.LOOP_CONTINUOUSLY);
+					if (volumeC != null) {
+						volumeC.setValue((float) 10 + (-10 * volume));
+					}
 				}
 			} catch (LineUnavailableException e) {
 				e.printStackTrace();

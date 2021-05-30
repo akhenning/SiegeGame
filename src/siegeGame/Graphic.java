@@ -114,7 +114,8 @@ public class Graphic extends Tile {
 			animationFrame += 1;
 			if (image_width * animationFrame + 300 > pictureWidth) {
 				animationFrame -= 1;
-				System.out.println("This should never occur more than twice?");
+				System.out.println("(Graphic) This should never occur more than twice?");
+				// Means... not deleting properly.
 			}
 			break;
 		case 9:

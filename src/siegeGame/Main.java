@@ -19,7 +19,7 @@ public class Main {
 	public static Dimension gameSize;
 	// This variable marks the locations at which the game starts to scroll
 	public static int scrollPos[] = {0,0,0,0};
-	public static boolean debug = true;
+	public static boolean debug = false;
 	/**
 	 * main method for the program which creates and configures the frame for the
 	 * program
