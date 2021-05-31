@@ -111,6 +111,11 @@ public class Screen extends JPanel {
 		TITLE, LEVEL, SELECT
 	}
 
+	private static SoundLevel soundMode = SoundLevel.ALL;
+	public enum SoundLevel {
+		ALL, MUSIC, NONE
+	}
+
 	public GameState state = GameState.TITLE;
 
 	public Screen() {
@@ -205,15 +210,24 @@ public class Screen extends JPanel {
 		} else if (state == GameState.TITLE) {
 			g2.setColor(Color.BLACK);
 			g2.fillRect(0, 0, 2000, 1500);
-			g2.setFont(font);
 			g2.drawImage(title, 0, 0, null);
 			g2.setColor(Color.WHITE);
-			g2.drawString("Press Enter", Main.screenSize.width / 3, Main.screenSize.height / 2);
+			//g2.drawString("Press Enter", Main.screenSize.width / 3, Main.screenSize.height / 2);
+			g2.setFont(text_fonts[0]);
+			g2.drawString("Or to toggle, if selecting sound options", Main.screenSize.width / 2, Main.screenSize.height*3 / 4);
+			g2.setFont(font);
+			int i = 0;
 			for (Tile tile : area) {
 				tile.draw(g2);
+				if (i == numSelected) {
+					tile.drawBoxAround(g2);
+				}
+				i++;
 			}
 		} else if (state == GameState.SELECT) {
 			// todo check visibility on level icons
+			g2.setColor(Color.BLACK);
+			g2.fillRect(0, 0, 2000, 1500);
 			g2.setFont(font);
 			g2.fillRect(0, 1000, 2000, 9999);
 			g2.drawImage(selectbg, scrollx, scrolly, null);
@@ -403,8 +417,8 @@ public class Screen extends JPanel {
 	public void nextFrame() {
 		if (state == GameState.LEVEL) {
 			// Make sure we don't waste time checking tiles out of frame
-			for (Tile tile : area) {
-				tile.checkIsVisible();
+			for (int i = 0; i < area.size();i+=1) {
+				area.get(i).checkIsVisible();
 			}
 			for (int i = 0; i < interactables.size(); i++) {
 				interactables.get(i).checkIsVisible();
@@ -421,8 +435,8 @@ public class Screen extends JPanel {
 					i -= 1;
 				}
 			}
-			for (Graphic tile : graphics) {
-				tile.checkIsVisible();
+			for (int i = 0; i < graphics.size();i+=1) {
+				graphics.get(i).checkIsVisible();
 			}
 
 			// Player moves; calculating collision is also handled in this method
@@ -848,46 +862,52 @@ public class Screen extends JPanel {
 	// modified as to be unrecognizable.
 	// Behavior- 0= none, 1 = intro sequence, 2= loop, 3= cancel upon quit
 	public static synchronized void playSound(String fileName, int behavior) {
+		if (Screen.soundMode == SoundLevel.NONE) {
+			return;
+		}
 		// If not music, is 3
 		if (behavior == 3) {
-			// Get sound and check that it works
-			AudioInputStream sound = sounds.get(fileName);
-			if (sound == null) {
-				System.out.println("Error, " + fileName +" not found/loaded");
-			}
-			// Reset it
-			try {
-				sound.reset();
-			} catch (IOException e) {
-				System.out.println("COuld not reset file :( "+e.getMessage());
-			}
-			// Put Clip together
-			try {
-				Clip clip;
-				clip = AudioSystem.getClip();
-				// Make it close when it finishes executing
-				clip.addLineListener(new LineListener() {
-					public void update(LineEvent e) {
-						if (e.getType() == LineEvent.Type.STOP) {
-							((SourceDataLine) e.getSource()).close();
-						}
-					}
-				});
-				// Start it
-				clip.open(sound);
-				clip.setFramePosition(0);
-				// Set volume
-				FloatControl volumeC = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
-				clip.start();
-				if (volumeC != null) {
-					volumeC.setValue((float) -10 * volume);
+			// Check if should be playing sounds
+			if (Screen.soundMode != SoundLevel.MUSIC) {
+				// Get sound and check that it works
+				AudioInputStream sound = sounds.get(fileName);
+				if (sound == null) {
+					System.out.println("Error, " + fileName +" not found/loaded");
 				}
-			} catch (LineUnavailableException e) {
-				e.printStackTrace();
-				throw new RuntimeException("Sound: Line Unavailable Exception Error: " + e);
-			} catch (IOException e) {
-				e.printStackTrace();
-				throw new RuntimeException("Sound: Input/Output Error: " + e);
+				// Reset it
+				try {
+					sound.reset();
+				} catch (IOException e) {
+					System.out.println("COuld not reset file :( "+e.getMessage());
+				}
+				// Put Clip together
+				try {
+					Clip clip;
+					clip = AudioSystem.getClip();
+					// Make it close when it finishes executing
+					clip.addLineListener(new LineListener() {
+						public void update(LineEvent e) {
+							if (e.getType() == LineEvent.Type.STOP) {
+								((SourceDataLine) e.getSource()).close();
+							}
+						}
+					});
+					// Start it
+					clip.open(sound);
+					clip.setFramePosition(0);
+					// Set volume
+					FloatControl volumeC = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+					clip.start();
+					if (volumeC != null) {
+						volumeC.setValue((float) -10 * volume);
+					}
+				} catch (LineUnavailableException e) {
+					e.printStackTrace();
+					throw new RuntimeException("Sound: Line Unavailable Exception Error: " + e);
+				} catch (IOException e) {
+					e.printStackTrace();
+					throw new RuntimeException("Sound: Input/Output Error: " + e);
+				}
 			}
 		} else {
 			// If it is a music track
@@ -1057,8 +1077,10 @@ public class Screen extends JPanel {
 
 		// If loading a level
 		if (state == GameState.LEVEL) {
-			music.stop();
-			music.close();
+			if (music != null) {
+				music.stop();
+				music.close();
+			}
 			if (music_last != null) {
 				music_last.stop();
 				music_last.close();
@@ -1253,13 +1275,17 @@ public class Screen extends JPanel {
 			// If title screen, don't really need to do anythign special
 		} else if (state == GameState.TITLE) {
 			area = new ArrayList<Tile>();
-			area.add(new Graphic(100, 100, 10));
+			//area.add(new Graphic(100, 100, 10));
 			fade_text = "";
+			area.add(new Graphic(50, Main.gameSize.height * 2 / 3, 900, 100, 1, 12));
+			area.get(area.size() - 1).setText("Press Enter to Start");
+			area.add(new Graphic(50, Main.gameSize.height * 2 / 3 + 150, 900, 100, 1, 12));
+			area.get(area.size() - 1).setText("Sound Mode: "+soundMode.toString());
+		
 			// if loading level select
 		} else if (state == GameState.SELECT) {
 			File file = new File("stages");
 			String[] files = file.list();
-			area = new ArrayList<Tile>();
 			int i = 0;
 			for (String name : files) {
 				area.add(new Graphic(800, 150 * i + 50, 500, 100, 1, 11));
@@ -1267,6 +1293,16 @@ public class Screen extends JPanel {
 				i++;
 			}
 			fade_text = "";
+			if (soundMode == SoundLevel.NONE) {
+				if (music != null) {
+					music.stop();
+					music.close();
+				}
+				if (music_last != null) {
+					music_last.stop();
+					music_last.close();
+				}
+			}
 		}
 
 	}
@@ -1296,9 +1332,21 @@ public class Screen extends JPanel {
 				break;
 			case KeyEvent.VK_ENTER:
 				if (state == GameState.TITLE) {
-					state = GameState.SELECT;
-					fade = 310;
-					loadLevel("");
+					if (numSelected == 0){
+						state = GameState.SELECT;
+						fade = 310;
+						System.out.println("Leaving title screen");
+						loadLevel("");
+					} else {
+						if (soundMode == SoundLevel.ALL) {
+							soundMode = SoundLevel.MUSIC;
+						} else if (soundMode == SoundLevel.MUSIC) {
+							soundMode = SoundLevel.NONE;
+						} else {
+							soundMode = SoundLevel.ALL;
+						}
+						area.get(area.size() - 1).setText("Sound Mode: "+soundMode.toString());
+					}
 				} else if (state == GameState.SELECT) {
 					System.out.println(area.get(numSelected).getText());
 					state = GameState.LEVEL;
@@ -1322,7 +1370,9 @@ public class Screen extends JPanel {
 				}
 				break;
 			case 16:
-				isShift = true;
+				if (Main.debug) {
+					isShift = true;
+				}
 				break;
 			case KeyEvent.VK_R:
 				scrollx = 0;
@@ -1387,11 +1437,13 @@ public class Screen extends JPanel {
 				}
 				break;
 			case KeyEvent.VK_W:
-				if (state == GameState.SELECT) {
+				if (state != GameState.LEVEL) {
 					numSelected -= 1;
 					if (numSelected < 0) {
 						numSelected = area.size() - 1;
-						scrolly = area.size() * -150 + 600;
+						if (state == GameState.SELECT) {
+							scrolly = area.size() * -150 + 600;
+						}
 					}
 					if (area.get(numSelected).getScreenY() < 0) {
 						scrolly += 300;
@@ -1399,7 +1451,7 @@ public class Screen extends JPanel {
 				}
 				break;
 			case KeyEvent.VK_S:
-				if (state == GameState.SELECT) {
+				if (state != GameState.LEVEL) {
 					numSelected += 1;
 					if (numSelected >= area.size()) {
 						numSelected = 0;

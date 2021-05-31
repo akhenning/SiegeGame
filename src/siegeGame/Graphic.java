@@ -61,13 +61,16 @@ public class Graphic extends Tile {
 		case 11:
 			// Level selector
 			break;
+		case 12:
+			// Title element
+			break;
 		default:
 		}
 	}
 
 	public Graphic(int x, int y, int width, int height, int direction, int id) {
 		this(x, y, id);
-		if (id == 11 || id == 0) {
+		if (id == 11 || id == 0 || id == 12) {
 			this.width = width;
 			this.height = height;
 		}
@@ -150,6 +153,15 @@ public class Graphic extends Tile {
 			g2.fillRect(scrollx + x, scrolly + y, width, height);
 			g2.setColor(Color.BLACK);
 			g2.drawString(text, x + scrollx, y + scrolly + height);
+			break;
+		case 12:
+			g2.setColor(Color.BLACK);
+			g2.fillRect(scrollx + x, scrolly + y, width, height);
+			g2.setColor(Color.BLACK);
+			g2.drawRect(scrollx + x, scrolly + y, width, height);
+			g2.setColor(Color.WHITE);
+			g2.drawString(text, x + scrollx+10, y + scrolly + height-20);
+			break;
 		}
 	}
 
@@ -166,6 +178,9 @@ public class Graphic extends Tile {
 			break;
 		case 11:
 			type = "Level selector graphic (should not be in level file)";
+			break;
+		case 12:
+			type = "Title graphic (should not be in level file)";
 			break;
 		}
 		return "Graphic,\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + direction + ",\t" + id + ",\t\t"
