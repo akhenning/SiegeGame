@@ -1,5 +1,6 @@
 # SiegeGame
-Simple game I made for fun using others' assets
+Simple game I made for fun using assets from online.
+Click on "SiegeGame.jar" to play the game, assuming you have Java.
 
 Note that the thing that makes this project notable, is that I didn't use ANYTHING other than the default Java libraries to create it!  
 It's also designed to be very easy to develop new levels for, and fairly modular within itself.
