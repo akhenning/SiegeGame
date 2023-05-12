@@ -252,7 +252,7 @@ public class Screen extends JPanel {
 				textBoxNum = 0;
 			}
 			if (textBoxNum >= faces.size()) {
-				System.out.println("This error again...");
+				System.out.println("This error again... (Text boxes probably set up imporperly)");
 				System.exit(0);
 			}
 			if (BREAK_POINT_SIGNIFIER.equals(faces.get(textBoxNum))) {
@@ -1034,8 +1034,11 @@ public class Screen extends JPanel {
 		case 4:
 			next_lvl = "Stage 1-4";
 			break;
+		case 5:
+			next_lvl = "Stage 1-5";
+			break;
 		default:
-			System.err.println("Error: Finish element has no assigned destination");
+			System.err.println("Error: Finish element has no assigned destination.");
 			next_lvl = "Default";
 		}
 

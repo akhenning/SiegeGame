@@ -33,7 +33,7 @@ public class ConnectedTile extends Interactable {
 			g2.setColor(Color.BLACK);
 			g2.drawLine(scrollx + x, scrolly + y + height, scrollx + x + width, scrolly + y + height);
 			g2.setColor(Color.GRAY);
-			if (flag == false) {
+			if (flag != Flag.JUSTHIT) {
 				g2.fillRect(scrollx + x+width/4, scrolly + y, width/2, height);
 			} else {
 				g2.fillRect(scrollx + x+width/4, scrolly + y+height/2, width/2, height/2);
@@ -68,7 +68,7 @@ public class ConnectedTile extends Interactable {
 		case -1:
 			return -1;
 		case -2:
-			flag = true;
+			flag = Flag.JUSTHIT;
 			action = 100;
 			tied.setData(1);
 			return -1;
@@ -79,10 +79,11 @@ public class ConnectedTile extends Interactable {
 	}
 
 	public void nextFrame() {
+		// Timer for button
 		if (action >= 0) {
 			action -= 1;
 			if (action == -1) {
-				flag = false;
+				flag = Flag.NOTHIT;
 				tied.setData(0);
 			}
 		}

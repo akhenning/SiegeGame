@@ -6,6 +6,10 @@ import java.awt.Image;
 import java.awt.Toolkit;
 
 public class Interactable extends Tile {
+	public enum Flag {
+		NOTHIT, JUSTHIT, ALREADYHIT
+	}
+
 	// See Tile for complete list of IDs
 	public static Image target = Toolkit.getDefaultToolkit().getImage("assets/target.jpg"); // ID 50
 	public static Image gravel = Toolkit.getDefaultToolkit().getImage("assets/gravel.png"); // ID 60
@@ -26,8 +30,8 @@ public class Interactable extends Tile {
 	protected boolean hasInteraction = true;
 	// Counter for how much time until an action will happen
 	protected int action = -1;
-	// Flag that can be set do do things...
-	protected boolean flag = false;
+	// Flag that can be set to track state (W graphic state, button pressed state)
+	protected Flag flag = Flag.NOTHIT;
 
 	public Interactable(int x, int y, int width, int height) {
 		this(x, y, width, height, 0, 50, -1);
@@ -97,14 +101,15 @@ public class Interactable extends Tile {
 
 	public void nextFrame() {
 		if (id == 61) {
-			if (flag == true) {
+			if (flag == Flag.JUSTHIT) {
 				int frame = animated_graphic.getFrame();
 				if (frame == 0 || frame == 40 || frame == 17 || frame == 55) {
 					// Last two are less seamless...
-					flag = false;
+					flag = Flag.ALREADYHIT;
 					action = 27;
 					animated_graphic = new Graphic(x, y, 8, data);
-					System.out.println("Flag tripped");
+					// Oh! This is getting triggerd twice! Ohhh probably because... got it.
+					System.out.println("Creating W leave anim.");
 				}
 			} else if (action > 0) {
 				System.out.println(action);
@@ -160,7 +165,7 @@ public class Interactable extends Tile {
 			toRemove = true;
 			return 0;
 		case 61:
-			flag = true;// action = 27;
+			flag = Flag.JUSTHIT;// action = 27;
 			return -1;
 		case 70:
 			id = 71;
