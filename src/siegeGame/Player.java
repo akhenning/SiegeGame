@@ -277,6 +277,11 @@ public class Player {
 							offset * animationFrame, 0, offset * animationFrame + offset, 340, null);
 				}
 				animationFrame += 1;
+				
+				// Speed up on the frame she swings the hammer down
+				if (animationFrame == 10) {
+					yspeed += 10; // caps right away pretty much
+				}
 				if (offset * animationFrame + 300 > width) {
 					animationFrame -= 1;
 				}
@@ -440,8 +445,8 @@ public class Player {
 		boolean doLandingCheck = false;
 		isSpace = isJump;
 
-		if (yspeed > 35) {
-			yspeed = 35;
+		if (yspeed > 37) {
+			yspeed = 37;
 		}
 		if (xspeed < .01 && xspeed > -.01) {
 			xspeed = 0;

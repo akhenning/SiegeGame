@@ -186,6 +186,8 @@ public class Tile {
 			g2.drawLine(xpts[0], ypts[0], xpts[1], ypts[0]);
 			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[1]);
 			g2.drawLine(xpts[1], ypts[0], xpts[2], ypts[2]);
+		} else {
+			g2.drawRect(scrollx + x, scrolly + y, width, height);
 		}
 	}
 
@@ -362,17 +364,12 @@ public class Tile {
 	}
 
 	public void checkIsVisible() {
-		// If the X value could be rendered
-		// if (id==10) {
-		// System.out.println((Screen.scrollx + x - 200)+ ">"+ (Main.screenSize.width) +
-		// ", ");
-		// }
+		// x and y are 200px out of frame, counting width. Should be fairly idiotproof
 		if (Screen.scrollx + x - 200 > Main.gameSize.width || Screen.scrollx + x + width < -200
 				|| Screen.scrolly + y + height < -200 || Screen.scrolly + y - 200 > Main.gameSize.height) {
 			// System.out.println("This one is not in frame");
 			isVisible = false;
 			return;
-			// if(Screen.scrolly+y)
 		}
 		isVisible = true;
 	}

@@ -196,9 +196,9 @@ public class Interactable extends Tile {
 		}
 	}
 
-	public boolean isInteractable() {
-		return true;
-	}
+	//public boolean isInteractable() {
+	//	return true;
+	//}
 
 	public void setId(int newId) {
 		id = newId;

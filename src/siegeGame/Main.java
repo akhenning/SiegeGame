@@ -67,7 +67,9 @@ public class Main {
 			timeTook = (System.nanoTime() - timeElapsed) / 1000000;
 			if (timeTook  > 2) {
 				System.out.println("Lag Spike: " + timeTook);
-				System.out.println("(This is not a problem so long as the number stays below 33)");
+				if (timeTook > 21) {
+					System.out.println("WARNING: LAG SPIKE WAS PRETTY HIGH");
+				}
 				// Currently rarely has any issues, and I don't see it above 5
 			}
 			//System.out.println("Time Took: " + timeTook);

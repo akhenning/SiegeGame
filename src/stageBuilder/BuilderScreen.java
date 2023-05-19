@@ -8,6 +8,7 @@ import siegeGame.Graphic;
 import siegeGame.Interactable;
 import siegeGame.Main;
 import siegeGame.Player;
+import siegeGame.Mob;
 
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
@@ -291,6 +292,10 @@ public class BuilderScreen extends JPanel {
 								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
 								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
 								Integer.parseInt(elements[6].trim()),tied));
+				} else if (elements[0].trim().equals("Mob")) {
+					area.add(new Mob(Integer.parseInt(elements[1].trim()),
+							Integer.parseInt(elements[2].trim()),
+							Integer.parseInt(elements[6].trim())));
 				} else {
 					try {
 						area.add(new Interactable(Integer.parseInt(elements[1].trim()),

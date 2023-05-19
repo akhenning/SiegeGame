@@ -69,6 +69,7 @@ public class Screen extends JPanel {
 	// Collection of level objects
 	private ArrayList<Tile> area = new ArrayList<Tile>();
 	private ArrayList<Interactable> interactables = new ArrayList<Interactable>();
+	private ArrayList<Mob> mobs = new ArrayList<Mob>();
 	private ArrayList<Graphic> graphics = new ArrayList<Graphic>();
 	private ArrayList<Particle> particles = new ArrayList<Particle>();
 	private int numSelected = 0;
@@ -197,6 +198,11 @@ public class Screen extends JPanel {
 				}
 			}
 			for (Interactable tile : interactables) {
+				if (tile.isVisible()) {
+					tile.draw(g2);
+				}
+			}
+			for (Mob tile : mobs) {
 				if (tile.isVisible()) {
 					tile.draw(g2);
 				}
@@ -420,9 +426,15 @@ public class Screen extends JPanel {
 			for (int i = 0; i < area.size();i+=1) {
 				area.get(i).checkIsVisible();
 			}
+			
+			for (int i = 0; i < mobs.size(); i++) {
+				mobs.get(i).checkIsVisible();
+				mobs.get(i).nextFrame();
+			}
 			for (int i = 0; i < interactables.size(); i++) {
 				interactables.get(i).checkIsVisible();
 				interactables.get(i).nextFrame();
+
 				// Check if Interactable should be removed
 				if (interactables.get(i).shouldRemove()) {
 					// Check if it is W; if so, needs to make a unique smoke effect
@@ -434,6 +446,7 @@ public class Screen extends JPanel {
 					interactables.remove(interactables.get(i));
 					i -= 1;
 				}
+				
 			}
 			for (int i = 0; i < graphics.size();i+=1) {
 				graphics.get(i).checkIsVisible();
@@ -602,10 +615,6 @@ public class Screen extends JPanel {
 		// for every Interactable
 		for (Interactable tile : interactables) {
 			if (tile.isVisible() && tile.hasInteraction()) {
-				// This should be removed eventually
-				if (tile.getId() == 71) {
-					System.out.println("Error: Interactable with no contact Interaction is registered as having one.");
-				}
 				// See if either foot is inside something
 				if (tile.canDetectRight()) {
 					if (tile.isInside(leftTop)) {
@@ -704,7 +713,7 @@ public class Screen extends JPanel {
 		int dx = player.x - Screen.scrollx;
 		int dy = player.y - Screen.scrolly;
 		int point[];
-		boolean rtrn = false;
+		boolean shouldBounce = false;
 		for (Hitbox box : hitboxes) {
 			if (box.isActive()) {
 				for (Interactable tile : interactables) {
@@ -721,8 +730,52 @@ public class Screen extends JPanel {
 								int effect = tile.interact();
 								// If it has a bouncing effect
 								if (effect == 1) {
-									rtrn = true;
+									shouldBounce = true;
 									// if it breaks upon contact
+								} else if (effect == 0) {
+									// Create new particles with semirandom properties in area of tile
+									int heightover4 = tile.getHeight() / 4;
+									int widthover4 = tile.getWidth() / 4;
+									particles.add(new Particle(tile.getX() + widthover4, tile.getY() + heightover4,
+											heightover4 / 2, heightover4 / 2, 1));
+									particles.add(new Particle(tile.getX() + (widthover4 * 3),
+											tile.getY() + heightover4, heightover4 / 2, heightover4 / 2, 1));
+									particles.add(new Particle(tile.getX() + widthover4,
+											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
+									particles.add(new Particle(tile.getX() + (widthover4 * 3),
+											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
+									// Remove the tile from the list
+									tile.setToRemove();
+									// If is a text box prompt (? mark)
+								} else if (effect == 2) {
+									// Tell the game to activate text boxes, and move to the proper box
+									activeText = true;
+									textBoxNum = tile.getData();
+									textScrollNum[0] = 0;
+									textScrollNum[1] = 1;
+								}
+							}
+						}
+					}
+				}
+				for (Mob tile : mobs) {
+					if (tile.isVisible()) {
+						// For each corner of the hitbox, find the hitboxes' location in the game
+						// (which is different from the player-relative location stored in the object)
+						for (int i = 1; i < 5; i++) {
+							point = box.getRelativePoint(i);
+							point[0] += dx;
+							point[1] += dy;
+							// If there is a point of contact;
+							if (tile.isInside(point)) {
+								// Check for the type of interaction
+								int effect = tile.interact();
+								
+								// (this is not used for mobs as of right now)
+								// If it has a bouncing effect
+								if (effect == 1) {
+									shouldBounce = true;
+									// if it takes damage or something
 								} else if (effect == 0) {
 									// Create new particles with semirandom properties in area of tile
 									int heightover4 = tile.getHeight() / 4;
@@ -751,7 +804,7 @@ public class Screen extends JPanel {
 				}
 			}
 		}
-		return rtrn;
+		return shouldBounce;
 	}
 
 	// Method that handles desending staircases.
@@ -1075,6 +1128,7 @@ public class Screen extends JPanel {
 		faceNames = new ArrayList<String>();
 		area = new ArrayList<Tile>();
 		interactables = new ArrayList<Interactable>();
+		mobs = new ArrayList<Mob>();
 		particles = new ArrayList<Particle>();
 		graphics = new ArrayList<Graphic>();
 
@@ -1151,12 +1205,12 @@ public class Screen extends JPanel {
 					}
 				} else if (elements[0].trim().equals("ConnectedTile")) {
 					Tile tied;
-					if (elements[8].trim().equals("Tile")) {
+					if (elements[8].trim().equals("Tile")) { // respawn element
 						tied = new Tile(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
 								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
 								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()));
 					} else {
-						tied = new Interactable(Integer.parseInt(elements[9].trim()),
+						tied = new Interactable(Integer.parseInt(elements[9].trim()), // door
 								Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
 								Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()),
 								Integer.parseInt(elements[14].trim()), Integer.parseInt(elements[15].trim()));
@@ -1166,6 +1220,10 @@ public class Screen extends JPanel {
 							Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
 							Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
 							Integer.parseInt(elements[6].trim()), tied));
+				} else if (elements[0].trim().equals("Mob")) {
+					mobs.add(new Mob(Integer.parseInt(elements[1].trim()),
+							Integer.parseInt(elements[2].trim()),
+							Integer.parseInt(elements[6].trim())));
 				} else {
 					try {
 						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()),
