@@ -62,8 +62,8 @@ public class Interactable extends Tile {
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
 		switch (id) {
 		case 99:
+			g2.drawImage(finish, scrollx + x, scrolly + y, width, height, null);
 			if (Main.debug) {
-				g2.drawImage(finish, scrollx + x, scrolly + y, width, height, null);
 				g2.drawRect(scrollx + x, scrolly + y, width, height);
 			}
 			break;

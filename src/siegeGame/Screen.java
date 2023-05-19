@@ -523,7 +523,7 @@ public class Screen extends JPanel {
 								highest = tile.getHeight(rightFoot.getX());
 							}
 							// if the object is a respawn element
-						} else if (tile.getId() == -1) {
+						} else if (tile.getId() == -1 || tile.getId() == -3) {
 							int[] dest_xy = tile.getTiedXY();
 							// int[] src_xy = {tile.getX()+(tile.getWidth()/2), tile.getY() +
 							// (tile.getHeight()/2)};
@@ -579,6 +579,16 @@ public class Screen extends JPanel {
 						if (tile.y > highest) {
 							highest = tile.getHeight(right.getX()) + tile.height;
 						}
+					} else if (tile.getId() == -1 || tile.getId() == -3) {
+						int[] dest_xy = tile.getTiedXY();
+						// int[] src_xy = {tile.getX()+(tile.getWidth()/2), tile.getY() +
+						// (tile.getHeight()/2)};
+						// int[] player_xy = {player.getAbsoluteX(), player.getAbsoluteY()};
+						player.goToAbsolute(dest_xy[0], dest_xy[1] + 250);
+						player.forceLanding();
+						player.stop();
+						fade = 300;
+						fade_text = "";
 					}
 				}
 			}
@@ -632,13 +642,14 @@ public class Screen extends JPanel {
 								textScrollNum[1] = 1;
 							}
 							// if the object is a respawn element
-						} else if (tile.getId() == -1) {
+						} else if (tile.getId() == -1 || tile.getId() == -3) {
 							int[] dest_xy = tile.getTiedXY();
 							// int[] src_xy = {tile.getX()+(tile.getWidth()/2), tile.getY() +
 							// (tile.getHeight()/2)};
 							// int[] player_xy = {player.getAbsoluteX(), player.getAbsoluteY()};
 							player.goToAbsolute(dest_xy[0], dest_xy[1] + 250);
 							player.forceLanding();
+							player.stop();
 							fade = 300;
 							fade_text = "";
 							// If the object is a finish line
@@ -674,10 +685,11 @@ public class Screen extends JPanel {
 								textScrollNum[0] = 0;
 								textScrollNum[1] = 1;
 							}
-						} else if (tile.getId() == -1) {
+						} else if (tile.getId() == -1 || tile.getId() == -3) {
 							int[] dest_xy = tile.getTiedXY();
 							player.goToAbsolute(dest_xy[0], dest_xy[1] + 250);
 							player.forceLanding();
+							player.stop();
 							fade = 300;
 							fade_text = "";
 							// If the object is a finish line

@@ -280,7 +280,7 @@ public class Player {
 				
 				// Speed up on the frame she swings the hammer down
 				if (animationFrame == 10) {
-					yspeed += 10; // caps right away pretty much
+					yspeed += 12; // caps right away pretty much
 				}
 				if (offset * animationFrame + 300 > width) {
 					animationFrame -= 1;
@@ -445,8 +445,8 @@ public class Player {
 		boolean doLandingCheck = false;
 		isSpace = isJump;
 
-		if (yspeed > 37) {
-			yspeed = 37;
+		if (yspeed > 40) {
+			yspeed = 40;
 		}
 		if (xspeed < .01 && xspeed > -.01) {
 			xspeed = 0;
@@ -756,7 +756,12 @@ public class Player {
 			}
 		}
 	}
-	
+
+	public void stop() {
+		yspeed = 0;
+		xspeed = 0;
+	}
+
 	// Loads images to remove flickering
 	public void load(Graphics2D g2) {
 		Image sprites[] = { walk, IDLE, jumpsquat, jumping, hovering, strike, landing, attack, heavy_attack };

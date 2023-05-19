@@ -104,6 +104,7 @@ public class BuilderScreen extends JPanel {
 		TileTypes.add(new TileType(99, true, "Basic finish element"));
 		ComplexTypes.add(new TileType(0, false, "Blank Graphic"));
 		ComplexTypes.add(new TileType(-1, false, "Respawn Paired Element"));
+		ComplexTypes.add(new TileType(-3, false, "Visible Respawn P.E."));
 		ComplexTypes.add(new TileType(-2, false, "Button-Door Pair"));
 		setBackground(Color.WHITE);
 		addMouseListener(new ClickListener());
@@ -606,6 +607,10 @@ public class BuilderScreen extends JPanel {
 						lastActiveTile = new ConnectedTile(0, 0, 200, 200, 0, ComplexTypes.get(current_complex_type).id, temp);
 						lastActiveTile.goToTied(point.getX(), point.getY() - 100);
 						area.add(lastActiveTile.getTied()); 
+					} else if (ComplexTypes.get(current_complex_type).id == -3) {
+						lastActiveTile = new ConnectedTile(0, 0, 200, 200, 0, ComplexTypes.get(current_complex_type).id);
+						lastActiveTile.goToTied(point.getX(), point.getY() - 100);
+						area.add(lastActiveTile.getTied());
 					} else {
 						lastActiveTile = new Graphic(0,0,ComplexTypes.get(current_complex_type).id);
 					}

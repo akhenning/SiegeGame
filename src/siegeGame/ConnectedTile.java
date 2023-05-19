@@ -12,14 +12,9 @@ public class ConnectedTile extends Interactable {
 
 	public ConnectedTile(int x, int y, int width, int height, int clipType, int id, Tile tied) {
 		super(x, y, width, height, clipType, id);
+		isTangible = false;
 		this.tied = tied;
 		this.tied.dontSaveThis();
-		switch (id) {
-		case -1:
-		case -2:
-			isTangible = false;
-			break;
-		}
 	}
 
 	public void draw(Graphics2D g2) {
@@ -27,9 +22,10 @@ public class ConnectedTile extends Interactable {
 	}
 
 	public void draw(Graphics2D g2, int scrollx, int scrolly) {
+		Color c = null;
 		switch (id) {
 		case -2:
-			Color c = g2.getColor();
+			c = g2.getColor();
 			g2.setColor(Color.BLACK);
 			g2.drawLine(scrollx + x, scrolly + y + height, scrollx + x + width, scrolly + y + height);
 			g2.setColor(Color.GRAY);
@@ -38,6 +34,12 @@ public class ConnectedTile extends Interactable {
 			} else {
 				g2.fillRect(scrollx + x+width/4, scrolly + y+height/2, width/2, height/2);
 			}
+			g2.setColor(c);
+			break;
+		case -3:
+			c = g2.getColor();
+			g2.setColor(Color.RED);
+			g2.fillRect(scrollx + x, scrolly + y, width, height);
 			g2.setColor(c);
 			break;
 		}
@@ -56,6 +58,9 @@ public class ConnectedTile extends Interactable {
 		case -2:
 			type = "Door Button";
 			break;
+		case -3:
+			type = "Visible Respawn Element";
+			break;
 		}
 		System.out.println(id);
 		return "ConnectedTile,\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id
@@ -71,6 +76,8 @@ public class ConnectedTile extends Interactable {
 			flag = Flag.JUSTHIT;
 			action = 100;
 			tied.setData(1);
+			return -1;
+		case -3:
 			return -1;
 		default:
 			System.out.println("Invalid Interactable type");
