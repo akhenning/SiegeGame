@@ -860,6 +860,10 @@ public class Screen extends JPanel {
 			break;
 		case 3:
 			// landing
+			for (int i = 0; i < 4; i++) {
+				particles.add(new Particle(x + 3, y + 3, 2 + (int) (Math.random() * 5 + 5),
+						2 + (int) (Math.random() * 5 + 5), 2));
+			}
 			playSound("audio/land.wav", 3);
 			break;
 		case 2:
@@ -1130,6 +1134,7 @@ public class Screen extends JPanel {
 		// And load level select
 		fade = 310;
 		state = GameState.SELECT;
+		
 		loadLevel("");
 	}
 
@@ -1375,6 +1380,16 @@ public class Screen extends JPanel {
 					music_last.stop();
 					music_last.close();
 				}
+			} else if (music_last != null && current_track != "audio/speedoflight_intro.wav") {
+				if (music != null) {
+					music.stop();
+					music.close();
+				}
+				if (music_last != null) {
+					music_last.stop();
+					music_last.close();
+				}
+				playSound("audio/speedoflight_intro.wav", 1);
 			}
 		}
 
@@ -1484,9 +1499,9 @@ public class Screen extends JPanel {
 					if (change && Main.scrollPos[3] < player.y
 							&& (player.state == State.GROUNDED || player.state == State.BASIC_ATTACK
 									|| player.state == State.LANDING || player.state == State.JUMPSQUAT)) {
-						System.out.println("Adjusting player location");
-						player.forceLanding();
-						player.adjust(0, 100);
+						//System.out.println("Adjusting player location");
+						//player.forceLanding();
+						//player.adjust(0, 100);
 					}
 				}
 				break;

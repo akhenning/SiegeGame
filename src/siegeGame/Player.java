@@ -288,7 +288,7 @@ public class Player {
 			} else if (state == State.LANDING && aerial_attack_state) {
 				int offset = 300;
 				if (previousAnimation != Animation.LANDING) {
-					screen.makeEffect(0,0,3,0);
+					screen.makeEffect(-Screen.scrollx+x+25+(direction*120),-Screen.scrolly+y+4,3,0);
 					for (Hitbox box : hitboxes) {
 						box.setActive(false, direction);
 					}

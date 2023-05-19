@@ -70,10 +70,10 @@ public class Main {
 				if (timeTook > 21) {
 					System.out.println("WARNING: LAG SPIKE WAS PRETTY HIGH");
 				}
-				// Currently rarely has any issues, and I don't see it above 5
 			}
 			//System.out.println("Time Took: " + timeTook);
 
+			// 30fps
 			try {
 				if (timeTook<33.3) {
 					Thread.sleep((long) (33.3-timeTook));

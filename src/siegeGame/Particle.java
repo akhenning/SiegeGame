@@ -34,7 +34,7 @@ public class Particle {
 		case 2:
 			// impact debris
 			timeRemaining = 15;
-			dx = Math.random() * 30 - 15;
+			dx = Math.random() * 25 - 15;
 			dy = Math.random() * -15;
 			break;
 		case 3:
