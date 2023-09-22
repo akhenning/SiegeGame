@@ -3,8 +3,14 @@ This is the default level, meaning there are no more levels past this point.
 Thanks for playing!
 [break] break
 [Nian] (This text has been redacted for high levels of cringe.)
-[WSmile] "[This text has been redacted for high levels of cringe.]" lmfao. Lemmie check what it used to say.
-[WMad] Wow, that really was cringe.
+[WSmile] "(This text has been redacted for high levels of cringe.)" lmfao. Lemmie check what it used to say.
+[WMad] Wow, that really was bad.
 [WCrazy] Lmfao, Allison, I can't believe you actually wrote this shit and showed it to people!
 [WCrazy] Hahaha, fucking idiot!
-(Nian pretty. Resist urge to fix sprite rips. Resist it........)
+[SiegeBlush] ...
+[SiegeAngry] Hey, cut her some slack.
+[SiegeAngry] Even at the time she knew it was pretty cringeworthy.
+[WCrazy] And that makes it better, how?
+[SiegeClosed] ...
+(I must resist urge to fix sprite rips. Resist it........)
+[break] break

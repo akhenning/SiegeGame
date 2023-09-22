@@ -683,29 +683,17 @@ public class Player {
 		//System.out.println(Screen.scrolly+" and "+y);
 	}
 
-	// so, scrollx is... something... we need to add the amount away from the player character it is...
-	// Need to take wherever the scrollx is and move it so that, for the new value, it has player's current location in the middle
 	// true location is scrollx + x. So, we want to adjust the values so that scrollx + half of width = x
 	// scrolly gets smaller when going down, y gets bigger when going down
 	// scrollx gets smaller when going right for some reason, x is bigger right
-	// 310 - 950 = truey
 	public void centerScreen() {
-		System.out.println("ScrollX: "+Screen.scrollx+", ScrollY: "+Screen.scrolly);
-		System.out.println("X: "+x+", Y:"+y);
-		int true_x = -Screen.scrollx + x;
-		int true_y = Screen.scrolly - y;
-		System.out.println("TrueY:"+true_y);
-		// Sends me up
-		Screen.scrollx = -1*(true_x - Main.gameSize.width/2);
-		Screen.scrolly = (true_y + Main.gameSize.height/2);
-		System.out.println("ScrollX: "+Screen.scrollx+", ScrollY: "+Screen.scrolly);
+		Screen.scrollx = -1*((-Screen.scrollx + x) - Main.gameSize.width/2);
+		Screen.scrolly = ((Screen.scrolly - y) + Main.gameSize.height/2);
 
 		litx = Main.gameSize.width/2;
 		lity = Main.gameSize.height/2;
 		x = (int) litx;
 		y = (int) lity;
-		System.out.println("ScrollX: "+Screen.scrollx+", ScrollY: "+Screen.scrolly);
-		System.out.println("X: "+x+", Y:"+y);
 	}
 
 	// public void setStandingOn(Tile obj) {

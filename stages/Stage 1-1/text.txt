@@ -1,11 +1,11 @@
-[SiegeNormal] Hello, and welcome to the tutorial of Siege Game (tentative).
-[SiegeEnigmatic] I am your playable character, Siege. Gang leader, and highest-rank Vanguard at Rhodes Island.
-[SiegeEnigmatic] Yorushiku.
+[SiegeSmile] Hello, and welcome to the tutorial of Siege Game (tentative).
+[SiegeSmile] I am your playable character, Siege. Gang leader, and highest-rank Vanguard at Rhodes Island.
+[SiegeClosedSmile] Yorushiku.
 [SiegeNormal] This is the first stage, and the first tutorial.
-[SiegeNormal] First, let's walk over to the large "?", and we will get started.
+[SiegeLookingAway] First, let's walk over to the large "?", and we will get started.
 [break] break
-[SiegeNormal] Great job. Now we can get started.
-[SiegeNormal] Let's start with something simple. Jump over this small obstacle, and then the gap, with "Space".
+[SiegeClosed] Excellent. Now we can get started.
+[SiegeLookingAway] Let's start with something simple. Jump over this small obstacle, and then the gap, with "Space".
 [break] break
 [SiegeEnigmatic] Fantastic job. Next, we have a wall that is too high to jump over normally.
 [SiegeEnigmatic] In order to jump higher and get more air, I can attack the [green] bounce pads and bounce away from them.
@@ -13,11 +13,11 @@
 [break] break
 [SiegeEnigmatic] Excellent!
 [SiegeNormal] This attacking move is the main way you will interact with your environment. 
-[SiegeNormal] For example, you can attack these text prompters to have them play their text again.
-[SiegeNormal] Next, let's use the same attacking move ("E") to break these destructable blocks to the right.
+[SiegeClosed] For example, you can attack these text prompters to have them play their text again.
+[SiegeAngry] Next, let's use the same attacking move ("E") to break these destructable blocks to the right.
 [break] break
 [SiegeNormal] Great. Now, there is only one more thing left to teach.
-[SiegeNormal] Basically, when you hold the space button instead of tapping it, it will cause me to get much more air.
-[SiegeNormal] Let's use this method to get on the platform up and to the left of this wall.
+[SiegeClosed] Basically, when you hold the space button instead of tapping it, it will cause me to get much more air.
+[SiegeLookingAway] Let's use this method to get on the platform up and to the left of this wall.
 [break] break
-[SiegeNormal] Congratulations on completing the tutorial! Move left to finish the level.
+[SiegeClosedSmile] Congratulations on completing the tutorial! Move left to finish the level.

@@ -54,7 +54,15 @@ public class Screen extends JPanel {
 			Toolkit.getDefaultToolkit().getImage("assets/w.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/w_smile.png"),
 			Toolkit.getDefaultToolkit().getImage("assets/w_mad.png"),
-			Toolkit.getDefaultToolkit().getImage("assets/w_crazy.png") };
+			Toolkit.getDefaultToolkit().getImage("assets/w_crazy.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeAngry.png"), 
+			Toolkit.getDefaultToolkit().getImage("assets/SiegePissed.png"),
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeSad.png"), 
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeLookingAway.png"), 
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeClosed.png"), 
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeClosedSmile.png"), 
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeSmile.png"), 
+			Toolkit.getDefaultToolkit().getImage("assets/SiegeBlush.png")};
 
 	private static Map<String, AudioInputStream> sounds = new HashMap<String, AudioInputStream>();
 	private static String[] snds = { "audio/heavy_hit.wav", "audio/land.wav", "audio/jump.wav", "audio/very_heavy_hit.wav", "audio/swish.wav" };
@@ -1319,6 +1327,38 @@ public class Screen extends JPanel {
 						faces.add(face_images[7]);
 						faceNames.add("W");
 						break;
+					case "[SiegeAngry]":
+						faces.add(face_images[8]);
+						faceNames.add("Siege");
+						break;
+					case "[SiegePissed]":
+						faces.add(face_images[9]);
+						faceNames.add("Siege");
+						break;
+					case "[SiegeSad]":
+						faces.add(face_images[10]);
+						faceNames.add("Siege");
+						break;
+					case "[SiegeLookingAway]":
+						faces.add(face_images[11]);
+						faceNames.add("Siege");
+						break;
+					case "[SiegeClosed]":
+						faces.add(face_images[12]);
+						faceNames.add("Siege");
+						break;
+					case "[SiegeClosedSmile]":
+						faces.add(face_images[13]);
+						faceNames.add("Siege");
+						break;
+					case "[SiegeSmile]":
+						faces.add(face_images[14]);
+						faceNames.add("Siege");
+						break;
+					case "[SiegeBlush]":
+						faces.add(face_images[15]);
+						faceNames.add("Siege");
+						break;
 					case "[break]":
 						faces.add(BREAK_POINT_SIGNIFIER);
 						faceNames.add("");
@@ -1508,8 +1548,8 @@ public class Screen extends JPanel {
 					} else {
 						// So, when it zooms out, we want to reduce scrollx by... half the original
 						scrollx += Main.gameSize.width / 2;
-						scrolly += Main.gameSize.height / 4;
-						player.adjust(Main.gameSize.width / 2, Main.gameSize.height / 4);
+						scrolly += Main.gameSize.height / 3;
+						player.adjust(Main.gameSize.width / 2, Main.gameSize.height / 3);
 						Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
 						Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
 						Main.scrollPos[0] = Main.gameSize.width / 5;

@@ -5,7 +5,7 @@ Graphic,	734,	358,	-1,	-1,	1,	-3,		Unrecognized
 ConnectedTile,	1260,	20,	820,	200,	0,	-3,		Visible Respawn Element 	,Tile,		720,	400,	200,	240,	0,	1,		Respawn Destination
 ConnectedTile,	800,	1020,	6080,	200,	0,	-1,		Respawn Element 	,Tile,		720,	400,	200,	240,	0,	1,		Respawn Destination
 Interactable,	2080,	60,	740,	200,	0,	50,	-1,	Bounce pad
-Interactable,	7200,	260,	200,	180,	0,	99,	-1,	Finish element
+Interactable,	7200,	380,	200,	180,	0,	99,	-1,	Finish element
 Tile,		3300,	520,	200,	200,	0,	0,		Basic black block
 Tile,		3240,	0,	300,	200,	0,	0,		Basic black block
 Tile,		4100,	-1980,	200,	1680,	0,	0,		Basic black block
@@ -22,3 +22,4 @@ Tile,		6160,	-500,	1040,	80,	1,	0,		Basic black block
 Interactable,	7000,	-500,	200,	940,	0,	50,	-1,	Bounce pad
 Interactable,	7380,	-500,	200,	940,	0,	50,	-1,	Bounce pad
 Tile,		6160,	-500,	60,	80,	2,	0,		Basic black block
+Interactable,	6780,	-700,	200,	200,	0,	70,	6,	Text continuer

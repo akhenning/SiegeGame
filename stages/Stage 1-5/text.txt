@@ -1,4 +1,4 @@
 [break] break
-[SiegeNormal] I think this is a door, over to my right. I should find a button to open it.
-[SiegeEnigmatic] Hi, Ellie <3
+[SiegeNormal] I think this is a door, over to my left. I should find a button to open it.
+[SiegeSmile] Hi, Ellie!! <3
 [break] break
