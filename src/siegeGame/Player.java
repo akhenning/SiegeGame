@@ -583,8 +583,12 @@ public class Player {
 		Point2D.Double right2 = new Point2D.Double(litx - Screen.scrollx + 77, lity - 150 - Screen.scrolly + yoffset);
 		int wallLevel = screen.checkHorizontalCollision(left, left2, right, right2);
 		if (wallLevel != -1000001) {
+			if (litx - (wallLevel + Screen.scrollx) > 0 && xspeed > 0) {
+				xspeed = 0;
+			} else if (litx - (wallLevel + Screen.scrollx) < 0 && xspeed < 0) {
+				xspeed = 0;
+			}
 			litx = wallLevel + Screen.scrollx;
-			xspeed = 0;
 		}
 
 		// Check if (airborne) player has their HEAD in a CEILING or are about to LAND
@@ -676,6 +680,32 @@ public class Player {
 		}
 		y = (int) lity;
 
+		//System.out.println(Screen.scrolly+" and "+y);
+	}
+
+	// so, scrollx is... something... we need to add the amount away from the player character it is...
+	// Need to take wherever the scrollx is and move it so that, for the new value, it has player's current location in the middle
+	// true location is scrollx + x. So, we want to adjust the values so that scrollx + half of width = x
+	// scrolly gets smaller when going down, y gets bigger when going down
+	// scrollx gets smaller when going right for some reason, x is bigger right
+	// 310 - 950 = truey
+	public void centerScreen() {
+		System.out.println("ScrollX: "+Screen.scrollx+", ScrollY: "+Screen.scrolly);
+		System.out.println("X: "+x+", Y:"+y);
+		int true_x = -Screen.scrollx + x;
+		int true_y = Screen.scrolly - y;
+		System.out.println("TrueY:"+true_y);
+		// Sends me up
+		Screen.scrollx = -1*(true_x - Main.gameSize.width/2);
+		Screen.scrolly = (true_y + Main.gameSize.height/2);
+		System.out.println("ScrollX: "+Screen.scrollx+", ScrollY: "+Screen.scrolly);
+
+		litx = Main.gameSize.width/2;
+		lity = Main.gameSize.height/2;
+		x = (int) litx;
+		y = (int) lity;
+		System.out.println("ScrollX: "+Screen.scrollx+", ScrollY: "+Screen.scrolly);
+		System.out.println("X: "+x+", Y:"+y);
 	}
 
 	// public void setStandingOn(Tile obj) {
@@ -707,7 +737,8 @@ public class Player {
 	public void adjust(int x_diff, int y_diff) {
 		litx += x_diff;
 		lity += y_diff;
-		
+		x = (int) litx;
+		y = (int) lity;
 		/**if (y_diff != 0 && (state == State.GROUNDED || state == State.BASIC_ATTACK || state == State.LANDING || state == State.JUMPSQUAT)) {
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly );
@@ -719,9 +750,11 @@ public class Player {
 		}*/
 	}
 
-	public void goTo(int x, int y) {
-		litx = x;
-		lity = y;
+	public void goTo(int tox, int toy) {
+		litx = tox;
+		lity = toy;
+		x = (int) litx;
+		y = (int) lity;
 	}
 	
 	/* NOTE: FOR LEFT FOOT

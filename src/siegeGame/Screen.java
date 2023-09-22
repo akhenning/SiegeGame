@@ -152,6 +152,7 @@ public class Screen extends JPanel {
 		if (state == GameState.LEVEL) {
 			g2.scale(zoom, zoom);
 
+			//System.out.println(scrollx);
 			// g2.translate(-Main.screenSize.width/2+Main.screenSize.width/zoom/2,
 			// -Main.screenSize.height/2+Main.screenSize.height/zoom/2);
 
@@ -364,7 +365,7 @@ public class Screen extends JPanel {
 				}
 				fade_in_text = new Color(255, 255, 255, fade);
 			}
-			g2.fillRect(0, 0, 3500, 1500);
+			g2.fillRect(0, 0, 6000, 3000);
 			g2.setColor(fade_in_text);
 			g2.drawString(fade_text, Main.screenSize.width / 3, Main.screenSize.height / 2);
 		} else {
@@ -1371,7 +1372,8 @@ public class Screen extends JPanel {
 				i++;
 			}
 			fade_text = "";
-			if (soundMode == SoundLevel.NONE) {
+			// Stop sound if no sound. Stop sound and play title music if not already doing so
+			if (soundMode == SoundLevel.NONE || (music_last != null && current_track != "audio/speedoflight_intro.wav")) {
 				if (music != null) {
 					music.stop();
 					music.close();
@@ -1380,16 +1382,9 @@ public class Screen extends JPanel {
 					music_last.stop();
 					music_last.close();
 				}
-			} else if (music_last != null && current_track != "audio/speedoflight_intro.wav") {
-				if (music != null) {
-					music.stop();
-					music.close();
+				if (soundMode != SoundLevel.NONE) {
+					playSound("audio/speedoflight_intro.wav", 1);
 				}
-				if (music_last != null) {
-					music_last.stop();
-					music_last.close();
-				}
-				playSound("audio/speedoflight_intro.wav", 1);
 			}
 		}
 
@@ -1482,27 +1477,27 @@ public class Screen extends JPanel {
 				break;
 			case KeyEvent.VK_UP:
 				if (state == GameState.LEVEL) {
-					boolean change = false;
+					//boolean change = false;
 					zoom += .5;
 					if (zoom > 1) {
 						zoom = 1;
 					} else {
-						change = true;
+						//change = true;
+						Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
+						Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
+						Main.scrollPos[0] = Main.gameSize.width / 5;
+						Main.scrollPos[1] = Main.gameSize.width * 2 / 3;
+						Main.scrollPos[2] = Main.gameSize.width / 5;
+						Main.scrollPos[3] = Main.gameSize.width * 2 / 5;
+						player.centerScreen();
 					}
-					// Why didn't I put this in the loop above?
-					Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
-					Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
-					Main.scrollPos[0] = Main.gameSize.width / 5;
-					Main.scrollPos[1] = Main.gameSize.width * 2 / 3;
-					Main.scrollPos[2] = Main.gameSize.width / 5;
-					Main.scrollPos[3] = Main.gameSize.width * 2 / 5;
-					if (change && Main.scrollPos[3] < player.y
-							&& (player.state == State.GROUNDED || player.state == State.BASIC_ATTACK
-									|| player.state == State.LANDING || player.state == State.JUMPSQUAT)) {
+					//if (change && Main.scrollPos[3] < player.y
+					//		&& (player.state == State.GROUNDED || player.state == State.BASIC_ATTACK
+					//				|| player.state == State.LANDING || player.state == State.JUMPSQUAT)) {
 						//System.out.println("Adjusting player location");
 						//player.forceLanding();
 						//player.adjust(0, 100);
-					}
+					//}
 				}
 				break;
 			case KeyEvent.VK_DOWN:
@@ -1512,16 +1507,16 @@ public class Screen extends JPanel {
 						zoom = .5;
 					} else {
 						// So, when it zooms out, we want to reduce scrollx by... half the original
-						scrollx += Main.gameSize.width / 4;
+						scrollx += Main.gameSize.width / 2;
 						scrolly += Main.gameSize.height / 4;
-						player.adjust(Main.gameSize.width / 4, Main.gameSize.height / 4);
+						player.adjust(Main.gameSize.width / 2, Main.gameSize.height / 4);
+						Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
+						Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
+						Main.scrollPos[0] = Main.gameSize.width / 5;
+						Main.scrollPos[1] = Main.gameSize.width * 2 / 3;
+						Main.scrollPos[2] = Main.gameSize.width / 5;
+						Main.scrollPos[3] = Main.gameSize.width * 2 / 5;
 					}
-					Main.gameSize.width = (int) ((double) Main.screenSize.width / zoom);
-					Main.gameSize.height = (int) ((double) Main.screenSize.height / zoom);
-					Main.scrollPos[0] = Main.gameSize.width / 5;
-					Main.scrollPos[1] = Main.gameSize.width * 2 / 3;
-					Main.scrollPos[2] = Main.gameSize.width / 5;
-					Main.scrollPos[3] = Main.gameSize.width * 2 / 5;
 				}
 				break;
 			case KeyEvent.VK_W:

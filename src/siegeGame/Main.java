@@ -65,10 +65,10 @@ public class Main {
 			canvas.nextFrame();
 			
 			timeTook = (System.nanoTime() - timeElapsed) / 1000000;
-			if (timeTook  > 2) {
-				System.out.println("Lag Spike: " + timeTook);
+			if (timeTook  > 3) {
+				System.out.println("Lag Spike: " + timeTook +" milliseconds.");
 				if (timeTook > 21) {
-					System.out.println("WARNING: LAG SPIKE WAS PRETTY HIGH");
+					System.out.println("WARNING: LAG SPIKE WAS PRETTY HIGH. 33 MS/F IS LIMIT");
 				}
 			}
 			//System.out.println("Time Took: " + timeTook);

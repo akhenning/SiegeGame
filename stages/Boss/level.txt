@@ -1,0 +1,14 @@
+Element Type	X	Y	Width	Height	Clip	ID	Other	Description
+-------------------------------------------------------------------------------------------
+Tile,		160,	640,	1440,	200,	1,	0,		Basic black block
+Tile,		1400,	640,	200,	800,	3,	0,		Basic black block
+Tile,		1740,	1440,	200,	520,	3,	0,		Basic black block
+Tile,		1880,	1760,	1920,	200,	1,	0,		Basic black block
+Tile,		1400,	1440,	400,	200,	1,	0,		Basic black block
+Tile,		3600,	1260,	200,	660,	2,	0,		Basic black block
+Tile,		3600,	1260,	600,	200,	1,	0,		Basic black block
+Tile,		4000,	780,	200,	680,	2,	0,		Basic black block
+Tile,		4160,	780,	760,	200,	1,	0,		Basic black block
+Tile,		4720,	-60,	200,	840,	2,	0,		Basic black block
+Tile,		1560,	-140,	40,	780,	3,	2,		Invisible block
+ConnectedTile,	-2700,	900,	2920,	320,	0,	-1,		Respawn Element 	,Tile,		440,	340,	200,	240,	0,	1,		Respawn Destination

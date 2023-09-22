@@ -1,4 +1,0 @@
-Tile,		120,	760,	2000,	200,	0,	Basic black block
-Interactable,	1560,	560,	200,	200,	70,	4,	Text continuer
-Tile,		0,	560,	500,	200,	0,	Basic black block
-Graphic,	732,	599,	349,	188,	10,	Nian lying down
