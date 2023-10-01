@@ -38,3 +38,4 @@ Tile,		680,	-880,	140,	340,	2,	0,		Basic black block
 Tile,		820,	-880,	120,	340,	3,	0,		Basic black block
 Tile,		680,	-640,	260,	100,	1,	0,		Basic black block
 Tile,		1180,	-2100,	100,	200,	1,	0,		Basic black block
+Mob,		-1676,	52,	188,	106,	-1,	-100,		Basic Drone,	-340,	80

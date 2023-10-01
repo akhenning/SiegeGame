@@ -53,6 +53,8 @@ public class BuilderScreen extends JPanel {
 	public int current_type = 0;
 	public ArrayList<TileType> ComplexTypes = new ArrayList<TileType>();
 	public int current_complex_type = 0;
+	public ArrayList<TileType> EnemyTypes = new ArrayList<TileType>();
+	public int current_enemy_type = 0;
 
 	public static int scrollx = 0;
 	public static int scrolly = 0;
@@ -63,7 +65,7 @@ public class BuilderScreen extends JPanel {
 	// RectObj finish=new RectObj(new Point2D.Double(3000,100),50,1000,Color.BLACK);
 	private boolean isShift = false;
 	private Tile lastActiveTile = null;
-	private int mode = 0;// 0 is drag, 1 is resize, 2 is change, 3 is add, 4 is change collision type, 5 is add complex object
+	private int mode = 0;// 0 is drag, 1 is resize, 2 is change, 3 is add, 4 is change collision type, 5 is add complex object, 6 is add enemy
 	boolean canDrag = false;// true if currently dragging
 	boolean nowResize;// true is resize mode
 	private Point2D.Double lastPoint = null;
@@ -79,7 +81,7 @@ public class BuilderScreen extends JPanel {
 	private Font font2 = new Font("Serif", Font.PLAIN, 100);
 	private Font font3 = new Font("Serif", Font.PLAIN, 50);
 	public static Image E = Toolkit.getDefaultToolkit().getImage("assets/E key.png");
-	public static Image R = Toolkit.getDefaultToolkit().getImage("assets/R key.png");
+	public static Image Q = Toolkit.getDefaultToolkit().getImage("assets/q_key.png");
 	private static Image selectbg = Toolkit.getDefaultToolkit().getImage("assets/selectbg1.png");
 
 	private enum GameState {
@@ -106,6 +108,12 @@ public class BuilderScreen extends JPanel {
 		ComplexTypes.add(new TileType(-1, false, "Respawn Paired Element"));
 		ComplexTypes.add(new TileType(-3, false, "Visible Respawn P.E."));
 		ComplexTypes.add(new TileType(-2, false, "Button-Door Pair"));
+		EnemyTypes.add(new TileType(-100, true, "Noninteractive Enemy Drone-2"));
+		EnemyTypes.add(new TileType(-100, true, "Noninteractive Enemy Drone-3"));
+		EnemyTypes.add(new TileType(-100, true, "Noninteractive Enemy Drone-4"));
+		EnemyTypes.add(new TileType(-110, true, "Hostile Enemy Drone-2"));
+		EnemyTypes.add(new TileType(-110, true, "Hostile Enemy Drone-3"));
+		EnemyTypes.add(new TileType(-110, true, "Hostile Enemy Drone-4"));
 		setBackground(Color.WHITE);
 		addMouseListener(new ClickListener());
 		addMouseMotionListener(new MovementListener());
@@ -167,7 +175,9 @@ public class BuilderScreen extends JPanel {
 			} else if (mode == 5) {
 				g2.drawString("Adding: " + ComplexTypes.get(current_complex_type).description,
 						(int) (BuilderMain.gameSize.width * .07), fontY);
-				
+			} else if (mode == 6) {
+				g2.drawString("Adding: " + EnemyTypes.get(current_enemy_type).description,
+						(int) (BuilderMain.gameSize.width * .07), fontY);
 			}
 
 			g2.setFont(font);
@@ -180,21 +190,24 @@ public class BuilderScreen extends JPanel {
 			} else if (mode == 1) {
 				g2.drawString("Mode: Resize", fontX, fontY);
 				g2.drawString("Select a Side", (int) (BuilderMain.gameSize.width * .07), fontY);
-				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+				g2.drawImage(Q, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			} else if (mode == 2) {
 				g2.drawString("Mode: Change", fontX, fontY);
 				g2.drawString("Change Type", (int) (BuilderMain.gameSize.width * .07), fontY);
-				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+				g2.drawImage(Q, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			} else if (mode == 3) {
 				g2.drawString("Mode: Add", fontX, fontY);
-				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+				g2.drawImage(Q, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			} else if (mode == 4) {
 				g2.drawString("Mode: Collision", fontX, fontY);
 				g2.drawString("Change Type", (int) (BuilderMain.gameSize.width * .07), fontY);
-				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+				g2.drawImage(Q, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			} else if (mode == 5) {
 				g2.drawString("Mode: Add Complex", fontX, fontY);
-				g2.drawImage(R, 0, (int) (BuilderMain.gameSize.height * .775), null);
+				g2.drawImage(Q, 0, (int) (BuilderMain.gameSize.height * .775), null);
+			} else if (mode == 6) {
+				g2.drawString("Mode: Add Enemy", fontX, fontY);
+				g2.drawImage(Q, 0, (int) (BuilderMain.gameSize.height * .775), null);
 			} 
 		} else if (state == GameState.SELECT) {
 			g2.setFont(font2);
@@ -294,9 +307,21 @@ public class BuilderScreen extends JPanel {
 								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
 								Integer.parseInt(elements[6].trim()),tied));
 				} else if (elements[0].trim().equals("Mob")) {
-					area.add(new Mob(Integer.parseInt(elements[1].trim()),
-							Integer.parseInt(elements[2].trim()),
-							Integer.parseInt(elements[6].trim())));
+					// todo this probably has an issue
+					int[] xarr = new int[(elements.length-7)/2];
+					int[] yarr = new int[(elements.length-7)/2];
+					for(int i = 8;i<elements.length;i+=2){
+						xarr[(i-8)/2] = Integer.parseInt(elements[i].trim());
+						yarr[(i-8)/2] = Integer.parseInt(elements[i+1].trim());
+					}
+					Tile temp = new Mob(Integer.parseInt(elements[1].trim()),
+							Integer.parseInt(elements[2].trim()),Integer.parseInt(elements[6].trim()),
+							xarr,yarr);
+					Tile[] cpts = temp.fetchCheckpoints();
+					area.add(temp);
+					for (int i = 0; i < cpts.length; i++) {
+						area.add(cpts[i]);
+					}
 				} else {
 					try {
 						area.add(new Interactable(Integer.parseInt(elements[1].trim()),
@@ -340,7 +365,7 @@ public class BuilderScreen extends JPanel {
 			out.write("Element Type\tX\tY\tWidth\tHeight\tClip\tID\tOther\tDescription\n".getBytes());
 			out.write("-------------------------------------------------------------------------------------------\n".getBytes());
 			for (Tile tile : area) {
-				if (tile.should_be_saved) {
+				if (tile.canHandleNormally()) {
 					out.write(tile.toString().getBytes());
 				}
 			}
@@ -415,7 +440,6 @@ public class BuilderScreen extends JPanel {
 				}
 				break;
 			case KeyEvent.VK_S:
-
 				if (state == GameState.SELECT) {
 					numSelected += 1;
 					if (numSelected >= area.size()) {
@@ -434,7 +458,7 @@ public class BuilderScreen extends JPanel {
 				break;
 			case KeyEvent.VK_E:
 				mode += 1;
-				if (mode > 5) {
+				if (mode > 6) {
 					mode = 0;
 				}
 				break;
@@ -486,6 +510,12 @@ public class BuilderScreen extends JPanel {
 						current_complex_type = 0;
 					}
 					break;
+				case 6:
+					current_enemy_type += 1;
+					if (current_enemy_type >= EnemyTypes.size()) {
+						current_enemy_type = 0;
+					}
+					break;
 				}
 				break;
 			case KeyEvent.VK_UP:
@@ -520,9 +550,11 @@ public class BuilderScreen extends JPanel {
 				}
 				break;
 			case KeyEvent.VK_DELETE:
-				lastActiveTile.cleanup();
-				area.remove(lastActiveTile);
-				lastActiveTile = null;
+				if (lastActiveTile.canHandleNormally()){
+					lastActiveTile.cleanup();
+					area.remove(lastActiveTile);
+					lastActiveTile = null;
+				}
 			default:
 
 			}
@@ -624,6 +656,52 @@ public class BuilderScreen extends JPanel {
 					} else {
 						System.out.println("Error: adding unrecognized type with id: " + ComplexTypes.get(current_complex_type).id);
 					}
+				}
+				
+				if (lastActiveTile == null && mode == 6) {
+					int[] xpoints = null;
+					int[] ypoints = null;
+					if (EnemyTypes.get(current_enemy_type).description.endsWith("2")) {
+						System.out.println("Making enemy with 2 checkpoints.");
+						xpoints = new int[1];
+						xpoints[0] = (int)point.getX()+100;
+						ypoints = new int[1];
+						ypoints[0] = (int)point.getY();
+					}
+					if (EnemyTypes.get(current_enemy_type).description.endsWith("3")) {
+						System.out.println("Making enemy with 3 checkpoints.");
+						xpoints = new int[2];
+						xpoints[0] = (int)point.getX()+100;
+						xpoints[1] = (int)point.getX()+300;
+						ypoints = new int[2];
+						ypoints[0] = (int)point.getY();
+						ypoints[1] = (int)point.getY()+100;
+					}
+					if (EnemyTypes.get(current_enemy_type).description.endsWith("4")) {
+						System.out.println("Making enemy with 4 checkpoints.");
+						xpoints = new int[3];
+						xpoints[0] = (int)point.getX()+100;
+						xpoints[1] = (int)point.getX()+300;
+						xpoints[2] = (int)point.getX()+500;
+						ypoints = new int[3];
+						ypoints[0] = (int)point.getY();
+						ypoints[1] = (int)point.getY()+100;
+						ypoints[2] = (int)point.getY()+200;
+					}
+					//System.out.println(xpoints.length+": "+xpoints);
+					lastActiveTile = new Mob(0, 0, EnemyTypes.get(current_enemy_type).id,xpoints,ypoints);
+					lastActiveTile.goTo(point.getX() - 100, point.getY() - 100);
+					canDrag = true;
+					area.add(lastActiveTile);
+					selectOffset = lastActiveTile.getDifference(point);
+					lastPoint = point;
+					hasChanges = true;
+
+					Tile[] cpts = lastActiveTile.fetchCheckpoints();
+					for (int i = 0; i < cpts.length; i++) {
+						area.add(cpts[i]);
+					}
+
 				}
 			}
 			// System.out.println(point.getX());

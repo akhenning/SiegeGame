@@ -3,7 +3,6 @@ package siegeGame;
 import javax.sound.sampled.*;
 import javax.swing.JPanel;
 
-import siegeGame.Player.State;
 import siegeGame.Tile.SlopeState;
 
 import java.awt.event.KeyListener;
@@ -120,7 +119,7 @@ public class Screen extends JPanel {
 		TITLE, LEVEL, SELECT
 	}
 
-	private static SoundLevel soundMode = SoundLevel.ALL;
+	private static SoundLevel soundMode = SoundLevel.NONE; // ALL by default
 	public enum SoundLevel {
 		ALL, MUSIC, NONE
 	}
@@ -438,7 +437,39 @@ public class Screen extends JPanel {
 			
 			for (int i = 0; i < mobs.size(); i++) {
 				mobs.get(i).checkIsVisible();
-				mobs.get(i).nextFrame();
+				if (mobs.get(i).nextFrameAndCheck()) {
+					int projType = mobs.get(i).attemptingToShoot();
+					if (projType != 0) {
+						// shoot this projectile type
+						int[] projSpawnPoint = mobs.get(i).getProjSpawnPoint();
+						mobs.add(new Projectile(projSpawnPoint[0],projSpawnPoint[1],projType,mobs.get(i).getAimingAngle()));
+					} else {
+						// do distance check
+						int distance = Math.abs(player.getX()-mobs.get(i).getX()) + Math.abs(player.getY()-mobs.get(i).getY());
+						//System.out.println("Distance check got"+distance);
+						int[] projSpawnPoint = mobs.get(i).getProjSpawnPoint();
+						System.out.println("Atan2 x of: "+ (player.getX()-scrollx) +" - " + (projSpawnPoint[0]));
+						System.out.println("Atan2 Y of: "+ (player.getY()-scrolly) +" - " + (projSpawnPoint[1]));
+						
+						if (distance < 1200) {
+							mobs.get(i).distanceCheckSuccessful(true);
+							mobs.get(i).setAimingAngle(Math.atan2((player.getY()-scrolly)-projSpawnPoint[1], (player.getX()-scrollx)-projSpawnPoint[0]));
+							System.out.println("Angle: "+Math.atan2((player.getY()-scrolly)-projSpawnPoint[1], (player.getX()-scrollx)-projSpawnPoint[0]));
+						} else {
+							mobs.get(i).distanceCheckSuccessful(false);
+						}
+					}
+				}
+				// Check if Mob should be removed
+				if (mobs.get(i).shouldRemove()) {
+					if (mobs.get(i).getId() != -98) {
+						makeEffect(mobs.get(i).getX(), mobs.get(i).getY(), 7, 0);
+					}
+					mobs.get(i).cleanup();
+					mobs.remove(mobs.get(i));
+					i -= 1;
+				}
+
 			}
 			for (int i = 0; i < interactables.size(); i++) {
 				interactables.get(i).checkIsVisible();
@@ -448,10 +479,10 @@ public class Screen extends JPanel {
 				if (interactables.get(i).shouldRemove()) {
 					// Check if it is W; if so, needs to make a unique smoke effect
 					if (interactables.get(i).getId() == 61) {
-						// todo make puff of smoke
-						System.out.println("Removing W");
+						//System.out.println("Removing W");
 						makeEffect(interactables.get(i).getX(), interactables.get(i).getY(), 4, 0);
 					}
+					interactables.get(i).cleanup();
 					interactables.remove(interactables.get(i));
 					i -= 1;
 				}
@@ -809,8 +840,6 @@ public class Screen extends JPanel {
 											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
 									particles.add(new Particle(tile.getX() + (widthover4 * 3),
 											tile.getY() + (heightover4 * 3), heightover4 / 2, heightover4 / 2, 1));
-									// Remove the tile from the list
-									tile.setToRemove();
 									// If is a text box prompt (? mark)
 								} else if (effect == 2) {
 									// Tell the game to activate text boxes, and move to the proper box
@@ -907,6 +936,16 @@ public class Screen extends JPanel {
 			// spinning in the air
 			playSound("audio/swish.wav", 3);
 			// playSound("audio/jump_mid.wav", 3);
+			break;
+		case 7:
+			// destroy drone
+			particles.add(new Particle(x + 20, y + 25, 70, 70, 5));
+			particles.add(new Particle(x + 40, y + 75, 70, 70, 5));
+			particles.add(new Particle(x + 60, y - 25, 70, 70, 5));
+			for (int i = 0; i < 6; i++) {
+				particles.add(
+						new Particle(x, y, 2 + (int) (Math.random() * 15 + 25), 2 + (int) (Math.random() * 15 + 25), 7));
+			}
 			break;
 		}
 	}
@@ -1247,9 +1286,17 @@ public class Screen extends JPanel {
 							Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
 							Integer.parseInt(elements[6].trim()), tied));
 				} else if (elements[0].trim().equals("Mob")) {
+					// todo this probably has an issue
+					int[] xarr = new int[(elements.length-7)/2];
+					int[] yarr = new int[(elements.length-7)/2];
+					for(int i = 8;i<elements.length;i+=2){
+						xarr[(i-8)/2] = Integer.parseInt(elements[i].trim());
+						yarr[(i-8)/2] = Integer.parseInt(elements[i+1].trim());
+					}
+					//System.out.println(xarr.length+": "+xarr);
 					mobs.add(new Mob(Integer.parseInt(elements[1].trim()),
-							Integer.parseInt(elements[2].trim()),
-							Integer.parseInt(elements[6].trim())));
+							Integer.parseInt(elements[2].trim()),Integer.parseInt(elements[6].trim()),
+							xarr,yarr));
 				} else {
 					try {
 						interactables.add(new Interactable(Integer.parseInt(elements[1].trim()),

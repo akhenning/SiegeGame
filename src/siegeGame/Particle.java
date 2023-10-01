@@ -70,9 +70,22 @@ public class Particle {
 				case 3:
 					color = Color.ORANGE;
 					break;
+				case 0:
+				case 1:
 				case 4:
 					color = Color.GRAY;
 					break;
+			}
+			break;
+		case 7:
+			// large but less dramaticimpact debris
+			timeRemaining = 20;
+			dx = Math.random() * 20 - 10;
+			dy = Math.random() * -20;
+			if (Math.random()*5 == 0) {
+				color = Color.YELLOW;
+			} else {
+				color = Color.GRAY;
 			}
 			break;
 		}

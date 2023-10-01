@@ -442,6 +442,7 @@ public class Player {
 	}
 
 	public void calcMove(double xMove, boolean isShift, boolean isJump, boolean isAttack, boolean isHeavyAttack) {
+		//System.out.println(state);
 		boolean doLandingCheck = false;
 		isSpace = isJump;
 
@@ -613,7 +614,7 @@ public class Player {
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly + yoffset);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly + yoffset);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
-			if (groundLevel != 1000001) {
+			if (groundLevel != 1000001) {// && !(state == State.JUMPING && animationFrame < 5)) {
 				// System.out.println("FORCED LANDING");
 				lity = groundLevel + Screen.scrolly;
 				yspeed = 0;
@@ -634,15 +635,15 @@ public class Player {
 		}
 
 		// Check case where grounded player walks off of the ground (i.e. ledge)
-		if ((state == State.GROUNDED || state == State.BASIC_ATTACK || state == State.HEAVY_ATTACK) || doLandingCheck) {
+		if ((state == State.GROUNDED || state == State.BASIC_ATTACK || state == State.HEAVY_ATTACK || state == State.LANDING) || doLandingCheck) {
 			Point2D.Double leftFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[0], lity - Screen.scrolly);
 			Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly);
 			int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 			// This means that nothing is below the player
 			if (groundLevel == 1000001) {
-				int check_below = 12; // 10
+				int check_below = 14; // 10
 				if (screen.checkDescendingStairs(new Point2D.Double(leftFoot.getX(), leftFoot.getY() + check_below),
-						new Point2D.Double(rightFoot.getX(), rightFoot.getY() + check_below))) {
+						new Point2D.Double(rightFoot.getX(), rightFoot.getY() + check_below))){ //&& !(state == State.JUMPING && animationFrame < 5)) {
 					lity += 6;// 6;
 				} else {
 					aerial_attack_state = false;
@@ -753,6 +754,13 @@ public class Player {
 	public int getAbsoluteY() {
 		return (int)(lity - Screen.scrolly);
 	}
+
+	public int getX() {
+		return x;
+	}
+	public int getY() {
+		return y;
+	}
 	
 	public void goToAbsolute(int x, int y) {
 		// if absX = litx - scollx, then
@@ -766,7 +774,7 @@ public class Player {
 		Point2D.Double rightFoot = new Point2D.Double(litx - Screen.scrollx + FOOT_WIDTH[1], lity - Screen.scrolly);
 		int groundLevel = screen.checkLandingCollision(leftFoot, rightFoot);
 		if (groundLevel != 1000001) {
-			System.out.println("FORCED LANDING");
+			//System.out.println("FORCED LANDING");
 			lity = groundLevel + Screen.scrolly;
 			yspeed = 0;
 			xspeed = 0;

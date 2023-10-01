@@ -11,4 +11,12 @@ Tile,		4000,	780,	200,	680,	2,	0,		Basic black block
 Tile,		4160,	780,	760,	200,	1,	0,		Basic black block
 Tile,		4720,	-60,	200,	840,	2,	0,		Basic black block
 Tile,		1560,	-140,	40,	780,	3,	2,		Invisible block
+Tile,		440,	340,	200,	240,	0,	1,		Respawn Destination
+Tile,		440,	340,	200,	240,	0,	1,		Respawn Destination
+Tile,		440,	340,	200,	240,	0,	1,		Respawn Destination
+Tile,		440,	340,	200,	240,	0,	1,		Respawn Destination
+Tile,		440,	340,	200,	240,	0,	1,		Respawn Destination
 ConnectedTile,	-2700,	900,	2920,	320,	0,	-1,		Respawn Element 	,Tile,		440,	340,	200,	240,	0,	1,		Respawn Destination
+Mob,		956,	266,	188,	106,	-1,	-100,		Basic Drone,	1720,	560,	1060,	520
+Mob,		2204,	214,	188,	106,	-1,	-100,		Basic Drone,	1660,	340
+Mob,		648,	288,	180,	100,	-1,	-110,		Hostile Drone,	540,	220,	720,	520

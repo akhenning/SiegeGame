@@ -25,7 +25,6 @@ public class BuilderMain {
 	 *
 	 */
 	public static void main(String[] args) {
-		System.out.println("Test");
 		JFrame frame = new JFrame();
 
 		// new thing I'm testing

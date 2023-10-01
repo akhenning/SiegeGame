@@ -1,11 +1,27 @@
 Element Type	X	Y	Width	Height	Clip	ID	Other	Description
 -------------------------------------------------------------------------------------------
-Tile,		200,	620,	860,	100,	1,	0,		Basic black block
+Tile,		200,	620,	900,	100,	1,	0,		Basic black block
 Tile,		0,	-100,	200,	820,	3,	0,		Basic black block
-Tile,		920,	620,	140,	100,	3,	0,		Basic black block
-Tile,		360,	720,	200,	620,	3,	0,		Basic black block
-Tile,		560,	1220,	340,	120,	1,	0,		Basic black block
+Tile,		960,	620,	140,	100,	3,	0,		Basic black block
+Tile,		300,	720,	200,	1980,	3,	0,		Basic black block
+Tile,		700,	1220,	200,	120,	1,	0,		Basic black block
 Graphic,	652,	428,	138,	196,	-1,	9,		W Dancing
-Interactable,	560,	1020,	200,	200,	0,	99,	5,	Finish element
+Interactable,	500,	2680,	200,	200,	0,	99,	5,	Finish element
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
 ConnectedTile,	940,	1340,	980,	200,	0,	-1,		Respawn Element 	,Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
 ConnectedTile,	1920,	140,	200,	1200,	0,	-1,		Respawn Element 	,Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
+Mob,		1740,	1714,	188,	106,	-1,	-100,		Basic Drone,	2380,	400
+Tile,		800,	1220,	100,	120,	3,	0,		Basic black block
+Tile,		700,	1340,	120,	1360,	2,	0,		Basic black block
+Interactable,	500,	1220,	200,	300,	0,	60,	-1,	Destructable block
+Interactable,	500,	1520,	200,	300,	0,	60,	-1,	Destructable block
+Interactable,	500,	1820,	200,	300,	0,	60,	-1,	Destructable block
+Interactable,	500,	2120,	200,	300,	0,	60,	-1,	Destructable block
+Interactable,	500,	2420,	200,	300,	0,	60,	-1,	Destructable block

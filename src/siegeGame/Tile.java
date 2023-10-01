@@ -51,6 +51,10 @@ public class Tile {
 
 	SlopeState slopeState = SlopeState.NONE;
 
+	// False if is an object that should be ignored by things like deletion and saving
+	// such as a checkpoint
+	protected boolean can_handle_normally = true;
+
 	// To make the level files a bit more legible
 	protected String type = "Unrecognized";
 
@@ -75,6 +79,12 @@ public class Tile {
 				slope = -((double) height) / ((double) width);
 			}
 		}
+		if (id == -99) {
+			can_handle_normally = false;
+			type = "Checkpoint";
+			//System.out.println("Creating checkpoint");
+		}
+
 		// Let's try to make it so that this doesn't need to calculate every frame
 		switch (clipType) {
 		case 0:
@@ -96,6 +106,9 @@ public class Tile {
 			can_clip_vertical = false;
 			can_clip_left = false;
 			can_clip_right = true;
+			break;
+		case -1:
+			makeIntangible();
 			break;
 		}
 
@@ -378,6 +391,12 @@ public class Tile {
 		return isVisible;
 	}
 
+	// False if is an object that should be ignored by things like deletion and saving
+	// such as a checkpoint
+	public boolean canHandleNormally() {
+		return can_handle_normally;
+	}
+
 	public String toString() {
 		switch (id) {
 		case 101:
@@ -508,6 +527,11 @@ public class Tile {
 	public void dontSaveThis() {
 		should_be_saved = false;
 	}
+
+	// for enemy movement
+    public Tile[] fetchCheckpoints() {
+		return null;
+    }
 
 	// return 1 if effects Siege, 2 if changes text
 	// Will eventually need to make more complicated if we want to add buttons or
