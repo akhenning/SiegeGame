@@ -2,6 +2,7 @@ package siegeGame;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 
 public class Projectile extends Mob {
 
@@ -18,12 +19,12 @@ public class Projectile extends Mob {
         this.angle = angle;
         effx = x;
         effy = y;
-        double velocity = 5;
+        double velocity = 8;
 
         proj_id = id;
 
         // Worth noting that vertical is flipped for some reason
-        System.out.println("Angle: "+angle+" gives dx "+Math.cos(angle)+" and dy "+Math.sin(angle));
+        //System.out.println("Angle: "+angle+" gives dx "+Math.cos(angle)+" and dy "+Math.sin(angle));
         dx = velocity * Math.cos(angle);
         dy = velocity * Math.sin(angle);
     }
@@ -70,6 +71,16 @@ public class Projectile extends Mob {
         g2.drawLine(scrollx + x, scrolly + y, scrollx + x + (int)(15*dx), scrolly + y + (int)(15*dy));
         g2.fillOval(scrollx + x - 20, scrolly + y - 20, 40, 40);
 		g2.setColor(Color.black);
+    }
+
+    public boolean hasContactDamage() {
+        return true;
+    }
+
+    public int[][] getContactPoints() {
+        // needs scrollx and scrolly to be added before comparison is done
+        int[][] rtrn = {{x,y},{x + (int)(15*dx), y + (int)(15*dy)}};
+        return rtrn;
     }
 
     public void cleanup() {

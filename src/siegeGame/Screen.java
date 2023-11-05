@@ -64,7 +64,7 @@ public class Screen extends JPanel {
 			Toolkit.getDefaultToolkit().getImage("assets/SiegeBlush.png")};
 
 	private static Map<String, AudioInputStream> sounds = new HashMap<String, AudioInputStream>();
-	private static String[] snds = { "audio/heavy_hit.wav", "audio/land.wav", "audio/jump.wav", "audio/very_heavy_hit.wav", "audio/swish.wav" };
+	private static String[] snds = { "audio/heavy_hit.wav", "audio/land.wav", "audio/jump.wav", "audio/very_heavy_hit.wav", "audio/swish.wav", "audio/cheater.wav" };
 
 	// Handles scroll for player and background
 	public static int scrollx = 0;
@@ -434,29 +434,34 @@ public class Screen extends JPanel {
 			for (int i = 0; i < area.size();i+=1) {
 				area.get(i).checkIsVisible();
 			}
+
+			checkHurtbox();
 			
 			for (int i = 0; i < mobs.size(); i++) {
 				mobs.get(i).checkIsVisible();
 				if (mobs.get(i).nextFrameAndCheck()) {
 					int projType = mobs.get(i).attemptingToShoot();
-					if (projType != 0) {
+					if (projType > 0) {
 						// shoot this projectile type
+						//System.out.println("Firing.");
 						int[] projSpawnPoint = mobs.get(i).getProjSpawnPoint();
 						mobs.add(new Projectile(projSpawnPoint[0],projSpawnPoint[1],projType,mobs.get(i).getAimingAngle()));
-					} else {
+					} else if (projType == 0) {
 						// do distance check
-						int distance = Math.abs(player.getX()-mobs.get(i).getX()) + Math.abs(player.getY()-mobs.get(i).getY());
+						int distance = Math.abs(player.getX()-(mobs.get(i).getX()+scrollx)) + Math.abs(player.getY()-(mobs.get(i).getY()+scrolly));
+
 						//System.out.println("Distance check got"+distance);
-						int[] projSpawnPoint = mobs.get(i).getProjSpawnPoint();
-						System.out.println("Atan2 x of: "+ (player.getX()-scrollx) +" - " + (projSpawnPoint[0]));
-						System.out.println("Atan2 Y of: "+ (player.getY()-scrolly) +" - " + (projSpawnPoint[1]));
+						//System.out.println("Atan2 x of: "+ (player.getX()-scrollx) +" - " + (projSpawnPoint[0]));
+						//System.out.println("Atan2 Y of: "+ (player.getY()-scrolly) +" - " + (projSpawnPoint[1]));
 						
-						if (distance < 1200) {
-							mobs.get(i).distanceCheckSuccessful(true);
-							mobs.get(i).setAimingAngle(Math.atan2((player.getY()-scrolly)-projSpawnPoint[1], (player.getX()-scrollx)-projSpawnPoint[0]));
-							System.out.println("Angle: "+Math.atan2((player.getY()-scrolly)-projSpawnPoint[1], (player.getX()-scrollx)-projSpawnPoint[0]));
+						if (distance < 2000) {
+							//System.out.println("Fire successful, taking aim.");
+							int[] projSpawnPoint = mobs.get(i).getProjSpawnPoint();
+							//mobs.get(i).setAimingAngle(Math.atan2((player.getY()-scrolly-70)-projSpawnPoint[1], (player.getX()+30-scrollx)-projSpawnPoint[0]));
+							mobs.get(i).setAimingAngle(true, Math.atan2((player.getY()-70)-(projSpawnPoint[1] + scrolly), (player.getX()+30)-(projSpawnPoint[0]+scrollx)));
+							//System.out.println("Angle: "+Math.atan2((player.getY()-scrolly)-projSpawnPoint[1], (player.getX()-scrollx)-projSpawnPoint[0]));
 						} else {
-							mobs.get(i).distanceCheckSuccessful(false);
+							mobs.get(i).setAimingAngle(false,0);
 						}
 					}
 				}
@@ -857,6 +862,22 @@ public class Screen extends JPanel {
 		return shouldBounce;
 	}
 
+	public void checkHurtbox() {
+		for (Mob mob : mobs) {
+			if (mob.isVisible() && mob.hasContactDamage()) {
+				if (player.isInPlayer(mob.getContactPoints(),scrollx,scrolly)) {
+					// hit by bullet. Respawn player or restart level or deduct HP
+					scrollx = 0;
+					scrolly = 100;
+					player = new Player(this);
+					fade = 300;
+					fade_text = "";
+					return;
+				}
+			}
+		}
+	}
+
 	// Method that handles desending staircases.
 	// In the case where the player steps from solid ground onto air, this method
 	// is called to check if they are simply decending a staircase.
@@ -979,8 +1000,11 @@ public class Screen extends JPanel {
 	// modified as to be unrecognizable.
 	// Behavior- 0= none, 1 = intro sequence, 2= loop, 3= cancel upon quit
 	public static synchronized void playSound(String fileName, int behavior) {
-		if (Screen.soundMode == SoundLevel.NONE) {
-			return;
+		if (Screen.soundMode == SoundLevel.NONE ) {
+			if (behavior != 4) {
+				return;
+			}
+			behavior = 3;
 		}
 		// If not music, is 3
 		if (behavior == 3) {
@@ -1154,6 +1178,9 @@ public class Screen extends JPanel {
 		case 5:
 			next_lvl = "Stage 1-5";
 			break;
+		case 6:
+			next_lvl = "Stage 1-6";
+			break;
 		default:
 			System.err.println("Error: Finish element has no assigned destination.");
 			next_lvl = "Default";
@@ -1271,20 +1298,27 @@ public class Screen extends JPanel {
 				} else if (elements[0].trim().equals("ConnectedTile")) {
 					Tile tied;
 					if (elements[8].trim().equals("Tile")) { // respawn element
+						//System.out.println("Parsing not-door: "+elements);
 						tied = new Tile(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
 								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
 								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()));
+						area.add(tied);
+						interactables.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim()), tied));
 					} else {
-						tied = new Interactable(Integer.parseInt(elements[9].trim()), // door
+						//System.out.println("Parsing door: "+elements);
+						tied = new Interactable(// door
 								Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
 								Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()),
 								Integer.parseInt(elements[14].trim()), Integer.parseInt(elements[15].trim()));
+						area.add(tied);
+						interactables.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim()), Integer.parseInt(elements[7].trim()), tied));
 					}
-					area.add(tied);
-					interactables.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
-							Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
-							Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
-							Integer.parseInt(elements[6].trim()), tied));
 				} else if (elements[0].trim().equals("Mob")) {
 					// todo this probably has an issue
 					int[] xarr = new int[(elements.length-7)/2];
@@ -1498,6 +1532,13 @@ public class Screen extends JPanel {
 			case KeyEvent.VK_F:
 				if (state == GameState.LEVEL) {
 					isHeavyAttack = true;
+				}
+				break;
+			case KeyEvent.VK_J:
+				if (Main.debug) {
+					playSound("audio/cheater.wav", 4);
+					System.out.println("THIS IS CHEATING BTW, DON'T USE THIS OUTSIDE OF TESTING");
+					player.yspeed += -60;
 				}
 				break;
 			case KeyEvent.VK_ENTER:

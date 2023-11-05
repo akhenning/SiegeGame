@@ -27,11 +27,12 @@ public class Player {
 
 	private int direction = 1;
 	private double xspeed = 0;
-	private double yspeed = 0;
+	public double yspeed = 0;
 	public double litx = 0;
 	public double lity = 0;
 	public int x;
 	public int y;
+	public int yoffset;
 	private boolean isSpace = false;
 	int width = -1;
 	private boolean isHitbox = false;
@@ -401,18 +402,18 @@ public class Player {
 		}
 		// These are the collision points, which are simply being visualized
 		if (Main.debug) {
-			int yoffset = 0;
-			if (state == State.HOVERING) {
-				yoffset = -70;
-			} else if (state == State.JUMPING) {
-				yoffset = -5 * animationFrame;
-			} else if (state == State.DESCENDING) {
-				if (animationFrame < 5) {
-					yoffset = -80;
-				} else if (animationFrame < 10) {
-					yoffset = -16 * (4 - (animationFrame - 5));
-				}
-			}
+			//yoffset = 0;
+			//if (state == State.HOVERING) {
+			//	yoffset = -70;
+			//} else if (state == State.JUMPING) {
+			//	yoffset = -5 * animationFrame;
+			//} else if (state == State.DESCENDING) {
+			//	if (animationFrame < 5) {
+			//		yoffset = -80;
+			//	} else if (animationFrame < 10) {
+			//		yoffset = -16 * (4 - (animationFrame - 5));
+			//	}
+			//}
 			// NOTE: Very useful for debugging
 			//System.out.println("State and AnimationFrame:" + state + " " + animationFrame);
 			
@@ -436,6 +437,11 @@ public class Player {
 					box.draw(g2, x, y);
 				}
 			}
+
+			// proj hurtbox
+			// (point[0]+scrollx > x && point[0]+scrollx < x+60 && point[1]+scrolly < y-45 && point[1]+scrolly > y - 140)
+			g2.drawRect(x, y - 170 + yoffset, 60, 150);
+
 			g2.setColor(Color.black);
 		}
 
@@ -563,7 +569,7 @@ public class Player {
 			litx += xspeed;
 		}
 
-		int yoffset = 0;
+		yoffset = 0;
 		if (state == State.HOVERING) {
 			yoffset = -70;
 		} else if (state == State.JUMPING) {
@@ -789,6 +795,18 @@ public class Player {
 	public void stop() {
 		yspeed = 0;
 		xspeed = 0;
+	}
+
+	public boolean isInPlayer(int[][] points, int scrollx, int scrolly) {
+		// Go through each point and see if any of them are within the hurtbox
+		for (int[] point : points) {
+			if (point[0]+scrollx > x && point[0]+scrollx < x+60 && point[1]+scrolly < y-20 + yoffset && point[1]+scrolly > y - 170 + yoffset) {
+				return true;
+			}
+		}
+		// hurbox visual
+		// g2.drawRect(x, y - 170, 60, 150);
+		return false;
 	}
 
 	// Loads images to remove flickering

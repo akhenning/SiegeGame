@@ -7,15 +7,7 @@ Tile,		300,	720,	200,	1980,	3,	0,		Basic black block
 Tile,		700,	1220,	200,	120,	1,	0,		Basic black block
 Graphic,	652,	428,	138,	196,	-1,	9,		W Dancing
 Interactable,	500,	2680,	200,	200,	0,	99,	5,	Finish element
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
 ConnectedTile,	940,	1340,	980,	200,	0,	-1,		Respawn Element 	,Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
-Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
 ConnectedTile,	1920,	140,	200,	1200,	0,	-1,		Respawn Element 	,Tile,		240,	380,	200,	240,	0,	1,		Respawn Destination
 Mob,		1740,	1714,	188,	106,	-1,	-100,		Basic Drone,	2380,	400
 Tile,		800,	1220,	100,	120,	3,	0,		Basic black block

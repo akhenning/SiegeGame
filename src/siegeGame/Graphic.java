@@ -166,6 +166,9 @@ public class Graphic extends Tile {
 	}
 
 	public String toString() {
+		if (!should_be_saved) {
+			return "";
+		}
 		switch (id) {
 		case 0:
 			type = "Blank black graphic";

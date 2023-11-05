@@ -11,10 +11,18 @@ Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
 Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
 Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
 Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
+Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
+Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
+Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
+Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
 ConnectedTile,	2400,	340,	200,	400,	0,	-3,		Visible Respawn Element 	,Tile,		1620,	260,	200,	240,	0,	1,		Respawn Destination
 Tile,		1040,	540,	200,	200,	2,	0,		Basic black block
 Mob,		686,	262,	188,	106,	-1,	-100,		Basic Drone,	1140,	320
 Mob,		638,	948,	188,	106,	-1,	-102,		Basic Drone,	1320,	940,	1120,	1140,	440,	1140
 Mob,		-588,	426,	188,	106,	-1,	-103,		Basic Drone,	-280,	360,	-180,	540,	-400,	660
 Mob,		1418,	120,	188,	106,	-1,	-104,		Basic Drone,	2000,	80,	2040,	120,	2000,	160
-Mob,		232,	20,	180,	100,	-1,	-110,		Basic Drone,	720,	80,	960,	80,	1240,	80
+Mob,		232,	20,	188,	106,	-1,	-110,		Hostile Drone,	720,	80,	960,	80,	1240,	80
+Tile,		-120,	280,	200,	460,	1,	0,		Basic black block
+Tile,		-360,	20,	200,	200,	0,	0,		Basic black block
+Mob,		3976,	272,	188,	106,	-1,	-110,		Hostile Drone,	4580,	320,	4360,	-100
+Tile,		4140,	380,	300,	360,	0,	101,		Right-leaning slope

@@ -5,14 +5,20 @@ import java.awt.Graphics2D;
 
 public class ConnectedTile extends Interactable {
 	private Tile tied;
+	private int actionTimer;
 
 	public ConnectedTile(int x, int y, int width, int height, int clipType, int id) {
 		this(x, y, width, height, clipType, id, new Tile(x, y, 200, 250, 0, 1));
 	}
-
 	public ConnectedTile(int x, int y, int width, int height, int clipType, int id, Tile tied) {
+		this(x,y,width,height,clipType,id,100,tied);
+	}
+
+	public ConnectedTile(int x, int y, int width, int height, int clipType, int id, int actionTimer, Tile tied) {
 		super(x, y, width, height, clipType, id);
+		//System.out.println(actionTimer);
 		isTangible = false;
+		this.actionTimer = actionTimer;
 		this.tied = tied;
 		this.tied.dontSaveThis();
 	}
@@ -51,18 +57,21 @@ public class ConnectedTile extends Interactable {
 	}
 
 	public String toString() {
+		if (!should_be_saved) {
+			return "";
+		}
 		switch (id) {
 		case -1:
 			type = "Respawn Element";
 			break;
 		case -2:
 			type = "Door Button";
-			break;
+			return "ConnectedTile,\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id
+				+ ",\t"+actionTimer+",\t" + type + " \t," + tied.toString();
 		case -3:
 			type = "Visible Respawn Element";
 			break;
 		}
-		System.out.println(id);
 		return "ConnectedTile,\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id
 				+ ",\t\t" + type + " \t," + tied.toString();
 	}
@@ -74,7 +83,7 @@ public class ConnectedTile extends Interactable {
 			return -1;
 		case -2:
 			flag = Flag.JUSTHIT;
-			action = 100;
+			action = actionTimer;
 			tied.setData(1);
 			return -1;
 		case -3:

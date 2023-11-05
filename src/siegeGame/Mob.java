@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.geom.Point2D;
 
 public class Mob extends Interactable {
 	public static Image basicdrone = Toolkit.getDefaultToolkit().getImage("assets/smalldrone.png"); // ID 0
@@ -37,9 +38,13 @@ public class Mob extends Interactable {
 
     private int fire_rate = -1;
     private int fire_cooldown = 100;
+    private int search_rate = 25;
     private int attack_animation_timer = -1;
-    private int request_distance_check = 0; // 0 is no request, 1 is requesting, 2 is request granted
-    private boolean attempting_to_shoot = false;
+    private enum FireState {
+		COOLDOWN, REQUESTING_ANGLE, ANGLE_GRANTED, ATTACKING
+	}
+    FireState state = FireState.COOLDOWN;
+    //private int request_distance_check = 0; // 0 is no request, 1 is requesting, 2 is request granted
     private int projectile_type = 0;
 
     private double aiming_angle = 0;
@@ -240,11 +245,6 @@ public class Mob extends Interactable {
             }
         } else if (attack_animation_timer > -1) {
             attack_animation_timer -= 1;
-            if (attack_animation_timer == 7) {
-                attempting_to_shoot = true;
-            } else if (attempting_to_shoot) {
-                attempting_to_shoot = false;
-            }
         }
 
         calculateVisualEffects();
@@ -252,7 +252,8 @@ public class Mob extends Interactable {
         x = (int)effx;
         y = (int)effy;
 
-        return (request_distance_check == 1 || attempting_to_shoot);
+        // return if is going to do anything related to projectiles
+        return (state == FireState.REQUESTING_ANGLE || state == FireState.ANGLE_GRANTED);
 	}
 
     private void calculateAttack() {
@@ -260,21 +261,15 @@ public class Mob extends Interactable {
             fire_cooldown -= 1;
         }
         if (fire_cooldown <= 0) {
-            if (request_distance_check == 0) {
-                request_distance_check = 1;
-                fire_cooldown = fire_rate;
-                //System.out.println("Requesting if should fire");
-            }
-            if (request_distance_check == 2) {
-                attack_animation_timer = 15;
-                request_distance_check = 0;
-                //System.out.println("Entering attack animation");
+            if (state == FireState.COOLDOWN) {
+                state = FireState.REQUESTING_ANGLE;
             }
         }
     }
 
     public int[] getProjSpawnPoint() {
         int[] rtrn = new int[2];
+        state = FireState.COOLDOWN;
         switch (sub_id) {
             case -100:
             case -110:
@@ -287,25 +282,22 @@ public class Mob extends Interactable {
         return rtrn;
     }
 
-    // redundant
-    public boolean requestingDistanceCheck() {
-        return (request_distance_check == 1);
-    }
     public int attemptingToShoot() {
-        if (attempting_to_shoot) {
-            return projectile_type;
+        if (attack_animation_timer != -1) {
+            if (attack_animation_timer == 7) {
+                // ready to fire
+                System.out.println("Attack animation is at fire frame: "+attack_animation_timer);
+                return projectile_type;
+            } else {
+                // wait for frame 7
+                return -1;
+            }
         } else {
+            // not aimed atm
             return 0;
         }
     }
 
-    public void distanceCheckSuccessful(boolean is) {
-        if (is) {
-            request_distance_check = 2;
-        } else {
-            request_distance_check = 0;
-        }
-    }
 
     private void moveTowardsCheckpoint(int which) {
         tick_in_cycle = 0;
@@ -330,15 +322,6 @@ public class Mob extends Interactable {
         }
     }
 
-    public int wantsToFire() {
-        if (attempting_to_shoot == true) {
-            attempting_to_shoot = false;
-            return projectile_type;
-        } else {
-            return -1;
-        }
-    }
-
 	public void goTo(double x, double y) {
 		this.x = (int) x;
 		this.y = (int) y;
@@ -359,6 +342,16 @@ public class Mob extends Interactable {
 		return false; //not certain this is false
 	}
 
+    public boolean hasContactDamage() {
+        return false;
+    }
+
+    public int[][] getContactPoints() {
+        // needs scrollx and scrolly to be added before comparison is done
+        int[][] rtrn = {{x,y},{x+width,y},{x,y+height},{x+width,y+height}};
+        return rtrn;
+    }
+
     // return 1 if effects Siege, 2 if changes text, 0 if should register as hitting something
 	public int interact() {
         if (turn_red != 0) {
@@ -377,8 +370,17 @@ public class Mob extends Interactable {
         return checkpoints;
     }
 
-    public void setAimingAngle(double angle) {
-        aiming_angle = angle;
+    public void setAimingAngle(boolean success, double angle) {
+        if (success) {
+            aiming_angle = angle;
+            state = FireState.ANGLE_GRANTED;
+            fire_cooldown = fire_rate;
+            attack_animation_timer = 15;
+        } else {
+            state = FireState.COOLDOWN;
+            fire_cooldown = search_rate;
+        }
+        //System.out.println("Taking aim: "+success+", state "+state);
     }
 
     public double getAimingAngle() {
@@ -386,6 +388,9 @@ public class Mob extends Interactable {
     }
     
 	public String toString() {
+        if (!should_be_saved) {
+			return "";
+		}
 		switch (sub_id) {
 		case -100:
 			type = "Basic Drone";

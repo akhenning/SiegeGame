@@ -398,25 +398,29 @@ public class Tile {
 	}
 
 	public String toString() {
-		switch (id) {
-		case 101:
-			type = "Right-leaning slope";
-			break;
-		case 102:
-			type = "Left-leaning slope";
-			break;
-		case 0:
-			type = "Basic black block";
-			break;
-		case 1:
-			type = "Respawn Destination";
-			break;
-		case 2:
-			type = "Invisible block";
-			break;
+		if(should_be_saved) {
+			switch (id) {
+			case 101:
+				type = "Right-leaning slope";
+				break;
+			case 102:
+				type = "Left-leaning slope";
+				break;
+			case 0:
+				type = "Basic black block";
+				break;
+			case 1:
+				type = "Respawn Destination";
+				break;
+			case 2:
+				type = "Invisible block";
+				break;
+			}
+			return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id + ",\t\t"
+					+ type + "\n";
+		} else {
+			return "";
 		}
-		return "Tile,\t\t" + x + ",\t" + y + ",\t" + width + ",\t" + height + ",\t" + clipType + ",\t" + id + ",\t\t"
-				+ type + "\n";
 	}
 
 	public void setText(String name) {

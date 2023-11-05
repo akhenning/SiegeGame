@@ -291,21 +291,28 @@ public class BuilderScreen extends JPanel {
 					}
 				} else if (elements[0].trim().equals("ConnectedTile")) {
 					Tile tied;
-					if (elements[8].trim().equals("Tile")) {
+					if (elements[8].trim().equals("Tile")) { // respawn element
+						System.out.println("Parsing not-door: "+elements);
 						tied = new Tile(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
 								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
 								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()));
-					} else {
-						tied = new Interactable(Integer.parseInt(elements[9].trim()), Integer.parseInt(elements[10].trim()),
-								Integer.parseInt(elements[11].trim()), Integer.parseInt(elements[12].trim()),
-								Integer.parseInt(elements[13].trim()), Integer.parseInt(elements[14].trim()),
-								Integer.parseInt(elements[15].trim()));
-					}
-					area.add(tied);
-					area.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
+						area.add(tied);
+						area.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
 								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
 								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
-								Integer.parseInt(elements[6].trim()),tied));
+								Integer.parseInt(elements[6].trim()), tied));
+					} else {
+						System.out.println("Parsing door: "+elements);
+						tied = new Interactable(// door
+								Integer.parseInt(elements[10].trim()), Integer.parseInt(elements[11].trim()),
+								Integer.parseInt(elements[12].trim()), Integer.parseInt(elements[13].trim()),
+								Integer.parseInt(elements[14].trim()), Integer.parseInt(elements[15].trim()));
+						area.add(tied);
+						area.add(new ConnectedTile(Integer.parseInt(elements[1].trim()),
+								Integer.parseInt(elements[2].trim()), Integer.parseInt(elements[3].trim()),
+								Integer.parseInt(elements[4].trim()), Integer.parseInt(elements[5].trim()),
+								Integer.parseInt(elements[6].trim()), Integer.parseInt(elements[7].trim()), tied));
+					}
 				} else if (elements[0].trim().equals("Mob")) {
 					// todo this probably has an issue
 					int[] xarr = new int[(elements.length-7)/2];
